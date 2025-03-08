@@ -42,24 +42,24 @@ const Index = () => {
               
               <div className="flex flex-col sm:flex-row mt-8 gap-4">
                 {isAuthenticated() ? (
-                  <Button 
-                    className="bg-primary button-hover"
-                    size="lg"
-                    as={Link}
-                    to="/dashboard"
-                  >
-                    Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                ) : (
-                  <>
+                  <Link to="/dashboard">
                     <Button 
                       className="bg-primary button-hover"
                       size="lg"
-                      as={Link}
-                      to="/login"
                     >
-                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                      Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/login">
+                      <Button 
+                        className="bg-primary button-hover"
+                        size="lg"
+                      >
+                        Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
                     
                     <Button 
                       variant="outline"
@@ -223,34 +223,34 @@ const Index = () => {
             
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               {isAuthenticated() ? (
-                <Button 
-                  className="bg-primary button-hover"
-                  size="lg"
-                  as={Link}
-                  to="/dashboard"
-                >
-                  Go to Dashboard
-                </Button>
-              ) : (
-                <>
+                <Link to="/dashboard">
                   <Button 
                     className="bg-primary button-hover"
                     size="lg"
-                    as={Link}
-                    to="/login"
                   >
-                    <LogIn className="mr-2 h-4 w-4" /> Create Account
+                    Go to Dashboard
                   </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button 
+                      className="bg-primary button-hover"
+                      size="lg"
+                    >
+                      <LogIn className="mr-2 h-4 w-4" /> Create Account
+                    </Button>
+                  </Link>
                   
-                  <Button 
-                    variant="outline"
-                    size="lg"
-                    className="border-primary text-primary hover:bg-primary/5"
-                    as={Link}
-                    to="/login"
-                  >
-                    Sign In
-                  </Button>
+                  <Link to="/login">
+                    <Button 
+                      variant="outline"
+                      size="lg"
+                      className="border-primary text-primary hover:bg-primary/5"
+                    >
+                      Sign In
+                    </Button>
+                  </Link>
                 </>
               )}
             </div>
