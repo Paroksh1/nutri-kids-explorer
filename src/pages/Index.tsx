@@ -3,38 +3,12 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import NutritionCalculator from '@/components/NutritionCalculator';
-import ResultsDisplay from '@/components/ResultsDisplay';
-import BMICalculator from '@/components/BMICalculator';
-import EducationalSection from '@/components/EducationalSection';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, ArrowRight, Apple, Activity, Baby } from 'lucide-react';
-
-interface NutritionResult {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  calcium: number;
-  iron: number;
-  vitaminD: number;
-}
+import { ArrowDown, ArrowRight, Apple, Activity, Baby, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { isAuthenticated } from '@/components/auth/AuthForm';
 
 const Index = () => {
-  const [nutritionResults, setNutritionResults] = useState<NutritionResult | null>(null);
-  
-  const handleCalculateNutrition = (results: NutritionResult) => {
-    setNutritionResults(results);
-    
-    // Scroll to results
-    setTimeout(() => {
-      const resultsSection = document.getElementById('results-section');
-      if (resultsSection) {
-        resultsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
-  };
-  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -67,32 +41,41 @@ const Index = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row mt-8 gap-4">
-                <Button 
-                  className="bg-primary button-hover"
-                  size="lg"
-                  onClick={() => {
-                    const calculatorSection = document.getElementById('calculator-section');
-                    if (calculatorSection) {
-                      calculatorSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                >
-                  Start Assessment <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  className="border-primary text-primary hover:bg-primary/5"
-                  onClick={() => {
-                    const educationSection = document.getElementById('education-section');
-                    if (educationSection) {
-                      educationSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                >
-                  Learn More
-                </Button>
+                {isAuthenticated() ? (
+                  <Button 
+                    className="bg-primary button-hover"
+                    size="lg"
+                    as={Link}
+                    to="/dashboard"
+                  >
+                    Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      className="bg-primary button-hover"
+                      size="lg"
+                      as={Link}
+                      to="/login"
+                    >
+                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    
+                    <Button 
+                      variant="outline"
+                      size="lg"
+                      className="border-primary text-primary hover:bg-primary/5"
+                      onClick={() => {
+                        const educationSection = document.getElementById('education-section');
+                        if (educationSection) {
+                          educationSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                    >
+                      Learn More
+                    </Button>
+                  </>
+                )}
               </div>
             </motion.div>
             
@@ -155,90 +138,72 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Calculator Section */}
-      <section id="calculator-section" className="py-16 px-4 bg-gradient-to-b from-background to-background/60">
+      {/* Features Section */}
+      <section className="py-16 px-4 bg-gradient-to-b from-background to-background/60">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="heading-lg">Nutrition Assessment Tool</h2>
+          <div className="text-center mb-16">
+            <h2 className="heading-lg">Why Choose NutriYouth?</h2>
             <p className="paragraph mt-3 max-w-2xl mx-auto">
-              Enter your child's information to calculate personalized nutritional recommendations
+              Our platform offers comprehensive nutrition tools specifically designed for children and teens
             </p>
           </div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <NutritionCalculator onCalculate={handleCalculateNutrition} />
-          </motion.div>
-        </div>
-      </section>
-      
-      {/* Results Section */}
-      {nutritionResults && (
-        <section id="results-section" className="py-16 px-4 bg-gradient-to-b from-background/95 to-accent/20">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="heading-lg">Nutritional Assessment Results</h2>
-              <p className="paragraph mt-3 max-w-2xl mx-auto">
-                Personalized nutritional recommendations based on your child's profile
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="bg-card p-6 rounded-lg shadow-sm border border-border"
+            >
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Personalized Meal Plans</h3>
+              <p className="text-muted-foreground">
+                Custom meal recommendations based on your child's age, weight, height, and dietary preferences.
               </p>
-            </div>
+            </motion.div>
             
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="bg-card p-6 rounded-lg shadow-sm border border-border"
             >
-              <ResultsDisplay results={nutritionResults} />
+              <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
+                <svg className="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Nutritional Analysis</h3>
+              <p className="text-muted-foreground">
+                Track macronutrients, vitamins, and minerals to ensure balanced nutrition for optimal growth.
+              </p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-card p-6 rounded-lg shadow-sm border border-border"
+            >
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Growth Monitoring</h3>
+              <p className="text-muted-foreground">
+                Track your child's growth and development over time with easy-to-understand charts and metrics.
+              </p>
             </motion.div>
           </div>
-        </section>
-      )}
-      
-      {/* BMI Calculator Section */}
-      <section className="py-16 px-4 bg-gradient-to-b from-accent/20 to-background">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="heading-lg">Growth & BMI Calculator</h2>
-            <p className="paragraph mt-3 max-w-2xl mx-auto">
-              Track your child's Body Mass Index and growth percentile
-            </p>
-          </div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="flex justify-center"
-          >
-            <BMICalculator />
-          </motion.div>
-        </div>
-      </section>
-      
-      {/* Educational Section */}
-      <section id="education-section" className="py-16 px-4 bg-gradient-to-b from-background to-background/95">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="heading-lg">Nutritional Education</h2>
-            <p className="paragraph mt-3 max-w-2xl mx-auto">
-              Essential nutrition knowledge for supporting your child's health and development
-            </p>
-          </div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <EducationalSection />
-          </motion.div>
         </div>
       </section>
       
@@ -253,33 +218,41 @@ const Index = () => {
           >
             <h2 className="heading-lg mb-6">Ready to Optimize Your Child's Nutrition?</h2>
             <p className="paragraph max-w-2xl mx-auto mb-8">
-              Start using our tools today to ensure your child receives the proper nutrition needed for healthy growth and development.
+              Create a free account today to access personalized meal plans, nutritional tracking, and expert recommendations.
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button 
-                className="bg-primary button-hover"
-                size="lg"
-                onClick={() => {
-                  const calculatorSection = document.getElementById('calculator-section');
-                  if (calculatorSection) {
-                    calculatorSection.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-              >
-                Start Assessment
-              </Button>
-              
-              <Button 
-                variant="outline"
-                size="lg"
-                className="border-primary text-primary hover:bg-primary/5"
-                onClick={() => {
-                  window.location.href = '/resources';
-                }}
-              >
-                Explore Resources
-              </Button>
+              {isAuthenticated() ? (
+                <Button 
+                  className="bg-primary button-hover"
+                  size="lg"
+                  as={Link}
+                  to="/dashboard"
+                >
+                  Go to Dashboard
+                </Button>
+              ) : (
+                <>
+                  <Button 
+                    className="bg-primary button-hover"
+                    size="lg"
+                    as={Link}
+                    to="/login"
+                  >
+                    <LogIn className="mr-2 h-4 w-4" /> Create Account
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    size="lg"
+                    className="border-primary text-primary hover:bg-primary/5"
+                    as={Link}
+                    to="/login"
+                  >
+                    Sign In
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
         </div>
