@@ -6,10 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, logout } from '../auth/AuthForm';
 import { getChildProfiles, ChildProfile } from '../onboarding/ChildProfileForm';
-import { Plus, LogOut, User, Apple, Utensils, Calendar } from 'lucide-react';
+import { Plus, LogOut, User, Apple, Utensils, Calendar, Activity } from 'lucide-react';
 import MealPlanDisplay from '../meal/MealPlanDisplay';
 import MealTracker from '../meal/MealTracker';
 import { getNutritionSummary } from '../meal/MealService';
+import RecommendationsDisplay from '../recommendations/RecommendationsDisplay';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -137,7 +138,7 @@ const Dashboard: React.FC = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="overview">
                     <Apple className="mr-2 h-4 w-4" /> Overview
                   </TabsTrigger>
@@ -146,6 +147,9 @@ const Dashboard: React.FC = () => {
                   </TabsTrigger>
                   <TabsTrigger value="tracking">
                     <Utensils className="mr-2 h-4 w-4" /> Food Tracking
+                  </TabsTrigger>
+                  <TabsTrigger value="recommendations">
+                    <Activity className="mr-2 h-4 w-4" /> Recommendations
                   </TabsTrigger>
                 </TabsList>
                 
@@ -230,6 +234,10 @@ const Dashboard: React.FC = () => {
                 
                 <TabsContent value="tracking" className="mt-4">
                   {activeChild && <MealTracker childId={activeChild.id} />}
+                </TabsContent>
+                
+                <TabsContent value="recommendations" className="mt-4">
+                  {activeChild && <RecommendationsDisplay childProfile={activeChild} />}
                 </TabsContent>
               </Tabs>
             </>
