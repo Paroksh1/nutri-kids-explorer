@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import AnimatedCounter from './ui/AnimatedCounter';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface BMIResult {
   bmi: number;
@@ -195,8 +196,7 @@ const BMICalculator: React.FC = () => {
                 </div>
                 <Progress 
                   value={results.percentile} 
-                  className="h-2" 
-                  indicatorClassName={getProgressColor(results.percentile)}
+                  className={cn("h-2", getProgressColor(results.percentile))}
                 />
                 <p className="text-xs text-muted-foreground mt-2">
                   This indicates where your child's BMI falls compared to other children of the same age and gender.
