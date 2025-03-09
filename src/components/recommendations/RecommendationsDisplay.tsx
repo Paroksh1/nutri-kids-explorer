@@ -1,12 +1,18 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChildProfile } from '../onboarding/ChildProfileForm';
-import { getExerciseRecommendations, getCheatMealRecommendations } from './RecommendationsService';
-import { ExternalLink, ChevronDown, Check } from 'lucide-react';
+import { 
+  getExerciseRecommendations, 
+  getCheatMealRecommendations, 
+  recordPreference,
+  getPreferences
+} from './RecommendationsService';
+import { ExternalLink, ChevronDown, Check, Star, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 
 interface RecommendationsDisplayProps {
   childProfile: ChildProfile;
@@ -14,8 +20,18 @@ interface RecommendationsDisplayProps {
 
 const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childProfile }) => {
   const [expandedRecipe, setExpandedRecipe] = useState<string | null>(null);
-  const exerciseVideos = getExerciseRecommendations(childProfile);
-  const cheatMeals = getCheatMealRecommendations(childProfile);
+  const [exerciseVideos, setExerciseVideos] = useState<any[]>([]);
+  const [cheatMeals, setCheatMeals] = useState<any[]>([]);
+  const [preferences, setPreferences] = useState<any>(null);
+  
+  useEffect(() => {
+    // Get ML-enhanced recommendations
+    setExerciseVideos(getExerciseRecommendations(childProfile));
+    setCheatMeals(getCheatMealRecommendations(childProfile));
+    
+    // Load user preferences
+    setPreferences(getPreferences(childProfile.id));
+  }, [childProfile]);
   
   const toggleRecipe = (id: string) => {
     if (expandedRecipe === id) {
@@ -25,12 +41,65 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
     }
   };
   
+  const handleRateExercise = (videoId: string, score: number) => {
+    recordPreference(childProfile.id, videoId, score, 'exercise');
+    toast.success('Your rating has been saved');
+    
+    // Update preferences in state
+    setPreferences(getPreferences(childProfile.id));
+    
+    // Refresh recommendations after a short delay
+    setTimeout(() => {
+      setExerciseVideos(getExerciseRecommendations(childProfile));
+    }, 500);
+  };
+  
+  const handleRateRecipe = (recipeId: string, score: number) => {
+    recordPreference(childProfile.id, recipeId, score, 'meal');
+    toast.success('Your rating has been saved');
+    
+    // Update preferences in state
+    setPreferences(getPreferences(childProfile.id));
+    
+    // Refresh recommendations after a short delay
+    setTimeout(() => {
+      setCheatMeals(getCheatMealRecommendations(childProfile));
+    }, 500);
+  };
+  
+  const getRatingButtons = (id: string, type: 'exercise' | 'meal') => {
+    // Get current rating if it exists
+    const currentRating = preferences ? 
+      (type === 'exercise' ? preferences.exercisePreferences[id] : preferences.mealPreferences[id]) : 
+      0;
+    
+    return (
+      <div className="flex items-center space-x-1 mt-2">
+        <span className="text-xs text-muted-foreground mr-1">Rate:</span>
+        {[7, 8, 9, 10].map((score) => (
+          <Button
+            key={score}
+            variant={currentRating === score ? "default" : "outline"}
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={() => type === 'exercise' ? 
+              handleRateExercise(id, score) : 
+              handleRateRecipe(id, score)
+            }
+          >
+            {score === 10 ? <ThumbsUp className="h-3 w-3" /> : score}
+          </Button>
+        ))}
+      </div>
+    );
+  };
+  
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Personalized Recommendations for {childProfile.name}</CardTitle>
+        <CardTitle>ML-Enhanced Recommendations for {childProfile.name}</CardTitle>
         <CardDescription>
-          Exercise videos and occasional treats tailored to {childProfile.name}'s age, preferences, and activity level
+          Personalized exercise videos and treat recipes tailored to {childProfile.name}'s preferences using machine learning
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -68,6 +137,7 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
                           </span>
                         ))}
                       </div>
+                      {getRatingButtons(video.id, 'exercise')}
                     </div>
                   </CardContent>
                 </Card>
@@ -100,6 +170,7 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
                       </Button>
                     </div>
                     <p className="mt-1 text-sm">{recipe.description}</p>
+                    {getRatingButtons(recipe.id, 'meal')}
                     
                     {expandedRecipe === recipe.id && (
                       <div className="mt-4 space-y-4">

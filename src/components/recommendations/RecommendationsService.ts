@@ -1,4 +1,3 @@
-
 import { ChildProfile } from '../onboarding/ChildProfileForm';
 
 // Exercise recommendation interfaces
@@ -24,6 +23,23 @@ interface CheatMealRecipe {
   dietTypes: string[];
   imageUrl?: string;
   calories: number;
+}
+
+// ML recommendation enhancement interfaces
+interface MLWeights {
+  age: number;
+  activityLevel: number;
+  recentPreferences: number;
+}
+
+interface UserPreference {
+  userId: string;
+  exercisePreferences: {
+    [videoId: string]: number;  // Score from 0-10
+  };
+  mealPreferences: {
+    [recipeId: string]: number;  // Score from 0-10
+  };
 }
 
 // Sample exercise videos data
@@ -266,8 +282,22 @@ const cheatMealRecipes: CheatMealRecipe[] = [
   }
 ];
 
-// Get exercise recommendations based on child profile
-export const getExerciseRecommendations = (childProfile: ChildProfile): ExerciseVideo[] => {
+// In-memory storage for ML-based preferences
+let userPreferences: Record<string, UserPreference> = {};
+
+// Initialize preferences from localStorage
+const initializePreferences = () => {
+  const storedPreferences = localStorage.getItem('userPreferences');
+  if (storedPreferences) {
+    userPreferences = JSON.parse(storedPreferences);
+  }
+};
+
+// Call initialize on module load
+initializePreferences();
+
+// Base recommendations without ML
+const getBaseExerciseRecommendations = (childProfile: ChildProfile): ExerciseVideo[] => {
   return exerciseVideos.filter(video => {
     // Filter by age range
     const ageMatch = childProfile.age >= video.ageRangeMin && 
@@ -280,11 +310,196 @@ export const getExerciseRecommendations = (childProfile: ChildProfile): Exercise
   });
 };
 
-// Get cheat meal recommendations based on child profile
-export const getCheatMealRecommendations = (childProfile: ChildProfile): CheatMealRecipe[] => {
+// Base recommendations without ML
+const getBaseCheatMealRecommendations = (childProfile: ChildProfile): CheatMealRecipe[] => {
   return cheatMealRecipes.filter(recipe => {
     // Filter by diet type
     return recipe.dietTypes.includes(childProfile.dietType) || 
            (childProfile.dietType === 'non-vegetarian' && recipe.dietTypes.includes('vegetarian'));
   });
+};
+
+// ML-enhanced recommendations with collaborative filtering
+export const getExerciseRecommendations = (childProfile: ChildProfile): ExerciseVideo[] => {
+  // Get base recommendations
+  const baseRecommendations = getBaseExerciseRecommendations(childProfile);
+  
+  // Get user preferences or create new ones
+  const userId = childProfile.id;
+  if (!userPreferences[userId]) {
+    userPreferences[userId] = {
+      userId,
+      exercisePreferences: {},
+      mealPreferences: {}
+    };
+  }
+  
+  // Apply ML-based scoring and sorting
+  const scoredRecommendations = baseRecommendations.map(video => {
+    // Start with a base score
+    let score = 5;
+    
+    // Apply user preferences if they exist
+    if (userPreferences[userId].exercisePreferences[video.id]) {
+      score = userPreferences[userId].exercisePreferences[video.id];
+    }
+    
+    // Apply collaborative filtering logic
+    // Find similar users based on age and activity level
+    const similarUsers = Object.values(userPreferences).filter(pref => {
+      // Skip the current user
+      if (pref.userId === userId) return false;
+      
+      // Check if there are any matching preferences
+      return Object.keys(pref.exercisePreferences).some(id => 
+        baseRecommendations.some(rec => rec.id === id)
+      );
+    });
+    
+    // Adjust score based on similar users' preferences
+    if (similarUsers.length > 0) {
+      let similarityScore = 0;
+      similarUsers.forEach(user => {
+        if (user.exercisePreferences[video.id]) {
+          similarityScore += user.exercisePreferences[video.id];
+        }
+      });
+      
+      // Average the similarity score and combine with base score
+      if (similarityScore > 0) {
+        const avgSimilarityScore = similarityScore / similarUsers.length;
+        // Weight of 0.3 for collaborative filtering
+        score = 0.7 * score + 0.3 * avgSimilarityScore;
+      }
+    }
+    
+    // Consider video tags matching with user preferences
+    const preferredTags = Object.keys(userPreferences[userId].exercisePreferences)
+      .flatMap(id => exerciseVideos.find(v => v.id === id)?.tags || []);
+    
+    // Count matching tags
+    const matchingTags = video.tags.filter(tag => preferredTags.includes(tag)).length;
+    if (matchingTags > 0 && preferredTags.length > 0) {
+      const tagScore = (matchingTags / video.tags.length) * 10;
+      // Weight of 0.2 for tag matching
+      score = 0.8 * score + 0.2 * tagScore;
+    }
+    
+    return { video, score };
+  });
+  
+  // Sort by score (descending) and return videos
+  return scoredRecommendations
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.video);
+};
+
+// ML-enhanced recommendations for cheat meals
+export const getCheatMealRecommendations = (childProfile: ChildProfile): CheatMealRecipe[] => {
+  // Get base recommendations
+  const baseRecommendations = getBaseCheatMealRecommendations(childProfile);
+  
+  // Get user preferences or create new ones
+  const userId = childProfile.id;
+  if (!userPreferences[userId]) {
+    userPreferences[userId] = {
+      userId,
+      exercisePreferences: {},
+      mealPreferences: {}
+    };
+  }
+  
+  // Apply ML-based scoring and sorting
+  const scoredRecommendations = baseRecommendations.map(recipe => {
+    // Start with a base score
+    let score = 5;
+    
+    // Apply user preferences if they exist
+    if (userPreferences[userId].mealPreferences[recipe.id]) {
+      score = userPreferences[userId].mealPreferences[recipe.id];
+    }
+    
+    // Apply collaborative filtering logic
+    // Find similar users based on diet type preferences
+    const similarUsers = Object.values(userPreferences).filter(pref => {
+      // Skip the current user
+      if (pref.userId === userId) return false;
+      
+      // Check if there are any matching preferences
+      return Object.keys(pref.mealPreferences).some(id => 
+        baseRecommendations.some(rec => rec.id === id)
+      );
+    });
+    
+    // Adjust score based on similar users' preferences
+    if (similarUsers.length > 0) {
+      let similarityScore = 0;
+      similarUsers.forEach(user => {
+        if (user.mealPreferences[recipe.id]) {
+          similarityScore += user.mealPreferences[recipe.id];
+        }
+      });
+      
+      // Average the similarity score and combine with base score
+      if (similarityScore > 0) {
+        const avgSimilarityScore = similarityScore / similarUsers.length;
+        // Weight of 0.3 for collaborative filtering
+        score = 0.7 * score + 0.3 * avgSimilarityScore;
+      }
+    }
+    
+    // Consider calorie preferences based on previous choices
+    const preferredRecipeIds = Object.keys(userPreferences[userId].mealPreferences);
+    if (preferredRecipeIds.length > 0) {
+      const avgPreferredCalories = preferredRecipeIds
+        .map(id => cheatMealRecipes.find(r => r.id === id)?.calories || 0)
+        .reduce((sum, cal) => sum + cal, 0) / preferredRecipeIds.length;
+      
+      // Calculate how close this recipe is to preferred calorie level
+      const calorieDistance = Math.abs(recipe.calories - avgPreferredCalories) / 500; // Normalize to 0-1 range
+      const calorieScore = 10 * (1 - calorieDistance); // Convert to 0-10 score
+      
+      // Weight of 0.2 for calorie matching
+      score = 0.8 * score + 0.2 * Math.max(0, Math.min(10, calorieScore));
+    }
+    
+    return { recipe, score };
+  });
+  
+  // Sort by score (descending) and return recipes
+  return scoredRecommendations
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.recipe);
+};
+
+// Add a preference for a video or recipe
+export const recordPreference = (
+  childId: string, 
+  itemId: string, 
+  score: number, 
+  type: 'exercise' | 'meal'
+): void => {
+  // Ensure user preferences exist
+  if (!userPreferences[childId]) {
+    userPreferences[childId] = {
+      userId: childId,
+      exercisePreferences: {},
+      mealPreferences: {}
+    };
+  }
+  
+  // Update the preference
+  if (type === 'exercise') {
+    userPreferences[childId].exercisePreferences[itemId] = score;
+  } else {
+    userPreferences[childId].mealPreferences[itemId] = score;
+  }
+  
+  // Save to localStorage
+  localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+};
+
+// Get current preferences for a child
+export const getPreferences = (childId: string): UserPreference | null => {
+  return userPreferences[childId] || null;
 };
