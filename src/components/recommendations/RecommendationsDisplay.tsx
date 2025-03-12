@@ -9,7 +9,7 @@ import {
   recordPreference,
   getPreferences
 } from './RecommendationsService';
-import { ExternalLink, ChevronDown, Check, Star, ThumbsUp } from 'lucide-react';
+import { ExternalLink, ChevronDown, Check, Star, ThumbsUp, Calendar, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -23,6 +23,17 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
   const [exerciseVideos, setExerciseVideos] = useState<any[]>([]);
   const [cheatMeals, setCheatMeals] = useState<any[]>([]);
   const [preferences, setPreferences] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
+  
+  // Get today's date formatted
+  const getTodayFormatted = () => {
+    const today = new Date();
+    return today.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
   
   useEffect(() => {
     // Get ML-enhanced recommendations
@@ -31,7 +42,7 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
     
     // Load user preferences
     setPreferences(getPreferences(childProfile.id));
-  }, [childProfile]);
+  }, [childProfile, refreshKey]);
   
   const toggleRecipe = (id: string) => {
     if (expandedRecipe === id) {
@@ -97,19 +108,39 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>ML-Enhanced Recommendations for {childProfile.name}</CardTitle>
-        <CardDescription>
-          Personalized exercise videos and treat recipes tailored to {childProfile.name}'s preferences using machine learning
+        <CardTitle>
+          <div className="flex items-center justify-between">
+            <span>Daily Recommendations for {childProfile.name}</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-2"
+              onClick={() => setRefreshKey(prev => prev + 1)}
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Refresh
+            </Button>
+          </div>
+        </CardTitle>
+        <CardDescription className="flex items-center">
+          <Calendar className="mr-1 h-4 w-4" />
+          {getTodayFormatted()} - Personalized by AI for maximum effectiveness
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="exercise">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="exercise">Exercise Videos</TabsTrigger>
-            <TabsTrigger value="meals">Fun Treat Recipes</TabsTrigger>
+            <TabsTrigger value="exercise">Today's Exercise Videos</TabsTrigger>
+            <TabsTrigger value="meals">Today's Fun Treat Recipes</TabsTrigger>
           </TabsList>
           
           <TabsContent value="exercise" className="mt-4 space-y-4">
+            <div className="p-2 bg-muted rounded-md mb-4">
+              <p className="text-sm text-center">
+                These 3 videos are specifically selected for {childProfile.name} today based on their health assessment
+              </p>
+            </div>
+            
             {exerciseVideos.length > 0 ? (
               exerciseVideos.map(video => (
                 <Card key={video.id} className="overflow-hidden">
@@ -150,6 +181,12 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
           </TabsContent>
           
           <TabsContent value="meals" className="mt-4 space-y-4">
+            <div className="p-2 bg-muted rounded-md mb-4">
+              <p className="text-sm text-center">
+                These 3 recipes are nutritionally balanced for {childProfile.name}'s current health status
+              </p>
+            </div>
+            
             {cheatMeals.length > 0 ? (
               cheatMeals.map(recipe => (
                 <Card key={recipe.id} className="overflow-hidden">

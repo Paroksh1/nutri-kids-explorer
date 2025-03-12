@@ -468,7 +468,7 @@ const getBaseCheatMealRecommendations = (childProfile: ChildProfile): CheatMealR
     } else if (healthAssessment.status === 'obese' && recipe.calories < 250) {
       calorieMatch = true;
     } else {
-      // If nothing specific matches, be more lenient
+      // If nothing specific matches, be more lenient for healthy status
       calorieMatch = healthAssessment.status === 'healthy';
     }
     
@@ -476,7 +476,33 @@ const getBaseCheatMealRecommendations = (childProfile: ChildProfile): CheatMealR
   });
 };
 
-// ML-enhanced recommendations with collaborative filtering
+// Get today's date as string in YYYY-MM-DD format
+const getTodayDateString = (): string => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
+// Function to get seed based on date and child ID for consistent randomization within a day
+const getDailySeed = (childId: string): number => {
+  const today = getTodayDateString();
+  const seedString = childId + today;
+  let seed = 0;
+  for (let i = 0; i < seedString.length; i++) {
+    seed += seedString.charCodeAt(i);
+  }
+  return seed;
+};
+
+// Pseudorandom number generator with seed
+const seededRandom = (seed: number): () => number => {
+  let currentSeed = seed;
+  return () => {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    return currentSeed / 233280;
+  };
+};
+
+// ML-enhanced recommendations with collaborative filtering and daily rotation
 export const getExerciseRecommendations = (childProfile: ChildProfile): ExerciseVideo[] => {
   // Get base recommendations
   const baseRecommendations = getBaseExerciseRecommendations(childProfile);
@@ -545,13 +571,59 @@ export const getExerciseRecommendations = (childProfile: ChildProfile): Exercise
     return { video, score };
   });
   
-  // Sort by score (descending) and return videos
-  return scoredRecommendations
+  // Sort by score (descending)
+  const sortedRecommendations = scoredRecommendations
     .sort((a, b) => b.score - a.score)
     .map(item => item.video);
+  
+  // Use today's date and child ID to create a deterministic but daily-changing selection
+  const dailySeed = getDailySeed(childProfile.id);
+  const random = seededRandom(dailySeed);
+  
+  // Create daily subsets based on health status
+  const healthAssessment = assessChildHealth(childProfile);
+  
+  // Split videos by health focus
+  const healthFocusedVideos = sortedRecommendations.filter(video => {
+    if (healthAssessment.status === 'underweight' && video.tags.includes('underweight')) {
+      return true;
+    } else if (healthAssessment.status === 'healthy' && 
+              (video.tags.includes('maintenance') || video.tags.includes('balanced'))) {
+      return true;
+    } else if ((healthAssessment.status === 'overweight' || healthAssessment.status === 'obese') && 
+              (video.tags.includes('weight-loss') || video.tags.includes('fat-burning'))) {
+      return true;
+    }
+    return false;
+  });
+  
+  const generalVideos = sortedRecommendations.filter(video => 
+    !healthFocusedVideos.includes(video)
+  );
+  
+  // Select videos for today
+  const dailyVideos: ExerciseVideo[] = [];
+  
+  // Prioritize health-focused videos (1-2)
+  const numHealthFocused = Math.min(2, healthFocusedVideos.length);
+  for (let i = 0; i < numHealthFocused; i++) {
+    const index = Math.floor(random() * healthFocusedVideos.length);
+    dailyVideos.push(healthFocusedVideos[index]);
+    healthFocusedVideos.splice(index, 1); // Remove selected video
+  }
+  
+  // Fill remaining slots with general videos
+  const totalVideosNeeded = 3; // We want 3 videos per day
+  while (dailyVideos.length < totalVideosNeeded && generalVideos.length > 0) {
+    const index = Math.floor(random() * generalVideos.length);
+    dailyVideos.push(generalVideos[index]);
+    generalVideos.splice(index, 1); // Remove selected video
+  }
+  
+  return dailyVideos;
 };
 
-// ML-enhanced recommendations for cheat meals
+// ML-enhanced recommendations for cheat meals with daily rotation
 export const getCheatMealRecommendations = (childProfile: ChildProfile): CheatMealRecipe[] => {
   // Get base recommendations
   const baseRecommendations = getBaseCheatMealRecommendations(childProfile);
@@ -623,10 +695,56 @@ export const getCheatMealRecommendations = (childProfile: ChildProfile): CheatMe
     return { recipe, score };
   });
   
-  // Sort by score (descending) and return recipes
-  return scoredRecommendations
+  // Sort by score (descending)
+  const sortedRecommendations = scoredRecommendations
     .sort((a, b) => b.score - a.score)
     .map(item => item.recipe);
+  
+  // Use today's date and child ID to create a deterministic but daily-changing selection
+  const dailySeed = getDailySeed(childProfile.id);
+  const random = seededRandom(dailySeed);
+  
+  // Get health assessment
+  const healthAssessment = assessChildHealth(childProfile);
+  
+  // Split recipes by health focus
+  const healthFocusedRecipes = sortedRecommendations.filter(recipe => {
+    if (healthAssessment.status === 'underweight' && recipe.calories > 300) {
+      return true;
+    } else if (healthAssessment.status === 'healthy') {
+      return recipe.calories >= 200 && recipe.calories <= 350;
+    } else if (healthAssessment.status === 'overweight' && recipe.calories < 300) {
+      return true;
+    } else if (healthAssessment.status === 'obese' && recipe.calories < 250) {
+      return true;
+    }
+    return false;
+  });
+  
+  const otherRecipes = sortedRecommendations.filter(recipe => 
+    !healthFocusedRecipes.includes(recipe)
+  );
+  
+  // Select recipes for today
+  const dailyRecipes: CheatMealRecipe[] = [];
+  
+  // Prioritize health-focused recipes (at least 2)
+  const numHealthFocused = Math.min(2, healthFocusedRecipes.length);
+  for (let i = 0; i < numHealthFocused; i++) {
+    const index = Math.floor(random() * healthFocusedRecipes.length);
+    dailyRecipes.push(healthFocusedRecipes[index]);
+    healthFocusedRecipes.splice(index, 1); // Remove selected recipe
+  }
+  
+  // Fill remaining slots with other recipes
+  const totalRecipesNeeded = 3; // We want 3 recipes per day
+  while (dailyRecipes.length < totalRecipesNeeded && otherRecipes.length > 0) {
+    const index = Math.floor(random() * otherRecipes.length);
+    dailyRecipes.push(otherRecipes[index]);
+    otherRecipes.splice(index, 1); // Remove selected recipe
+  }
+  
+  return dailyRecipes;
 };
 
 // Add a preference for a video or recipe
