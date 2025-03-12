@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getChildProfiles } from '@/components/onboarding/ChildProfileForm';
 import RecommendationsDisplay from '@/components/recommendations/RecommendationsDisplay';
+import HealthAssessmentCard from '@/components/recommendations/HealthAssessmentCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Brain, Zap, LineChart, BarChart3, Fingerprint, PieChart } from 'lucide-react';
@@ -25,7 +26,7 @@ const Recommendations = () => {
   return (
     <div className="container mx-auto py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6 text-center">
-        Advanced ML-Powered Recommendations
+        Personalized Health & Activity Recommendations
       </h1>
       
       <Card className="mb-6">
@@ -153,7 +154,10 @@ const Recommendations = () => {
           </div>
           
           {selectedChild && (
-            <RecommendationsDisplay childProfile={selectedChild} />
+            <>
+              <HealthAssessmentCard childProfile={selectedChild} />
+              <RecommendationsDisplay childProfile={selectedChild} />
+            </>
           )}
         </div>
       ) : (

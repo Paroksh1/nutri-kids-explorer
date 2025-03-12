@@ -1,4 +1,5 @@
 import { ChildProfile } from '../onboarding/ChildProfileForm';
+import { assessChildHealth } from '@/utils/healthAssessment';
 
 // Exercise recommendation interfaces
 interface ExerciseVideo {
@@ -131,6 +132,50 @@ const exerciseVideos: ExerciseVideo[] = [
     ageRangeMax: 16,
     activityLevel: ['sedentary', 'light'],
     tags: ['gentle', 'adaptive', 'mobility']
+  },
+  {
+    id: 'ex9',
+    title: 'Fun Weight Gain Activities for Underweight Kids',
+    description: 'Gentle strength-building activities designed for underweight children to build muscle and increase appetite.',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    durationMinutes: 18,
+    ageRangeMin: 5,
+    ageRangeMax: 14,
+    activityLevel: ['light', 'moderate'],
+    tags: ['strength', 'underweight', 'muscle-building']
+  },
+  {
+    id: 'ex10',
+    title: 'Kid-Friendly Cardio for Weight Management',
+    description: 'Fun cardio exercises that help with weight management while keeping children engaged and motivated.',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    durationMinutes: 20,
+    ageRangeMin: 6,
+    ageRangeMax: 15,
+    activityLevel: ['moderate', 'active'],
+    tags: ['cardio', 'weight-loss', 'fat-burning']
+  },
+  {
+    id: 'ex11',
+    title: 'Balanced Fitness Routine for Healthy Kids',
+    description: 'A well-rounded fitness routine for children at a healthy weight that focuses on strength, flexibility, and endurance.',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    durationMinutes: 25,
+    ageRangeMin: 7,
+    ageRangeMax: 16,
+    activityLevel: ['moderate', 'active'],
+    tags: ['balanced', 'maintenance', 'fitness']
+  },
+  {
+    id: 'ex12',
+    title: 'Family-Friendly Weight Management Activities',
+    description: 'Exercise routines that the whole family can do together to support a child who needs to manage their weight.',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    durationMinutes: 30,
+    ageRangeMin: 5,
+    ageRangeMax: 17,
+    activityLevel: ['moderate', 'active'],
+    tags: ['family', 'weight-loss', 'overweight']
   }
 ];
 
@@ -279,6 +324,78 @@ const cheatMealRecipes: CheatMealRecipe[] = [
     prepTimeMinutes: 20,
     dietTypes: ['vegetarian', 'vegan', 'gluten-free'],
     calories: 170
+  },
+  {
+    id: 'cm7',
+    name: 'Protein-Packed Pancakes for Weight Gain',
+    description: 'Delicious, high-protein pancakes perfect for supporting healthy weight gain in underweight children.',
+    ingredients: [
+      '1 cup oat flour',
+      '2 scoops vanilla protein powder',
+      '1 banana',
+      '2 eggs',
+      '1/2 cup Greek yogurt',
+      '1 tbsp honey',
+      '1/2 tsp baking powder',
+      'Pinch of salt'
+    ],
+    instructions: [
+      'Blend all ingredients until smooth.',
+      'Heat a non-stick pan over medium heat.',
+      'Pour batter to form pancakes.',
+      'Cook until bubbles form, then flip.',
+      'Serve with fresh fruit and a drizzle of honey.'
+    ],
+    prepTimeMinutes: 15,
+    dietTypes: ['vegetarian', 'non-vegetarian'],
+    calories: 350
+  },
+  {
+    id: 'cm8',
+    name: 'Balanced Energy Bowl for Healthy Kids',
+    description: 'A perfectly balanced bowl with whole grains, veggies, and protein to maintain a healthy weight.',
+    ingredients: [
+      '1/2 cup quinoa',
+      '1/4 cup black beans',
+      '1/4 cup corn',
+      '1/4 cup cherry tomatoes',
+      '1/4 avocado',
+      '2 tbsp cilantro',
+      'Juice of 1/2 lime',
+      'Salt and pepper to taste'
+    ],
+    instructions: [
+      'Cook quinoa according to package instructions.',
+      'Mix quinoa with beans and corn.',
+      'Top with sliced cherry tomatoes and avocado.',
+      'Sprinkle with cilantro and drizzle with lime juice.',
+      'Season with salt and pepper.'
+    ],
+    prepTimeMinutes: 20,
+    dietTypes: ['vegetarian', 'vegan', 'non-vegetarian'],
+    calories: 290
+  },
+  {
+    id: 'cm9',
+    name: 'Lighter Pizza Pockets for Weight Management',
+    description: 'Kid-friendly pizza pockets with a lightened-up twist to help with weight management.',
+    ingredients: [
+      'Whole wheat pita pockets',
+      '1/4 cup low-sodium marinara sauce',
+      '1/2 cup part-skim mozzarella',
+      'Vegetables of choice (bell peppers, spinach, mushrooms)',
+      'Italian seasoning'
+    ],
+    instructions: [
+      'Preheat oven to 375°F.',
+      'Cut pita pockets in half to form two pouches.',
+      'Fill each with sauce, cheese, and veggies.',
+      'Sprinkle with Italian seasoning.',
+      'Bake for 10-12 minutes until cheese melts.'
+    ],
+    prepTimeMinutes: 15,
+    dietTypes: ['vegetarian', 'non-vegetarian'],
+    calories: 220
   }
 ];
 
@@ -296,8 +413,11 @@ const initializePreferences = () => {
 // Call initialize on module load
 initializePreferences();
 
-// Base recommendations without ML
+// Base recommendations with health status consideration
 const getBaseExerciseRecommendations = (childProfile: ChildProfile): ExerciseVideo[] => {
+  // Get health assessment
+  const healthAssessment = assessChildHealth(childProfile);
+  
   return exerciseVideos.filter(video => {
     // Filter by age range
     const ageMatch = childProfile.age >= video.ageRangeMin && 
@@ -306,16 +426,53 @@ const getBaseExerciseRecommendations = (childProfile: ChildProfile): ExerciseVid
     // Filter by activity level
     const activityMatch = video.activityLevel.includes(childProfile.activityLevel);
     
-    return ageMatch && activityMatch;
+    // Health status matching
+    let healthMatch = true;
+    if (healthAssessment.status === 'underweight' && video.tags.includes('underweight')) {
+      healthMatch = true;
+    } else if (healthAssessment.status === 'healthy' && 
+               (video.tags.includes('maintenance') || video.tags.includes('balanced'))) {
+      healthMatch = true;
+    } else if ((healthAssessment.status === 'overweight' || healthAssessment.status === 'obese') && 
+               (video.tags.includes('weight-loss') || video.tags.includes('fat-burning'))) {
+      healthMatch = true;
+    } else {
+      // If no specific health tags match, still include basic exercise videos
+      healthMatch = !video.tags.some(tag => 
+        ['underweight', 'weight-loss', 'fat-burning', 'maintenance'].includes(tag)
+      );
+    }
+    
+    return ageMatch && activityMatch && healthMatch;
   });
 };
 
-// Base recommendations without ML
+// Base recommendations with health status consideration
 const getBaseCheatMealRecommendations = (childProfile: ChildProfile): CheatMealRecipe[] => {
+  // Get health assessment
+  const healthAssessment = assessChildHealth(childProfile);
+  
   return cheatMealRecipes.filter(recipe => {
     // Filter by diet type
-    return recipe.dietTypes.includes(childProfile.dietType) || 
-           (childProfile.dietType === 'non-vegetarian' && recipe.dietTypes.includes('vegetarian'));
+    const dietMatch = recipe.dietTypes.includes(childProfile.dietType) || 
+                     (childProfile.dietType === 'non-vegetarian' && recipe.dietTypes.includes('vegetarian'));
+    
+    // Apply calorie considerations based on health status
+    let calorieMatch = true;
+    if (healthAssessment.status === 'underweight' && recipe.calories > 300) {
+      calorieMatch = true;
+    } else if (healthAssessment.status === 'healthy') {
+      calorieMatch = true;
+    } else if (healthAssessment.status === 'overweight' && recipe.calories < 300) {
+      calorieMatch = true;
+    } else if (healthAssessment.status === 'obese' && recipe.calories < 250) {
+      calorieMatch = true;
+    } else {
+      // If nothing specific matches, be more lenient
+      calorieMatch = healthAssessment.status === 'healthy';
+    }
+    
+    return dietMatch && calorieMatch;
   });
 };
 
@@ -502,4 +659,9 @@ export const recordPreference = (
 // Get current preferences for a child
 export const getPreferences = (childId: string): UserPreference | null => {
   return userPreferences[childId] || null;
+};
+
+// Export health assessment function for use in components
+export const getHealthAssessment = (childProfile: ChildProfile) => {
+  return assessChildHealth(childProfile);
 };
