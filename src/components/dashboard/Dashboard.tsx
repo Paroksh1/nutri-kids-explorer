@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, logout } from '../auth/AuthForm';
 import { getChildProfiles, ChildProfile } from '../onboarding/ChildProfileForm';
 import { Plus, LogOut, User, Apple, Utensils, Calendar, Activity } from 'lucide-react';
-import MealPlanDisplay from '../meal/MealPlanDisplay';
 import MealTracker from '../meal/MealTracker';
 import { getNutritionSummary } from '../meal/MealService';
 import RecommendationsDisplay from '../recommendations/RecommendationsDisplay';
@@ -51,6 +50,14 @@ const Dashboard: React.FC = () => {
     setActiveChild(child);
     const summary = getNutritionSummary(child.id);
     setNutritionSummary(summary);
+  };
+  
+  const navigateToMealPlans = () => {
+    navigate('/meal-plans');
+  };
+  
+  const navigateToRecommendations = () => {
+    navigate('/recommendations');
   };
   
   if (!activeChild && childProfiles.length === 0) {
@@ -138,18 +145,15 @@ const Dashboard: React.FC = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="overview">
                     <Apple className="mr-2 h-4 w-4" /> Overview
-                  </TabsTrigger>
-                  <TabsTrigger value="meal-plan">
-                    <Calendar className="mr-2 h-4 w-4" /> Meal Plan
                   </TabsTrigger>
                   <TabsTrigger value="tracking">
                     <Utensils className="mr-2 h-4 w-4" /> Food Tracking
                   </TabsTrigger>
-                  <TabsTrigger value="recommendations">
-                    <Activity className="mr-2 h-4 w-4" /> Recommendations
+                  <TabsTrigger value="ai-insights">
+                    <Activity className="mr-2 h-4 w-4" /> AI Insights
                   </TabsTrigger>
                 </TabsList>
                 
@@ -190,53 +194,50 @@ const Dashboard: React.FC = () => {
                   </Card>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card>
+                    <Card className="hover:shadow-md transition-all duration-300 bg-gradient-to-br from-background to-primary/5">
                       <CardHeader>
-                        <CardTitle>Quick Actions</CardTitle>
+                        <CardTitle>Meal Planning</CardTitle>
+                        <CardDescription>View and manage weekly meal plans</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-2">
+                        <p className="text-sm mb-4">
+                          Personalized meal plans based on {activeChild.name}'s nutritional needs and preferences.
+                        </p>
                         <Button 
-                          className="w-full justify-start" 
-                          onClick={() => setActiveTab('tracking')}
+                          className="w-full justify-start bg-primary hover:bg-primary/90" 
+                          onClick={navigateToMealPlans}
                         >
-                          <Utensils className="mr-2 h-4 w-4" /> Log Food
-                        </Button>
-                        <Button 
-                          className="w-full justify-start" 
-                          onClick={() => setActiveTab('meal-plan')}
-                        >
-                          <Calendar className="mr-2 h-4 w-4" /> View Meal Plan
+                          <Calendar className="mr-2 h-4 w-4" /> View Meal Plans
                         </Button>
                       </CardContent>
                     </Card>
                     
-                    <Card>
+                    <Card className="hover:shadow-md transition-all duration-300 bg-gradient-to-br from-background to-secondary/5">
                       <CardHeader>
-                        <CardTitle>Recommendations</CardTitle>
+                        <CardTitle>AI Recommendations</CardTitle>
+                        <CardDescription>Personalized nutrition insights</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Based on {activeChild.name}'s profile:
+                        <p className="text-sm mb-4">
+                          Get AI-powered recommendations to optimize {activeChild.name}'s nutritional intake.
                         </p>
-                        <ul className="space-y-2 text-sm list-disc pl-5">
-                          <li>Increase calcium intake for optimal bone development</li>
-                          <li>Maintain hydration with at least 6-8 glasses of water daily</li>
-                          <li>Include more colorful vegetables in meals</li>
-                        </ul>
+                        <Button 
+                          variant="outline"
+                          className="w-full justify-start border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary"
+                          onClick={navigateToRecommendations}
+                        >
+                          <Activity className="mr-2 h-4 w-4" /> View Recommendations
+                        </Button>
                       </CardContent>
                     </Card>
                   </div>
-                </TabsContent>
-                
-                <TabsContent value="meal-plan" className="mt-4">
-                  {activeChild && <MealPlanDisplay childId={activeChild.id} />}
                 </TabsContent>
                 
                 <TabsContent value="tracking" className="mt-4">
                   {activeChild && <MealTracker childId={activeChild.id} />}
                 </TabsContent>
                 
-                <TabsContent value="recommendations" className="mt-4">
+                <TabsContent value="ai-insights" className="mt-4">
                   {activeChild && <RecommendationsDisplay childProfile={activeChild} />}
                 </TabsContent>
               </Tabs>
