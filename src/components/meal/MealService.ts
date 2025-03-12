@@ -1,4 +1,3 @@
-
 import { ChildProfile } from '../onboarding/ChildProfileForm';
 
 // Interfaces for meal tracking
@@ -38,6 +37,75 @@ interface NutritionSummary {
 // In-memory storage (in a real app, this would be a database)
 let mealLogs: MealLog[] = [];
 let mealPlans: Record<string, MealPlanDay[]> = {};
+
+// Enhanced food database based on the provided image
+const foodDatabase: FoodItem[] = [
+  // Grains
+  { id: '1', name: 'Rice', calories: 130, protein: 2.7, carbs: 28, fat: 0.3, servingSize: '100g cooked' },
+  { id: '2', name: 'Wheat', calories: 340, protein: 13.2, carbs: 71, fat: 2.5, servingSize: '100g' },
+  { id: '3', name: 'Barley', calories: 354, protein: 12.5, carbs: 73.5, fat: 2.3, servingSize: '100g' },
+  { id: '4', name: 'Oats', calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9, servingSize: '100g' },
+  { id: '5', name: 'Maize', calories: 365, protein: 9.4, carbs: 74, fat: 4.7, servingSize: '100g' },
+  
+  // Protein sources
+  { id: '6', name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6, servingSize: '100g cooked' },
+  { id: '7', name: 'Egg', calories: 155, protein: 12.6, carbs: 1.1, fat: 11.2, servingSize: '100g (2 eggs)' },
+  { id: '8', name: 'Beef', calories: 250, protein: 26, carbs: 0, fat: 17, servingSize: '100g cooked' },
+  { id: '9', name: 'Fish', calories: 206, protein: 22, carbs: 0, fat: 12, servingSize: '100g' },
+  { id: '10', name: 'Pork', calories: 242, protein: 24, carbs: 0, fat: 16, servingSize: '100g cooked' },
+  { id: '11', name: 'Lentil', calories: 116, protein: 9, carbs: 20, fat: 0.4, servingSize: '100g cooked' },
+  
+  // Dairy products
+  { id: '12', name: 'Milk', calories: 42, protein: 3.4, carbs: 5, fat: 1, servingSize: '100ml' },
+  { id: '13', name: 'Cheese', calories: 402, protein: 25, carbs: 1.3, fat: 33, servingSize: '100g' },
+  { id: '14', name: 'Yogurt', calories: 59, protein: 3.6, carbs: 5, fat: 3.1, servingSize: '100g' },
+  { id: '15', name: 'Butter', calories: 717, protein: 0.9, carbs: 0.1, fat: 81, servingSize: '100g' },
+  
+  // Vegetables
+  { id: '16', name: 'Spinach', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4, servingSize: '100g' },
+  { id: '17', name: 'Carrot', calories: 41, protein: 0.9, carbs: 9.6, fat: 0.2, servingSize: '100g' },
+  { id: '18', name: 'Broccoli', calories: 34, protein: 2.8, carbs: 6.6, fat: 0.4, servingSize: '100g' },
+  { id: '19', name: 'Potato', calories: 77, protein: 2, carbs: 17, fat: 0.1, servingSize: '100g' },
+  { id: '20', name: 'Tomato', calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2, servingSize: '100g' },
+  
+  // Fruits
+  { id: '21', name: 'Apple', calories: 52, protein: 0.3, carbs: 13.8, fat: 0.2, servingSize: '100g' },
+  { id: '22', name: 'Banana', calories: 89, protein: 1.1, carbs: 22.8, fat: 0.3, servingSize: '100g' },
+  { id: '23', name: 'Orange', calories: 43, protein: 0.9, carbs: 8.3, fat: 0.2, servingSize: '100g' },
+  { id: '24', name: 'Grapes', calories: 67, protein: 0.6, carbs: 17.2, fat: 0.4, servingSize: '100g' },
+  { id: '25', name: 'Watermelon', calories: 30, protein: 0.6, carbs: 7.6, fat: 0.2, servingSize: '100g' },
+  
+  // Nuts and seeds
+  { id: '26', name: 'Almonds', calories: 579, protein: 21.2, carbs: 21.7, fat: 49.9, servingSize: '100g' },
+  { id: '27', name: 'Walnuts', calories: 654, protein: 15.2, carbs: 13.7, fat: 65.2, servingSize: '100g' },
+  { id: '28', name: 'Cashews', calories: 553, protein: 18.2, carbs: 30.2, fat: 43.9, servingSize: '100g' },
+  { id: '29', name: 'Sunflower Seeds', calories: 584, protein: 20.8, carbs: 20, fat: 51.5, servingSize: '100g' },
+  
+  // Legumes
+  { id: '30', name: 'Chickpeas', calories: 164, protein: 8.9, carbs: 27.4, fat: 2.6, servingSize: '100g cooked' },
+  { id: '31', name: 'Black Beans', calories: 132, protein: 8.9, carbs: 23.7, fat: 0.5, servingSize: '100g cooked' },
+  { id: '32', name: 'Green Peas', calories: 81, protein: 5.4, carbs: 14.5, fat: 0.4, servingSize: '100g' },
+  
+  // Oils
+  { id: '33', name: 'Olive Oil', calories: 884, protein: 0, carbs: 0, fat: 100, servingSize: '100g' },
+  { id: '34', name: 'Coconut Oil', calories: 862, protein: 0, carbs: 0, fat: 100, servingSize: '100g' },
+  
+  // Sweeteners
+  { id: '35', name: 'Honey', calories: 304, protein: 0.3, carbs: 82.4, fat: 0, servingSize: '100g' },
+  { id: '36', name: 'Sugar', calories: 387, protein: 0, carbs: 100, fat: 0, servingSize: '100g' },
+  
+  // Beverages
+  { id: '37', name: 'Orange Juice', calories: 45, protein: 0.7, carbs: 10.4, fat: 0.2, servingSize: '100ml' },
+  { id: '38', name: 'Apple Juice', calories: 46, protein: 0.1, carbs: 11.3, fat: 0.1, servingSize: '100ml' },
+  
+  // Processed foods
+  { id: '39', name: 'Bread', calories: 265, protein: 9, carbs: 49, fat: 3.2, servingSize: '100g' },
+  { id: '40', name: 'Pasta', calories: 131, protein: 5, carbs: 25, fat: 1.1, servingSize: '100g cooked' },
+  { id: '41', name: 'Pizza', calories: 266, protein: 11, carbs: 33, fat: 10, servingSize: '100g' },
+  { id: '42', name: 'Ice Cream', calories: 207, protein: 3.5, carbs: 23.6, fat: 11, servingSize: '100g' },
+  { id: '43', name: 'Chocolate', calories: 546, protein: 4.9, carbs: 61, fat: 31, servingSize: '100g' },
+  { id: '44', name: 'Potato Chips', calories: 536, protein: 7, carbs: 53, fat: 35, servingSize: '100g' },
+];
 
 // Sample meal plans based on diet type
 const vegetarianMeals = {
@@ -319,4 +387,9 @@ export const getNutritionSummary = (childId: string): NutritionSummary | null =>
     carbs: { consumed: Math.round(consumed.carbs), recommended: recommendedCarbs },
     fat: { consumed: Math.round(consumed.fat), recommended: recommendedFat }
   };
+};
+
+// Export the food database for use in other components
+export const getFoodDatabase = (): FoodItem[] => {
+  return foodDatabase;
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Plus, Search, Check, Trash } from 'lucide-react';
-import { getMealLogs, addMealLog } from './MealService';
+import { getMealLogs, addMealLog, getFoodDatabase } from './MealService';
 
 interface FoodItem {
   id: string;
@@ -27,21 +26,6 @@ interface MealLog {
   foods: Array<FoodItem & { quantity: number }>;
 }
 
-// Sample food database
-const foodDatabase: FoodItem[] = [
-  { id: '1', name: 'Whole Milk', calories: 149, protein: 8, carbs: 12, fat: 8, servingSize: '1 cup (240ml)' },
-  { id: '2', name: 'Boiled Egg', calories: 78, protein: 6, carbs: 1, fat: 5, servingSize: '1 large egg' },
-  { id: '3', name: 'White Rice (cooked)', calories: 130, protein: 2.7, carbs: 28, fat: 0.3, servingSize: '100g' },
-  { id: '4', name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6, servingSize: '100g cooked' },
-  { id: '5', name: 'Spinach (raw)', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4, servingSize: '100g' },
-  { id: '6', name: 'Apple', calories: 95, protein: 0.5, carbs: 25, fat: 0.3, servingSize: '1 medium (182g)' },
-  { id: '7', name: 'Banana', calories: 105, protein: 1.3, carbs: 27, fat: 0.4, servingSize: '1 medium (118g)' },
-  { id: '8', name: 'Whole Wheat Bread', calories: 81, protein: 4, carbs: 13.8, fat: 1.1, servingSize: '1 slice (32g)' },
-  { id: '9', name: 'Peanut Butter', calories: 188, protein: 8, carbs: 6, fat: 16, servingSize: '2 tbsp (32g)' },
-  { id: '10', name: 'Oatmeal (cooked)', calories: 154, protein: 6, carbs: 27, fat: 2.5, servingSize: '1 cup (234g)' },
-  { id: '11', name: 'Greek Yogurt', calories: 100, protein: 17, carbs: 6, fat: 0.7, servingSize: '170g, 6oz' },
-];
-
 const MealTracker: React.FC<{ childId: string }> = ({ childId }) => {
   const [mealLogs, setMealLogs] = useState<MealLog[]>([]);
   const [showAddMeal, setShowAddMeal] = useState(false);
@@ -49,11 +33,15 @@ const MealTracker: React.FC<{ childId: string }> = ({ childId }) => {
   const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
   const [selectedFoods, setSelectedFoods] = useState<Array<FoodItem & { quantity: number }>>([]);
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
+  const [foodDatabase, setFoodDatabase] = useState<FoodItem[]>([]);
   
   useEffect(() => {
     // Load meal logs for the child
     const logs = getMealLogs(childId);
     setMealLogs(logs);
+    
+    // Get the food database
+    setFoodDatabase(getFoodDatabase());
   }, [childId]);
   
   useEffect(() => {
@@ -66,7 +54,7 @@ const MealTracker: React.FC<{ childId: string }> = ({ childId }) => {
       );
       setSearchResults(results);
     }
-  }, [searchTerm]);
+  }, [searchTerm, foodDatabase]);
   
   const handleAddFood = (food: FoodItem) => {
     // Check if food is already added
