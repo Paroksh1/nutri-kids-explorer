@@ -16,12 +16,15 @@ const GlobalNav: React.FC<GlobalNavProps> = ({ className }) => {
   const isHomePage = location.pathname === '/';
   const isAuthenticated_ = isAuthenticated();
   
-  // Don't render on home page or dashboard pages (they have their own nav)
-  if (isHomePage || location.pathname.includes('/dashboard') || 
-      location.pathname.includes('/meal-plans') || 
-      location.pathname.includes('/recommendations')) {
+  // Only don't render on home page (it already has its own nav)
+  if (isHomePage) {
     return null;
   }
+  
+  // Different nav for dashboard pages (they have their own nav)
+  const isDashboardPage = location.pathname.includes('/dashboard') || 
+                          location.pathname.includes('/meal-plans') || 
+                          location.pathname.includes('/recommendations');
   
   return (
     <motion.div 
