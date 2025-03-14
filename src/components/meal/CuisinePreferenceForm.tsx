@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, AlertCircle } from 'lucide-react';
+import { getCuisinePreferences } from '@/services/AIRecommendationService';
 
 export interface CuisinePreferences {
   childId: string;
@@ -20,6 +21,9 @@ export interface CuisinePreferences {
   dietaryRestrictions: string[];
   mealSizePreference: string;
   sweetPreference: string;
+  indianRegionPreference?: string; // Added for Indian regional cuisine preference
+  favoriteIndianDishes?: string[]; // Added for favorite Indian dishes
+  traditionalPreference?: string; // Added for traditional vs fusion preference
 }
 
 interface CuisinePreferenceFormProps {
@@ -30,6 +34,32 @@ interface CuisinePreferenceFormProps {
 const CuisinePreferenceForm: React.FC<CuisinePreferenceFormProps> = ({ childId, onSubmit }) => {
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [customCuisine, setCustomCuisine] = useState('');
+  const [showIndianOptions, setShowIndianOptions] = useState(false);
+  const [selectedIndianDishes, setSelectedIndianDishes] = useState<string[]>([]);
+  const [customIndianDish, setCustomIndianDish] = useState('');
+  
+  // Load existing preferences if available
+  useEffect(() => {
+    const existingPreferences = getCuisinePreferences(childId);
+    if (existingPreferences) {
+      if (existingPreferences.favoriteCuisines) {
+        setSelectedCuisines(existingPreferences.favoriteCuisines);
+        // Check if Indian cuisine is selected
+        if (existingPreferences.favoriteCuisines.includes('indian')) {
+          setShowIndianOptions(true);
+        }
+      }
+      
+      if (existingPreferences.favoriteIndianDishes) {
+        setSelectedIndianDishes(existingPreferences.favoriteIndianDishes);
+      }
+      
+      // Update form defaults with existing values
+      form.reset({
+        ...existingPreferences
+      });
+    }
+  }, [childId]);
   
   const form = useForm({
     defaultValues: {
@@ -41,9 +71,14 @@ const CuisinePreferenceForm: React.FC<CuisinePreferenceFormProps> = ({ childId, 
       spiceLevel: 'medium',
       dietaryRestrictions: [],
       mealSizePreference: 'medium',
-      sweetPreference: 'medium'
+      sweetPreference: 'medium',
+      indianRegionPreference: '',
+      traditionalPreference: 'traditional'
     }
   });
+  
+  // Watch for changes to observe form values
+  const watchedValues = form.watch();
   
   const cuisineOptions = [
     { id: 'indian', label: 'Indian' },
@@ -63,9 +98,10 @@ const CuisinePreferenceForm: React.FC<CuisinePreferenceFormProps> = ({ childId, 
     { id: 'beef', label: 'Beef' },
     { id: 'fish', label: 'Fish' },
     { id: 'tofu', label: 'Tofu' },
-    { id: 'lentils', label: 'Lentils/Beans' },
+    { id: 'paneer', label: 'Paneer (Indian Cottage Cheese)' },
+    { id: 'lentils', label: 'Lentils/Beans (Dal)' },
     { id: 'eggs', label: 'Eggs' },
-    { id: 'dairy', label: 'Dairy' }
+    { id: 'dairy', label: 'Dairy (Milk, Curd)' }
   ];
   
   const dietaryRestrictionOptions = [
@@ -77,13 +113,31 @@ const CuisinePreferenceForm: React.FC<CuisinePreferenceFormProps> = ({ childId, 
     { id: 'low-sugar', label: 'Low-Sugar' }
   ];
   
+  const indianDishOptions = [
+    { id: 'dal-rice', label: 'Dal Rice' },
+    { id: 'roti-sabzi', label: 'Roti with Sabzi' },
+    { id: 'idli-dosa', label: 'Idli/Dosa' },
+    { id: 'paratha', label: 'Paratha' },
+    { id: 'khichdi', label: 'Khichdi' },
+    { id: 'pulao', label: 'Pulao/Biryani' },
+    { id: 'chaat', label: 'Chaat' },
+    { id: 'samosa', label: 'Samosa/Pakora' },
+    { id: 'upma', label: 'Upma/Poha' },
+    { id: 'chole', label: 'Chole/Rajma' }
+  ];
+  
   const handleSelectCuisine = (id: string, checked: boolean) => {
     setSelectedCuisines(prev => {
-      if (checked) {
-        return [...prev, id];
-      } else {
-        return prev.filter(item => item !== id);
+      const newSelection = checked 
+        ? [...prev, id] 
+        : prev.filter(item => item !== id);
+      
+      // Show Indian specific options if Indian is selected
+      if (id === 'indian') {
+        setShowIndianOptions(checked);
       }
+      
+      return newSelection;
     });
   };
   
@@ -95,11 +149,30 @@ const CuisinePreferenceForm: React.FC<CuisinePreferenceFormProps> = ({ childId, 
     }
   };
   
+  const handleSelectIndianDish = (id: string, checked: boolean) => {
+    setSelectedIndianDishes(prev => {
+      if (checked) {
+        return [...prev, id];
+      } else {
+        return prev.filter(item => item !== id);
+      }
+    });
+  };
+  
+  const handleAddCustomIndianDish = () => {
+    if (customIndianDish.trim() !== '') {
+      setSelectedIndianDishes(prev => [...prev, customIndianDish.trim()]);
+      setCustomIndianDish('');
+      toast.success(`Added ${customIndianDish} to favorite Indian dishes`);
+    }
+  };
+  
   const handleSubmitForm = (data: any) => {
-    // Combine selected cuisines with form data
+    // Combine selected cuisines and Indian dishes with form data
     const formData = {
       ...data,
-      favoriteCuisines: selectedCuisines
+      favoriteCuisines: selectedCuisines,
+      favoriteIndianDishes: selectedIndianDishes
     };
     
     onSubmit(formData);
@@ -154,6 +227,102 @@ const CuisinePreferenceForm: React.FC<CuisinePreferenceFormProps> = ({ childId, 
                 </Button>
               </div>
             </div>
+            
+            {/* Indian cuisine specific questions */}
+            {showIndianOptions && (
+              <div className="space-y-4 p-4 border rounded-md bg-muted/30">
+                <h3 className="text-lg font-medium flex items-center">
+                  <span className="text-primary mr-2">🇮🇳</span> 
+                  Indian Cuisine Preferences
+                </h3>
+                
+                <FormField
+                  control={form.control}
+                  name="indianRegionPreference"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Preferred Indian Regional Cuisine</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select regional preference" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="north">North Indian (Punjabi, Delhi style)</SelectItem>
+                          <SelectItem value="south">South Indian (Dosa, Idli, Tamil/Kerala style)</SelectItem>
+                          <SelectItem value="east">East Indian (Bengali, Odia style)</SelectItem>
+                          <SelectItem value="west">West Indian (Gujarati, Maharashtrian style)</SelectItem>
+                          <SelectItem value="mixed">Mixed/Pan-Indian</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        This helps us select recipes from your preferred regional style
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="space-y-2">
+                  <FormLabel>Favorite Indian Dishes</FormLabel>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {indianDishOptions.map((dish) => (
+                      <div key={dish.id} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`dish-${dish.id}`} 
+                          checked={selectedIndianDishes.includes(dish.id)}
+                          onCheckedChange={(checked) => handleSelectIndianDish(dish.id, checked as boolean)}
+                        />
+                        <label 
+                          htmlFor={`dish-${dish.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {dish.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex items-end gap-2 mt-2">
+                    <div className="flex-1">
+                      <FormLabel>Other Indian Dish</FormLabel>
+                      <Input 
+                        value={customIndianDish}
+                        onChange={(e) => setCustomIndianDish(e.target.value)}
+                        placeholder="Enter a dish not listed above"
+                      />
+                    </div>
+                    <Button type="button" onClick={handleAddCustomIndianDish} size="sm">
+                      Add
+                    </Button>
+                  </div>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="traditionalPreference"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Preparation Style Preference</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select style preference" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="traditional">Traditional (Authentic recipes)</SelectItem>
+                          <SelectItem value="modern">Modern (Healthier adaptations)</SelectItem>
+                          <SelectItem value="fusion">Fusion (Indian flavors with global techniques)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
             
             <FormField
               control={form.control}
