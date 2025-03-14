@@ -9,9 +9,10 @@ import {
   recordPreference,
   getPreferences
 } from './RecommendationsService';
-import { ExternalLink, ChevronDown, Check, Star, ThumbsUp, Calendar, RefreshCw } from 'lucide-react';
+import { ExternalLink, ChevronDown, Check, Star, ThumbsUp, Calendar, RefreshCw, Sparkles, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
 interface RecommendationsDisplayProps {
@@ -24,6 +25,13 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
   const [cheatMeals, setCheatMeals] = useState<any[]>([]);
   const [preferences, setPreferences] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  // AI personalization data
+  const [exerciseAIExplanation, setExerciseAIExplanation] = useState<string>('');
+  const [mealsAIExplanation, setMealsAIExplanation] = useState<string>('');
+  const [exercisePersonalizationScore, setExercisePersonalizationScore] = useState<number>(0);
+  const [mealsPersonalizationScore, setMealsPersonalizationScore] = useState<number>(0);
   
   // Get today's date formatted
   const getTodayFormatted = () => {
@@ -36,12 +44,31 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
   };
   
   useEffect(() => {
-    // Get ML-enhanced recommendations
-    setExerciseVideos(getExerciseRecommendations(childProfile));
-    setCheatMeals(getCheatMealRecommendations(childProfile));
+    const loadRecommendations = async () => {
+      setLoading(true);
+      try {
+        // Get ML-enhanced recommendations with AI personalization
+        const exerciseData = await getExerciseRecommendations(childProfile);
+        setExerciseVideos(exerciseData.recommendations);
+        setExerciseAIExplanation(exerciseData.aiExplanation);
+        setExercisePersonalizationScore(exerciseData.personalizationScore);
+        
+        const cheatMealData = await getCheatMealRecommendations(childProfile);
+        setCheatMeals(cheatMealData.recommendations);
+        setMealsAIExplanation(cheatMealData.aiExplanation);
+        setMealsPersonalizationScore(cheatMealData.personalizationScore);
+        
+        // Load user preferences
+        setPreferences(getPreferences(childProfile.id));
+      } catch (error) {
+        console.error('Error loading recommendations:', error);
+        toast.error('Failed to load personalized recommendations');
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Load user preferences
-    setPreferences(getPreferences(childProfile.id));
+    loadRecommendations();
   }, [childProfile, refreshKey]);
   
   const toggleRecipe = (id: string) => {
@@ -61,7 +88,7 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
     
     // Refresh recommendations after a short delay
     setTimeout(() => {
-      setExerciseVideos(getExerciseRecommendations(childProfile));
+      setRefreshKey(prev => prev + 1);
     }, 500);
   };
   
@@ -74,7 +101,7 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
     
     // Refresh recommendations after a short delay
     setTimeout(() => {
-      setCheatMeals(getCheatMealRecommendations(childProfile));
+      setRefreshKey(prev => prev + 1);
     }, 500);
   };
   
@@ -105,12 +132,42 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
     );
   };
   
+  const PersonalizationIndicator = ({ score, explanation }: { score: number, explanation: string }) => (
+    <div className="bg-muted/50 p-3 rounded-md mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
+          <Brain className="h-4 w-4 mr-2 text-primary" />
+          <span className="text-sm font-medium">AI Personalization</span>
+        </div>
+        <span className="text-sm font-semibold">{score}%</span>
+      </div>
+      <Progress value={score} className="h-2 mb-2" />
+      <p className="text-xs text-muted-foreground">{explanation}</p>
+    </div>
+  );
+  
+  if (loading) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px]">
+          <RefreshCw className="h-10 w-10 animate-spin text-primary mb-4" />
+          <p className="text-center text-muted-foreground">
+            AI is personalizing recommendations for {childProfile.name}...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>
           <div className="flex items-center justify-between">
-            <span>Daily Recommendations for {childProfile.name}</span>
+            <div className="flex items-center">
+              <span>Daily Recommendations for {childProfile.name}</span>
+              <Sparkles className="h-5 w-5 ml-2 text-yellow-500" />
+            </div>
             <Button 
               variant="outline" 
               size="sm" 
@@ -124,7 +181,7 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
         </CardTitle>
         <CardDescription className="flex items-center">
           <Calendar className="mr-1 h-4 w-4" />
-          {getTodayFormatted()} - Personalized by AI for maximum effectiveness
+          {getTodayFormatted()} - AI-personalized for maximum effectiveness
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -135,11 +192,10 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
           </TabsList>
           
           <TabsContent value="exercise" className="mt-4 space-y-4">
-            <div className="p-2 bg-muted rounded-md mb-4">
-              <p className="text-sm text-center">
-                These 3 videos are specifically selected for {childProfile.name} today based on their health assessment
-              </p>
-            </div>
+            <PersonalizationIndicator 
+              score={exercisePersonalizationScore} 
+              explanation={exerciseAIExplanation}
+            />
             
             {exerciseVideos.length > 0 ? (
               exerciseVideos.map(video => (
@@ -149,10 +205,10 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-semibold text-lg">{video.title}</h3>
-                          <p className="text-sm text-muted-foreground">{video.durationMinutes} minutes</p>
+                          <p className="text-sm text-muted-foreground">{video.duration} minutes</p>
                         </div>
                         <a 
-                          href={video.url} 
+                          href={video.videoUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-md text-sm flex items-center"
@@ -181,11 +237,10 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
           </TabsContent>
           
           <TabsContent value="meals" className="mt-4 space-y-4">
-            <div className="p-2 bg-muted rounded-md mb-4">
-              <p className="text-sm text-center">
-                These 3 recipes are nutritionally balanced for {childProfile.name}'s current health status
-              </p>
-            </div>
+            <PersonalizationIndicator 
+              score={mealsPersonalizationScore} 
+              explanation={mealsAIExplanation}
+            />
             
             {cheatMeals.length > 0 ? (
               cheatMeals.map(recipe => (
@@ -207,6 +262,11 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
                       </Button>
                     </div>
                     <p className="mt-1 text-sm">{recipe.description}</p>
+                    <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
+                      <span>Protein: {recipe.protein}g</span>
+                      <span>Carbs: {recipe.carbs}g</span>
+                      <span>Fat: {recipe.fat}g</span>
+                    </div>
                     {getRatingButtons(recipe.id, 'meal')}
                     
                     {expandedRecipe === recipe.id && (

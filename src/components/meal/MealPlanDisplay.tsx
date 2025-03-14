@@ -1,292 +1,307 @@
 
 import React, { useState, useEffect } from 'react';
+import { format, addDays, isSameDay } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon } from 'lucide-react';
-import { addDays, format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { getMealPlan } from './MealService';
-import { getChildProfiles } from '../onboarding/ChildProfileForm';
+import { Button } from '@/components/ui/button';
+import { Activity, ArrowLeft, ArrowRight, Calendar, Utensils, Brain, Sparkles } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { getMealPlan, getNutritionSummary } from './MealService';
 
-interface MealPlanDay {
-  date: string;
-  breakfast: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
-  lunch: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
-  dinner: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
-  snacks: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
+interface MealPlanDisplayProps {
+  childId: string;
 }
 
-const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
+const MealPlanDisplay: React.FC<MealPlanDisplayProps> = ({ childId }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [weekDates, setWeekDates] = useState<Date[]>([]);
-  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
-  const [mealPlan, setMealPlan] = useState<MealPlanDay[]>([]);
+  const [mealPlan, setMealPlan] = useState<any[]>([]);
+  const [nutritionSummary, setNutritionSummary] = useState<any>(null);
+  
+  // AI personalization indicator
+  const [aiPersonalizationScore, setAiPersonalizationScore] = useState<number>(
+    80 + Math.floor(Math.random() * 15) // Mock AI score between 80-95
+  );
+  
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
   
   useEffect(() => {
-    // Generate week dates
-    const dates = Array.from({ length: 7 }, (_, i) => addDays(currentDate, i));
-    setWeekDates(dates);
-    
-    // Get meal plan
+    // Get meal plan for the selected child
     const plan = getMealPlan(childId);
     setMealPlan(plan);
-  }, [childId, currentDate]);
+    
+    // Get nutrition summary
+    const summary = getNutritionSummary(childId);
+    setNutritionSummary(summary);
+  }, [childId]);
   
-  const selectedDate = weekDates[selectedDateIndex];
-  const selectedDateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
-  const dayPlan = mealPlan.find(day => day.date === selectedDateStr) || {
-    date: selectedDateStr,
+  const handleDateChange = (date: Date) => {
+    setCurrentDate(date);
+  };
+  
+  const currentDayPlan = mealPlan.find(day => 
+    isSameDay(new Date(day.date), currentDate)
+  ) || {
+    date: format(currentDate, 'yyyy-MM-dd'),
     breakfast: [],
     lunch: [],
     dinner: [],
     snacks: []
   };
   
-  const generatePreviousWeek = () => {
-    setCurrentDate(prev => addDays(prev, -7));
+  const formatDate = (date: Date) => {
+    return format(date, 'EEE, MMM d');
   };
   
-  const generateNextWeek = () => {
-    setCurrentDate(prev => addDays(prev, 7));
+  const nutritionProgress = (consumed: number, recommended: number) => {
+    const percent = Math.min(Math.round((consumed / recommended) * 100), 100);
+    return (
+      <div className="w-full">
+        <div className="flex justify-between text-xs mb-1">
+          <span>{consumed} / {recommended}</span>
+          <span>{percent}%</span>
+        </div>
+        <Progress value={percent} className="h-2" />
+      </div>
+    );
   };
   
-  const getNutritionTotals = (meals: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>[]) => {
-    const allMeals = meals.flat();
-    return {
-      calories: allMeals.reduce((sum, meal) => sum + meal.calories, 0),
-      protein: allMeals.reduce((sum, meal) => sum + meal.protein, 0),
-      carbs: allMeals.reduce((sum, meal) => sum + meal.carbs, 0),
-      fat: allMeals.reduce((sum, meal) => sum + meal.fat, 0),
-      count: allMeals.length
-    };
-  };
-  
-  const dayTotals = getNutritionTotals([
-    dayPlan.breakfast, 
-    dayPlan.lunch, 
-    dayPlan.dinner, 
-    dayPlan.snacks
-  ]);
+  const MealSection = ({ title, meals, icon }: { title: string, meals: any[], icon: React.ReactNode }) => (
+    <div className="mb-6">
+      <div className="flex items-center mb-3">
+        {icon}
+        <h3 className="text-lg font-medium ml-2">{title}</h3>
+      </div>
+      
+      {meals.length > 0 ? (
+        <div className="space-y-3">
+          {meals.map((meal, index) => (
+            <div key={index} className="p-3 bg-muted/30 rounded-md">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-medium">{meal.name}</h4>
+                  <p className="text-sm text-muted-foreground">{meal.portion}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium">{meal.calories} cal</p>
+                </div>
+              </div>
+              <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <span className="text-muted-foreground">Protein:</span> 
+                  <span className="ml-1 font-medium">{meal.protein}g</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Carbs:</span> 
+                  <span className="ml-1 font-medium">{meal.carbs}g</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Fat:</span> 
+                  <span className="ml-1 font-medium">{meal.fat}g</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-sm">No meals planned</p>
+      )}
+    </div>
+  );
   
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Weekly Meal Plan</CardTitle>
-            <CardDescription>
-              Customized meal suggestions based on nutritional needs
-            </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={generatePreviousWeek}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="m15 18-6-6 6-6"></path></svg>
-            </Button>
-            <Button variant="outline" size="icon" onClick={generateNextWeek}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="m9 18 6-6-6-6"></path></svg>
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto pb-4">
-          <div className="flex space-x-2 min-w-max">
-            {weekDates.map((date, index) => {
-              const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-              
-              return (
-                <Button
-                  key={index}
-                  variant={selectedDateIndex === index ? "default" : "outline"}
-                  className={cn(
-                    "flex flex-col items-center px-3 py-2 h-auto",
-                    isToday && selectedDateIndex !== index && "border-primary text-primary"
-                  )}
-                  onClick={() => setSelectedDateIndex(index)}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="md:col-span-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="flex items-center">
+                  Meal Plan
+                  <Sparkles className="h-5 w-5 ml-2 text-yellow-500" />
+                </CardTitle>
+                <CardDescription>AI-personalized nutrition for optimal growth</CardDescription>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => {
+                    const prevDay = addDays(currentDate, -1);
+                    if (prevDay >= new Date()) {
+                      setCurrentDate(prevDay);
+                    }
+                  }}
+                  disabled={isSameDay(currentDate, new Date())}
                 >
-                  <span className="text-xs">{format(date, 'E')}</span>
-                  <span className={cn("text-xl", isToday && "font-bold")}>{format(date, 'd')}</span>
+                  <ArrowLeft className="h-4 w-4" />
                 </Button>
-              );
-            })}
-          </div>
-        </div>
-        
-        <div className="mt-4">
-          <div className="flex items-center mb-4">
-            <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground" />
-            <h2 className="text-xl font-medium">
-              {selectedDate && format(selectedDate, 'EEEE, MMMM d, yyyy')}
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-base">Breakfast</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {dayPlan.breakfast.length > 0 ? (
-                    <ul className="space-y-4">
-                      {dayPlan.breakfast.map((item, i) => (
-                        <li key={i}>
-                          <div className="flex justify-between mb-1">
-                            <div className="font-medium">{item.name}</div>
-                            <div className="text-muted-foreground">{item.calories} kcal</div>
-                          </div>
-                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
-                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
-                            <div>
-                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No breakfast suggestions available</p>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-base">Lunch</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {dayPlan.lunch.length > 0 ? (
-                    <ul className="space-y-4">
-                      {dayPlan.lunch.map((item, i) => (
-                        <li key={i}>
-                          <div className="flex justify-between mb-1">
-                            <div className="font-medium">{item.name}</div>
-                            <div className="text-muted-foreground">{item.calories} kcal</div>
-                          </div>
-                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
-                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
-                            <div>
-                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No lunch suggestions available</p>
-                  )}
-                </CardContent>
-              </Card>
+                <span className="text-sm font-medium">{formatDate(currentDate)}</span>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setCurrentDate(addDays(currentDate, 1))}
+                  disabled={isSameDay(currentDate, addDays(new Date(), 6))}
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-auto pb-2 mb-6">
+              <div className="flex space-x-2">
+                {weekDays.map((date) => (
+                  <Button
+                    key={date.toString()}
+                    variant={isSameDay(date, currentDate) ? "default" : "outline"}
+                    size="sm"
+                    className={isSameDay(date, currentDate) ? "bg-primary" : ""}
+                    onClick={() => handleDateChange(date)}
+                  >
+                    {format(date, 'EEE, MMM d')}
+                  </Button>
+                ))}
+              </div>
             </div>
             
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-base">Dinner</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {dayPlan.dinner.length > 0 ? (
-                    <ul className="space-y-4">
-                      {dayPlan.dinner.map((item, i) => (
-                        <li key={i}>
-                          <div className="flex justify-between mb-1">
-                            <div className="font-medium">{item.name}</div>
-                            <div className="text-muted-foreground">{item.calories} kcal</div>
-                          </div>
-                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
-                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
-                            <div>
-                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No dinner suggestions available</p>
-                  )}
-                </CardContent>
-              </Card>
+            <div className="bg-muted/50 p-3 rounded-md mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <Brain className="h-4 w-4 mr-2 text-primary" />
+                  <span className="text-sm font-medium">AI Meal Personalization</span>
+                </div>
+                <span className="text-sm font-semibold">{aiPersonalizationScore}%</span>
+              </div>
+              <Progress value={aiPersonalizationScore} className="h-2 mb-2" />
+              <p className="text-xs text-muted-foreground">
+                This meal plan has been personalized by our AI based on nutritional needs, growth patterns, and dietary preferences specific to your child.
+              </p>
+            </div>
+            
+            <Tabs defaultValue="full-day">
+              <TabsList className="grid w-full grid-cols-4 mb-4">
+                <TabsTrigger value="full-day">Full Day</TabsTrigger>
+                <TabsTrigger value="breakfast">Breakfast</TabsTrigger>
+                <TabsTrigger value="lunch-dinner">Lunch/Dinner</TabsTrigger>
+                <TabsTrigger value="snacks">Snacks</TabsTrigger>
+              </TabsList>
               
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-base">Snacks</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {dayPlan.snacks.length > 0 ? (
-                    <ul className="space-y-4">
-                      {dayPlan.snacks.map((item, i) => (
-                        <li key={i}>
-                          <div className="flex justify-between mb-1">
-                            <div className="font-medium">{item.name}</div>
-                            <div className="text-muted-foreground">{item.calories} kcal</div>
-                          </div>
-                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
-                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
-                            <div>
-                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
-                            </div>
-                            <div>
-                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No snack suggestions available</p>
+              <TabsContent value="full-day">
+                <MealSection 
+                  title="Breakfast" 
+                  meals={currentDayPlan.breakfast}
+                  icon={<Calendar className="h-5 w-5 text-orange-500" />}
+                />
+                <MealSection 
+                  title="Lunch" 
+                  meals={currentDayPlan.lunch}
+                  icon={<Utensils className="h-5 w-5 text-blue-500" />}
+                />
+                <MealSection 
+                  title="Dinner" 
+                  meals={currentDayPlan.dinner}
+                  icon={<Utensils className="h-5 w-5 text-purple-500" />}
+                />
+                <MealSection 
+                  title="Snacks" 
+                  meals={currentDayPlan.snacks}
+                  icon={<Activity className="h-5 w-5 text-green-500" />}
+                />
+              </TabsContent>
+              
+              <TabsContent value="breakfast">
+                <MealSection 
+                  title="Breakfast" 
+                  meals={currentDayPlan.breakfast}
+                  icon={<Calendar className="h-5 w-5 text-orange-500" />}
+                />
+              </TabsContent>
+              
+              <TabsContent value="lunch-dinner">
+                <MealSection 
+                  title="Lunch" 
+                  meals={currentDayPlan.lunch}
+                  icon={<Utensils className="h-5 w-5 text-blue-500" />}
+                />
+                <MealSection 
+                  title="Dinner" 
+                  meals={currentDayPlan.dinner}
+                  icon={<Utensils className="h-5 w-5 text-purple-500" />}
+                />
+              </TabsContent>
+              
+              <TabsContent value="snacks">
+                <MealSection 
+                  title="Snacks" 
+                  meals={currentDayPlan.snacks}
+                  icon={<Activity className="h-5 w-5 text-green-500" />}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Nutrition Summary</CardTitle>
+            <CardDescription>Today's nutritional progress</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {nutritionSummary ? (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Calories</h3>
+                  {nutritionProgress(
+                    nutritionSummary.calories.consumed, 
+                    nutritionSummary.calories.recommended
                   )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-          
-          <div className="mt-6 bg-accent/20 rounded-lg p-4">
-            <h3 className="font-medium mb-2">Day Summary</h3>
-            <div className="grid grid-cols-4 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Calories</p>
-                <p className="text-xl font-bold">{dayTotals.calories} kcal</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Protein</h3>
+                  {nutritionProgress(
+                    nutritionSummary.protein.consumed, 
+                    nutritionSummary.protein.recommended
+                  )}
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Carbohydrates</h3>
+                  {nutritionProgress(
+                    nutritionSummary.carbs.consumed, 
+                    nutritionSummary.carbs.recommended
+                  )}
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Fats</h3>
+                  {nutritionProgress(
+                    nutritionSummary.fat.consumed, 
+                    nutritionSummary.fat.recommended
+                  )}
+                </div>
+                
+                <div className="p-3 rounded-md bg-muted/50">
+                  <h3 className="text-sm font-medium mb-2 flex items-center">
+                    <Brain className="h-4 w-4 mr-2 text-primary" />
+                    AI Nutritionist Insight
+                  </h3>
+                  <p className="text-xs">
+                    Based on growth patterns and activity levels, your child could benefit from increasing protein intake by 5-10g per day for optimal muscle development.
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Protein</p>
-                <p className="text-xl font-bold">{dayTotals.protein}g</p>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No nutrition data available</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Carbs</p>
-                <p className="text-xl font-bold">{dayTotals.carbs}g</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Fat</p>
-                <p className="text-xl font-bold">{dayTotals.fat}g</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

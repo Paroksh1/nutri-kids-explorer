@@ -1,4 +1,5 @@
 import { ChildProfile } from '@/components/onboarding/ChildProfileForm';
+import { enhanceRecommendationsWithAI } from '@/services/AIRecommendationService';
 
 // Types for recommendations
 export interface ExerciseVideo {
@@ -478,8 +479,13 @@ const getSeededRandomSubset = (array: any[], count: number, seed: number): any[]
 
 /**
  * Recommends exercise videos based on child's profile and health status
+ * Now enhanced with AI personalization
  */
-export const getExerciseRecommendations = (childProfile: ChildProfile, date = new Date()): ExerciseVideo[] => {
+export const getExerciseRecommendations = async (childProfile: ChildProfile, date = new Date()): Promise<{
+  recommendations: ExerciseVideo[],
+  aiExplanation: string,
+  personalizationScore: number
+}> => {
   const { age } = childProfile;
   
   // Calculate BMI and determine health status
@@ -526,13 +532,35 @@ export const getExerciseRecommendations = (childProfile: ChildProfile, date = ne
   // Use the current date as seed for random selection (changes daily)
   const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   
-  return getSeededRandomSubset(healthStatusFiltered, 3, seed);
+  const baseRecommendations = getSeededRandomSubset(healthStatusFiltered, 3, seed);
+  
+  // Get user preferences for AI enhancement
+  const preferences = userPreferences[childProfile.id]?.exercisePreferences || {};
+  
+  // Enhance with AI (add personalization)
+  const enhancedResults = await enhanceRecommendationsWithAI(
+    childProfile,
+    baseRecommendations,
+    'exercise',
+    preferences
+  );
+  
+  return {
+    recommendations: enhancedResults.enhancedRecommendations,
+    aiExplanation: enhancedResults.explanation,
+    personalizationScore: enhancedResults.personalizationScore
+  };
 };
 
 /**
  * Recommends "cheat meal" recipes that are still relatively healthy
+ * Now enhanced with AI personalization
  */
-export const getCheatMealRecommendations = (childProfile: ChildProfile, date = new Date()): any[] => {
+export const getCheatMealRecommendations = async (childProfile: ChildProfile, date = new Date()): Promise<{
+  recommendations: any[],
+  aiExplanation: string,
+  personalizationScore: number
+}> => {
   // Use the current date as seed for random selection (changes daily)
   const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   
@@ -540,13 +568,32 @@ export const getCheatMealRecommendations = (childProfile: ChildProfile, date = n
   const preferences = userPreferences[childProfile.id]?.mealPreferences || {};
   
   // Get a random subset of the cheat meals
-  return getSeededRandomSubset(cheatMealRecommendations, 3, seed);
+  const baseRecommendations = getSeededRandomSubset(cheatMealRecommendations, 3, seed);
+  
+  // Enhance with AI (add personalization)
+  const enhancedResults = await enhanceRecommendationsWithAI(
+    childProfile,
+    baseRecommendations,
+    'recipe',
+    preferences
+  );
+  
+  return {
+    recommendations: enhancedResults.enhancedRecommendations,
+    aiExplanation: enhancedResults.explanation,
+    personalizationScore: enhancedResults.personalizationScore
+  };
 };
 
 /**
  * Recommends recipes based on child's profile and health status
+ * Now enhanced with AI personalization
  */
-export const getRecipeRecommendations = (childProfile: ChildProfile, date = new Date()): Recipe[] => {
+export const getRecipeRecommendations = async (childProfile: ChildProfile, date = new Date()): Promise<{
+  recommendations: Recipe[],
+  aiExplanation: string,
+  personalizationScore: number
+}> => {
   const { age } = childProfile;
   
   // Calculate BMI and determine health status
@@ -592,7 +639,24 @@ export const getRecipeRecommendations = (childProfile: ChildProfile, date = new 
   // Use the current date as seed for random selection (changes daily)
   const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   
-  return getSeededRandomSubset(healthStatusFiltered, 3, seed);
+  const baseRecommendations = getSeededRandomSubset(healthStatusFiltered, 3, seed);
+  
+  // Get user preferences for AI enhancement
+  const preferences = userPreferences[childProfile.id]?.mealPreferences || {};
+  
+  // Enhance with AI (add personalization)
+  const enhancedResults = await enhanceRecommendationsWithAI(
+    childProfile,
+    baseRecommendations,
+    'recipe',
+    preferences
+  );
+  
+  return {
+    recommendations: enhancedResults.enhancedRecommendations,
+    aiExplanation: enhancedResults.explanation,
+    personalizationScore: enhancedResults.personalizationScore
+  };
 };
 
 /**
@@ -640,4 +704,3 @@ export default {
   recordPreference,
   getPreferences
 };
-
