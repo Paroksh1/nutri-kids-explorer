@@ -7,13 +7,15 @@ import {
   getExerciseRecommendations, 
   getCheatMealRecommendations, 
   recordPreference,
-  getPreferences
+  getPreferences,
+  ExerciseVideo
 } from './RecommendationsService';
-import { ExternalLink, ChevronDown, Check, Star, ThumbsUp, Calendar, RefreshCw, Sparkles, Brain } from 'lucide-react';
+import { ExternalLink, ChevronDown, Check, Star, ThumbsUp, Calendar, RefreshCw, Sparkles, Brain, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface RecommendationsDisplayProps {
   childProfile: ChildProfile;
@@ -21,11 +23,12 @@ interface RecommendationsDisplayProps {
 
 const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childProfile }) => {
   const [expandedRecipe, setExpandedRecipe] = useState<string | null>(null);
-  const [exerciseVideos, setExerciseVideos] = useState<any[]>([]);
+  const [exerciseVideos, setExerciseVideos] = useState<ExerciseVideo[]>([]);
   const [cheatMeals, setCheatMeals] = useState<any[]>([]);
   const [preferences, setPreferences] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   
   // AI personalization data
   const [exerciseAIExplanation, setExerciseAIExplanation] = useState<string>('');
@@ -77,6 +80,14 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
     } else {
       setExpandedRecipe(id);
     }
+  };
+  
+  // Extract video ID from YouTube URL
+  const getYouTubeEmbedUrl = (url: string) => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    const videoId = (match && match[7].length === 11) ? match[7] : null;
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
   };
   
   const handleRateExercise = (videoId: string, score: number) => {
@@ -201,31 +212,51 @@ const RecommendationsDisplay: React.FC<RecommendationsDisplayProps> = ({ childPr
               exerciseVideos.map(video => (
                 <Card key={video.id} className="overflow-hidden">
                   <CardContent className="p-0">
-                    <div className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold text-lg">{video.title}</h3>
-                          <p className="text-sm text-muted-foreground">{video.duration} minutes</p>
-                        </div>
-                        <a 
-                          href={video.videoUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                    {activeVideoId === video.id ? (
+                      <div className="relative">
+                        <AspectRatio ratio={16/9}>
+                          <iframe 
+                            src={getYouTubeEmbedUrl(video.videoUrl)}
+                            className="w-full h-full" 
+                            title={video.title}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen
+                          />
+                        </AspectRatio>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="absolute top-2 right-2"
+                          onClick={() => setActiveVideoId(null)}
                         >
-                          Watch <ExternalLink className="ml-1 h-3 w-3" />
-                        </a>
+                          Close
+                        </Button>
                       </div>
-                      <p className="mt-2 text-sm">{video.description}</p>
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {video.tags.map(tag => (
-                          <span key={tag} className="bg-secondary rounded-full px-2 py-0.5 text-xs">
-                            {tag}
-                          </span>
-                        ))}
+                    ) : (
+                      <div className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-lg">{video.title}</h3>
+                            <p className="text-sm text-muted-foreground">{video.duration} minutes</p>
+                          </div>
+                          <Button
+                            className="bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                            onClick={() => setActiveVideoId(video.id)}
+                          >
+                            Watch <Play className="ml-1 h-3 w-3" />
+                          </Button>
+                        </div>
+                        <p className="mt-2 text-sm">{video.description}</p>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {video.tags.map(tag => (
+                            <span key={tag} className="bg-secondary rounded-full px-2 py-0.5 text-xs">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        {getRatingButtons(video.id, 'exercise')}
                       </div>
-                      {getRatingButtons(video.id, 'exercise')}
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               ))

@@ -8,14 +8,19 @@ import { Navigate } from 'react-router-dom';
 import DashboardNav from '@/components/layout/DashboardNav';
 import MealPlanDisplay from '@/components/meal/MealPlanDisplay';
 import { getChildProfiles, ChildProfile } from '@/components/onboarding/ChildProfileForm';
-import { PlusCircle, RefreshCw, Download, Send, Filter, Brain, Sparkles } from 'lucide-react';
+import { PlusCircle, RefreshCw, Download, Send, Filter, Brain, Sparkles, ChefHat } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from '@/hooks/use-toast';
+import CuisinePreferenceForm from '@/components/meal/CuisinePreferenceForm';
+import { getCuisinePreferences, saveCuisinePreferences } from '@/services/AIRecommendationService';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const MealPlans: React.FC = () => {
   const [activeChild, setActiveChild] = useState<ChildProfile | null>(null);
   const [childProfiles, setChildProfiles] = useState<ChildProfile[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
+  const [hasSetPreferences, setHasSetPreferences] = useState(false);
   
   useEffect(() => {
     const profiles = getChildProfiles();
@@ -23,14 +28,34 @@ const MealPlans: React.FC = () => {
     
     if (profiles.length > 0) {
       setActiveChild(profiles[0]);
+      
+      // Check if this child already has preferences set
+      if (profiles[0] && getCuisinePreferences(profiles[0].id)) {
+        setHasSetPreferences(true);
+      } else {
+        // Show preferences dialog on first load if no preferences set
+        setShowPreferencesDialog(true);
+      }
     }
   }, []);
+  
+  // Update preferences status when active child changes
+  useEffect(() => {
+    if (activeChild) {
+      setHasSetPreferences(!!getCuisinePreferences(activeChild.id));
+    }
+  }, [activeChild]);
   
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
   
   const handleGenerateNew = () => {
+    if (!hasSetPreferences) {
+      setShowPreferencesDialog(true);
+      return;
+    }
+    
     setIsGenerating(true);
     
     // Simulating AI-powered meal plan generation
@@ -55,6 +80,25 @@ const MealPlans: React.FC = () => {
       title: "Sent to Device",
       description: "Meal plan has been sent to your connected mobile device.",
     });
+  };
+  
+  const handleSubmitPreferences = (data: any) => {
+    if (activeChild) {
+      saveCuisinePreferences({
+        ...data,
+        childId: activeChild.id
+      });
+      setHasSetPreferences(true);
+      setShowPreferencesDialog(false);
+      
+      toast({
+        title: "Preferences Saved",
+        description: "We'll use these preferences to generate more personalized meal plans.",
+      });
+      
+      // Auto-generate after setting preferences
+      handleGenerateNew();
+    }
   };
   
   return (
@@ -96,6 +140,28 @@ const MealPlans: React.FC = () => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            
+            <Dialog open={showPreferencesDialog} onOpenChange={setShowPreferencesDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <ChefHat className="h-4 w-4 mr-2" /> Food Preferences
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Set Food Preferences</DialogTitle>
+                  <DialogDescription>
+                    Help us understand your child's food preferences to create better meal plans
+                  </DialogDescription>
+                </DialogHeader>
+                {activeChild && (
+                  <CuisinePreferenceForm 
+                    childId={activeChild.id} 
+                    onSubmit={handleSubmitPreferences} 
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
             
             <TooltipProvider>
               <Tooltip>

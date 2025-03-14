@@ -1,6 +1,7 @@
 
 import { ChildProfile } from '@/components/onboarding/ChildProfileForm';
 import { toast } from 'sonner';
+import { CuisinePreferences } from '@/components/meal/CuisinePreferenceForm';
 
 // Types for AI-powered recommendations
 export interface AIRecommendationRequest {
@@ -9,6 +10,7 @@ export interface AIRecommendationRequest {
   preferences?: Record<string, number>;
   healthGoals?: string[];
   dietaryRestrictions?: string[];
+  cuisinePreferences?: CuisinePreferences;
 }
 
 export interface AIRecommendationResponse {
@@ -26,7 +28,7 @@ export const getAIRecommendations = async (
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const { childProfile, requestType, preferences = {} } = request;
+    const { childProfile, requestType, preferences = {}, cuisinePreferences } = request;
     
     // Calculate BMI for personalization
     const bmi = childProfile.weight / ((childProfile.height / 100) ** 2);
@@ -44,9 +46,23 @@ export const getAIRecommendations = async (
     let explanation = '';
     let personalizationScore = 85 + Math.floor(Math.random() * 15); // 85-100 base score
     
+    // Add cuisine preferences to explanation if available
+    let cuisineExplanation = '';
+    if (cuisinePreferences) {
+      cuisineExplanation = ` Taking into account their preference for ${cuisinePreferences.favoriteCuisines.join(', ')} cuisines`;
+      if (cuisinePreferences.spiceLevel) {
+        cuisineExplanation += ` with a ${cuisinePreferences.spiceLevel} spice level`;
+      }
+      if (cuisinePreferences.dietaryRestrictions && cuisinePreferences.dietaryRestrictions.length > 0) {
+        cuisineExplanation += `, while respecting ${cuisinePreferences.dietaryRestrictions.join(', ')} dietary guidelines`;
+      }
+      cuisineExplanation += '.';
+      personalizationScore += 5;
+    }
+    
     switch (requestType) {
       case 'meal':
-        explanation = `Based on ${childProfile.name}'s profile (age: ${childProfile.age}, weight: ${childProfile.weight}kg, health status: ${healthStatus}), our AI nutritional analysis recommends meals optimized for their specific growth and nutrition needs.`;
+        explanation = `Based on ${childProfile.name}'s profile (age: ${childProfile.age}, weight: ${childProfile.weight}kg, health status: ${healthStatus}), our AI nutritional analysis recommends meals optimized for their specific growth and nutrition needs.${cuisineExplanation}`;
         if (Object.keys(preferences).length > 0) {
           explanation += ` Personalization factor: Previous meal preferences incorporated.`;
           personalizationScore += 5;
@@ -62,7 +78,7 @@ export const getAIRecommendations = async (
         break;
         
       case 'recipe':
-        explanation = `Recipes selected specifically for ${childProfile.name}'s nutritional requirements, age (${childProfile.age}), weight (${childProfile.weight}kg), and dietary preferences.`;
+        explanation = `Recipes selected specifically for ${childProfile.name}'s nutritional requirements, age (${childProfile.age}), weight (${childProfile.weight}kg), and dietary preferences.${cuisineExplanation}`;
         if (childProfile.hasAllergies && childProfile.allergies) {
           explanation += ` Allergies and dietary restrictions (${childProfile.allergies}) have been factored into recipe selection.`;
           personalizationScore += 10;
@@ -95,7 +111,8 @@ export const enhanceRecommendationsWithAI = async (
   childProfile: ChildProfile, 
   existingRecommendations: any[],
   type: 'meal' | 'exercise' | 'recipe',
-  preferences?: Record<string, number>
+  preferences?: Record<string, number>,
+  cuisinePreferences?: CuisinePreferences
 ): Promise<{
   enhancedRecommendations: any[],
   explanation: string,
@@ -105,7 +122,8 @@ export const enhanceRecommendationsWithAI = async (
   const aiResponse = await getAIRecommendations({
     childProfile,
     requestType: type,
-    preferences
+    preferences,
+    cuisinePreferences
   });
   
   // In a real app, this would analyze and rerank the recommendations
@@ -118,7 +136,23 @@ export const enhanceRecommendationsWithAI = async (
   };
 };
 
+// Data storage for cuisine preferences
+const cuisinePreferencesStore: Record<string, CuisinePreferences> = {};
+
+// Save cuisine preferences
+export const saveCuisinePreferences = (preferences: CuisinePreferences): void => {
+  cuisinePreferencesStore[preferences.childId] = preferences;
+  console.log('Saved cuisine preferences:', preferences);
+};
+
+// Get cuisine preferences
+export const getCuisinePreferences = (childId: string): CuisinePreferences | undefined => {
+  return cuisinePreferencesStore[childId];
+};
+
 export default {
   getAIRecommendations,
-  enhanceRecommendationsWithAI
+  enhanceRecommendationsWithAI,
+  saveCuisinePreferences,
+  getCuisinePreferences
 };

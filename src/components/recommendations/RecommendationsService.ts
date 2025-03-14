@@ -1,5 +1,5 @@
 import { ChildProfile } from '@/components/onboarding/ChildProfileForm';
-import { enhanceRecommendationsWithAI } from '@/services/AIRecommendationService';
+import { enhanceRecommendationsWithAI, getCuisinePreferences } from '@/services/AIRecommendationService';
 
 // Types for recommendations
 export interface ExerciseVideo {
@@ -34,14 +34,14 @@ export interface Recipe {
   tags: string[];
 }
 
-// Mock database of exercise videos
+// Mock database of exercise videos with working video URLs
 const exerciseVideos: ExerciseVideo[] = [
   {
     id: 'ex1',
     title: 'Fun Dance Workout for Kids',
     description: 'A fun and energetic dance workout designed specifically for children to improve coordination and burn energy.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Dance+Workout',
-    videoUrl: 'https://example.com/videos/dance-workout',
+    videoUrl: 'https://www.youtube.com/watch?v=Rz0go1pTda8',
     duration: 15,
     intensity: 'moderate',
     ageRange: { min: 5, max: 12 },
@@ -52,7 +52,7 @@ const exerciseVideos: ExerciseVideo[] = [
     title: 'Yoga for Young Children',
     description: 'Gentle yoga poses that help children improve flexibility, balance, and mindfulness.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Kids+Yoga',
-    videoUrl: 'https://example.com/videos/kids-yoga',
+    videoUrl: 'https://www.youtube.com/watch?v=X655B4ISakg',
     duration: 20,
     intensity: 'low',
     ageRange: { min: 4, max: 10 },
@@ -63,7 +63,7 @@ const exerciseVideos: ExerciseVideo[] = [
     title: 'Playground Circuit Training',
     description: 'Turn any playground into a fun circuit training course with these simple exercises.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Playground+Workout',
-    videoUrl: 'https://example.com/videos/playground-circuit',
+    videoUrl: 'https://www.youtube.com/watch?v=Q4n-12q7JXA',
     duration: 25,
     intensity: 'moderate',
     ageRange: { min: 6, max: 12 },
@@ -74,7 +74,7 @@ const exerciseVideos: ExerciseVideo[] = [
     title: 'Teen Strength Training Basics',
     description: 'Safe and effective strength training exercises designed specifically for teenagers.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Teen+Strength',
-    videoUrl: 'https://example.com/videos/teen-strength',
+    videoUrl: 'https://www.youtube.com/watch?v=FGO8IWiusJo',
     duration: 30,
     intensity: 'high',
     ageRange: { min: 13, max: 18 },
@@ -85,7 +85,7 @@ const exerciseVideos: ExerciseVideo[] = [
     title: 'HIIT for Active Teens',
     description: 'High-intensity interval training workout that helps teens improve cardiovascular fitness and burn calories.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Teen+HIIT',
-    videoUrl: 'https://example.com/videos/teen-hiit',
+    videoUrl: 'https://www.youtube.com/watch?v=vHpYJfJ1TUI',
     duration: 20,
     intensity: 'high',
     ageRange: { min: 14, max: 18 },
@@ -96,7 +96,7 @@ const exerciseVideos: ExerciseVideo[] = [
     title: 'Toddler Movement Games',
     description: 'Simple and fun movement games that help toddlers develop motor skills and burn energy.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Toddler+Games',
-    videoUrl: 'https://example.com/videos/toddler-movement',
+    videoUrl: 'https://www.youtube.com/watch?v=3ceoezsiBbE',
     duration: 15,
     intensity: 'low',
     ageRange: { min: 2, max: 5 },
@@ -107,7 +107,7 @@ const exerciseVideos: ExerciseVideo[] = [
     title: 'Swimming Exercises for Kids',
     description: 'Fun swimming exercises that help children become comfortable in water while getting a full-body workout.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Swimming+Kids',
-    videoUrl: 'https://example.com/videos/kids-swimming',
+    videoUrl: 'https://www.youtube.com/watch?v=XQWMG4bJJj0',
     duration: 25,
     intensity: 'moderate',
     ageRange: { min: 6, max: 14 },
@@ -118,7 +118,7 @@ const exerciseVideos: ExerciseVideo[] = [
     title: 'Bodyweight Exercises for Teens',
     description: 'Effective bodyweight exercises that teens can do anywhere to build strength and muscle.',
     thumbnailUrl: 'https://placehold.co/300x200?text=Teen+Bodyweight',
-    videoUrl: 'https://example.com/videos/teen-bodyweight',
+    videoUrl: 'https://www.youtube.com/watch?v=xbADFCFOYQo',
     duration: 30,
     intensity: 'high',
     ageRange: { min: 13, max: 18 },
@@ -536,13 +536,15 @@ export const getExerciseRecommendations = async (childProfile: ChildProfile, dat
   
   // Get user preferences for AI enhancement
   const preferences = userPreferences[childProfile.id]?.exercisePreferences || {};
+  const cuisinePreferences = getCuisinePreferences(childProfile.id);
   
   // Enhance with AI (add personalization)
   const enhancedResults = await enhanceRecommendationsWithAI(
     childProfile,
     baseRecommendations,
     'exercise',
-    preferences
+    preferences,
+    cuisinePreferences
   );
   
   return {
@@ -566,6 +568,7 @@ export const getCheatMealRecommendations = async (childProfile: ChildProfile, da
   
   // Get user preferences to potentially influence recommendations
   const preferences = userPreferences[childProfile.id]?.mealPreferences || {};
+  const cuisinePreferences = getCuisinePreferences(childProfile.id);
   
   // Get a random subset of the cheat meals
   const baseRecommendations = getSeededRandomSubset(cheatMealRecommendations, 3, seed);
@@ -575,7 +578,8 @@ export const getCheatMealRecommendations = async (childProfile: ChildProfile, da
     childProfile,
     baseRecommendations,
     'recipe',
-    preferences
+    preferences,
+    cuisinePreferences
   );
   
   return {
@@ -643,13 +647,15 @@ export const getRecipeRecommendations = async (childProfile: ChildProfile, date 
   
   // Get user preferences for AI enhancement
   const preferences = userPreferences[childProfile.id]?.mealPreferences || {};
+  const cuisinePreferences = getCuisinePreferences(childProfile.id);
   
   // Enhance with AI (add personalization)
   const enhancedResults = await enhanceRecommendationsWithAI(
     childProfile,
     baseRecommendations,
     'recipe',
-    preferences
+    preferences,
+    cuisinePreferences
   );
   
   return {
