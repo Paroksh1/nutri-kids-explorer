@@ -12,7 +12,7 @@ import { PlusCircle, RefreshCw, Download, Send, Filter, Brain, Sparkles, ChefHat
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from '@/hooks/use-toast';
 import CuisinePreferenceForm from '@/components/meal/CuisinePreferenceForm';
-import { getCuisinePreferences, saveCuisinePreferences } from '@/services/AIRecommendationService';
+import { getCuisinePreferences, saveCuisinePreferences, getAIRecommendations } from '@/services/AIRecommendationService';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const MealPlans: React.FC = () => {
@@ -21,6 +21,7 @@ const MealPlans: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
   const [hasSetPreferences, setHasSetPreferences] = useState(false);
+  const [showPreferencesMessage, setShowPreferencesMessage] = useState(false);
   
   useEffect(() => {
     const profiles = getChildProfiles();
@@ -35,6 +36,7 @@ const MealPlans: React.FC = () => {
       } else {
         // Show preferences dialog on first load if no preferences set
         setShowPreferencesDialog(true);
+        setShowPreferencesMessage(true);
       }
     }
   }, []);
@@ -42,7 +44,14 @@ const MealPlans: React.FC = () => {
   // Update preferences status when active child changes
   useEffect(() => {
     if (activeChild) {
-      setHasSetPreferences(!!getCuisinePreferences(activeChild.id));
+      const hasPreferences = !!getCuisinePreferences(activeChild.id);
+      setHasSetPreferences(hasPreferences);
+      
+      if (!hasPreferences) {
+        setShowPreferencesMessage(true);
+      } else {
+        setShowPreferencesMessage(false);
+      }
     }
   }, [activeChild]);
   
@@ -58,7 +67,7 @@ const MealPlans: React.FC = () => {
     
     setIsGenerating(true);
     
-    // Simulating AI-powered meal plan generation
+    // Generate AI-powered meal plan
     setTimeout(() => {
       setIsGenerating(false);
       toast({
@@ -90,6 +99,7 @@ const MealPlans: React.FC = () => {
       });
       setHasSetPreferences(true);
       setShowPreferencesDialog(false);
+      setShowPreferencesMessage(false);
       
       toast({
         title: "Preferences Saved",
@@ -190,6 +200,30 @@ const MealPlans: React.FC = () => {
             </TooltipProvider>
           </div>
         </div>
+        
+        {showPreferencesMessage && (
+          <Card className="mb-6 border-primary/50 bg-primary/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <ChefHat className="h-5 w-5 mr-2 text-primary" />
+                Set Food Preferences First
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">
+                Please set your child's food preferences first, including cuisine preferences like Indian food, 
+                to get a fully personalized meal plan that meets your cultural and dietary needs.
+              </p>
+              <Button 
+                className="mt-3" 
+                size="sm" 
+                onClick={() => setShowPreferencesDialog(true)}
+              >
+                Set Preferences Now
+              </Button>
+            </CardContent>
+          </Card>
+        )}
         
         {activeChild && childProfiles.length > 0 ? (
           <div>

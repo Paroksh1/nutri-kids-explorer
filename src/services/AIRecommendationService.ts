@@ -1,3 +1,4 @@
+
 import { ChildProfile } from '@/components/onboarding/ChildProfileForm';
 import { toast } from 'sonner';
 import { CuisinePreferences } from '@/components/meal/CuisinePreferenceForm';
@@ -286,6 +287,15 @@ export const getAIRecommendations = async (
           // Get Indian meal suggestions
           recommendations = getIndianMealSuggestions(childProfile, cuisinePreferences);
           explanation += ` We've selected authentic Indian meals that are commonly prepared at home and provide balanced nutrition for growing children.`;
+        } else {
+          // Default recommendations if Indian cuisine not selected
+          recommendations = [
+            {
+              name: "Balanced Meal Plan",
+              description: "A nutritionally balanced meal suitable for a growing child",
+              items: ["Whole grain pasta", "Steamed vegetables", "Grilled chicken", "Fresh fruit"]
+            }
+          ];
         }
         
         if (Object.keys(preferences).length > 0) {
@@ -310,6 +320,16 @@ export const getAIRecommendations = async (
           // Get Indian recipe suggestions
           recommendations = getIndianMealSuggestions(childProfile, cuisinePreferences);
           explanation += ` We've selected authentic Indian recipes that are commonly prepared at home and provide balanced nutrition for growing children.`;
+        } else {
+          // Default recommendations if Indian cuisine not selected
+          recommendations = [
+            {
+              name: "Simple Recipe",
+              description: "An easy recipe suitable for children",
+              ingredients: ["Ingredient 1", "Ingredient 2"],
+              instructions: ["Step 1", "Step 2"]
+            }
+          ];
         }
         
         if (childProfile.hasAllergies && childProfile.allergies) {
