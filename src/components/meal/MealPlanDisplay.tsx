@@ -11,10 +11,10 @@ import { getChildProfiles } from '../onboarding/ChildProfileForm';
 
 interface MealPlanDay {
   date: string;
-  breakfast: Array<{ name: string; portion: string; calories: number }>;
-  lunch: Array<{ name: string; portion: string; calories: number }>;
-  dinner: Array<{ name: string; portion: string; calories: number }>;
-  snacks: Array<{ name: string; portion: string; calories: number }>;
+  breakfast: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
+  lunch: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
+  dinner: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
+  snacks: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
 }
 
 const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
@@ -51,10 +51,13 @@ const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
     setCurrentDate(prev => addDays(prev, 7));
   };
   
-  const getNutritionTotals = (meals: Array<{ name: string; portion: string; calories: number }>[]) => {
+  const getNutritionTotals = (meals: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>[]) => {
     const allMeals = meals.flat();
     return {
       calories: allMeals.reduce((sum, meal) => sum + meal.calories, 0),
+      protein: allMeals.reduce((sum, meal) => sum + meal.protein, 0),
+      carbs: allMeals.reduce((sum, meal) => sum + meal.carbs, 0),
+      fat: allMeals.reduce((sum, meal) => sum + meal.fat, 0),
       count: allMeals.length
     };
   };
@@ -126,14 +129,25 @@ const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
                 </CardHeader>
                 <CardContent>
                   {dayPlan.breakfast.length > 0 ? (
-                    <ul className="space-y-2">
+                    <ul className="space-y-4">
                       {dayPlan.breakfast.map((item, i) => (
-                        <li key={i} className="flex justify-between">
-                          <div>
+                        <li key={i}>
+                          <div className="flex justify-between mb-1">
                             <div className="font-medium">{item.name}</div>
-                            <div className="text-sm text-muted-foreground">{item.portion}</div>
+                            <div className="text-muted-foreground">{item.calories} kcal</div>
                           </div>
-                          <div className="text-muted-foreground">{item.calories} kcal</div>
+                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
+                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
+                            <div>
+                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
+                            </div>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -149,14 +163,25 @@ const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
                 </CardHeader>
                 <CardContent>
                   {dayPlan.lunch.length > 0 ? (
-                    <ul className="space-y-2">
+                    <ul className="space-y-4">
                       {dayPlan.lunch.map((item, i) => (
-                        <li key={i} className="flex justify-between">
-                          <div>
+                        <li key={i}>
+                          <div className="flex justify-between mb-1">
                             <div className="font-medium">{item.name}</div>
-                            <div className="text-sm text-muted-foreground">{item.portion}</div>
+                            <div className="text-muted-foreground">{item.calories} kcal</div>
                           </div>
-                          <div className="text-muted-foreground">{item.calories} kcal</div>
+                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
+                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
+                            <div>
+                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
+                            </div>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -174,14 +199,25 @@ const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
                 </CardHeader>
                 <CardContent>
                   {dayPlan.dinner.length > 0 ? (
-                    <ul className="space-y-2">
+                    <ul className="space-y-4">
                       {dayPlan.dinner.map((item, i) => (
-                        <li key={i} className="flex justify-between">
-                          <div>
+                        <li key={i}>
+                          <div className="flex justify-between mb-1">
                             <div className="font-medium">{item.name}</div>
-                            <div className="text-sm text-muted-foreground">{item.portion}</div>
+                            <div className="text-muted-foreground">{item.calories} kcal</div>
                           </div>
-                          <div className="text-muted-foreground">{item.calories} kcal</div>
+                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
+                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
+                            <div>
+                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
+                            </div>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -197,14 +233,25 @@ const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
                 </CardHeader>
                 <CardContent>
                   {dayPlan.snacks.length > 0 ? (
-                    <ul className="space-y-2">
+                    <ul className="space-y-4">
                       {dayPlan.snacks.map((item, i) => (
-                        <li key={i} className="flex justify-between">
-                          <div>
+                        <li key={i}>
+                          <div className="flex justify-between mb-1">
                             <div className="font-medium">{item.name}</div>
-                            <div className="text-sm text-muted-foreground">{item.portion}</div>
+                            <div className="text-muted-foreground">{item.calories} kcal</div>
                           </div>
-                          <div className="text-muted-foreground">{item.calories} kcal</div>
+                          <div className="text-sm text-muted-foreground mb-2">{item.portion}</div>
+                          <div className="grid grid-cols-3 gap-2 text-xs bg-muted p-2 rounded-md">
+                            <div>
+                              <span className="font-semibold text-primary">Protein:</span> {item.protein}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Carbs:</span> {item.carbs}g
+                            </div>
+                            <div>
+                              <span className="font-semibold text-primary">Fat:</span> {item.fat}g
+                            </div>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -218,14 +265,22 @@ const MealPlanDisplay: React.FC<{ childId: string }> = ({ childId }) => {
           
           <div className="mt-6 bg-accent/20 rounded-lg p-4">
             <h3 className="font-medium mb-2">Day Summary</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Total Calories</p>
                 <p className="text-xl font-bold">{dayTotals.calories} kcal</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Meals &amp; Snacks</p>
-                <p className="text-xl font-bold">{dayTotals.count}</p>
+                <p className="text-sm text-muted-foreground">Protein</p>
+                <p className="text-xl font-bold">{dayTotals.protein}g</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Carbs</p>
+                <p className="text-xl font-bold">{dayTotals.carbs}g</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Fat</p>
+                <p className="text-xl font-bold">{dayTotals.fat}g</p>
               </div>
             </div>
           </div>

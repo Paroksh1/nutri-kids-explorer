@@ -327,6 +327,133 @@ const healthyRecipes: Recipe[] = [
   }
 ];
 
+// Mock "cheat meal" recommendations
+export const cheatMealRecommendations = [
+  {
+    id: 'cheat1',
+    name: 'Mini Pizza with Whole Grain Crust',
+    description: 'A healthier pizza option with whole grain crust and plenty of vegetables.',
+    ingredients: [
+      '1 whole grain pita bread or small pizza crust',
+      '2 tbsp tomato sauce',
+      '1/4 cup shredded mozzarella cheese',
+      'Assorted vegetables (bell peppers, mushrooms, spinach)',
+      '1 tbsp olive oil'
+    ],
+    instructions: [
+      'Preheat oven to 425°F',
+      'Spread tomato sauce on pita bread',
+      'Add vegetables and cheese on top',
+      'Drizzle with olive oil',
+      'Bake for 10-12 minutes until cheese is melted and crust is crispy'
+    ],
+    prepTimeMinutes: 10,
+    calories: 320,
+    protein: 15,
+    carbs: 38,
+    fat: 12
+  },
+  {
+    id: 'cheat2',
+    name: 'Baked Sweet Potato Fries',
+    description: 'Crispy oven-baked sweet potato fries - a healthier alternative to regular fries.',
+    ingredients: [
+      '1 large sweet potato',
+      '1 tbsp olive oil',
+      '1/2 tsp paprika',
+      '1/4 tsp garlic powder',
+      'Salt to taste'
+    ],
+    instructions: [
+      'Preheat oven to 425°F',
+      'Cut sweet potato into even fry shapes',
+      'Toss with oil and seasonings',
+      'Arrange in a single layer on a baking sheet',
+      'Bake for 20-25 minutes, flipping halfway through'
+    ],
+    prepTimeMinutes: 10,
+    calories: 150,
+    protein: 2,
+    carbs: 23,
+    fat: 5
+  },
+  {
+    id: 'cheat3',
+    name: 'Greek Yogurt Parfait with Chocolate',
+    description: 'A sweet treat that combines protein-rich yogurt with a bit of chocolate and fruit.',
+    ingredients: [
+      '1 cup Greek yogurt',
+      '1 tbsp honey',
+      '1 tbsp dark chocolate chips',
+      '1/2 cup mixed berries',
+      '2 tbsp granola'
+    ],
+    instructions: [
+      'Layer Greek yogurt in a bowl or glass',
+      'Top with berries, granola, and chocolate chips',
+      'Drizzle with honey',
+      'Enjoy immediately or chill for 30 minutes'
+    ],
+    prepTimeMinutes: 5,
+    calories: 280,
+    protein: 18,
+    carbs: 32,
+    fat: 10
+  },
+  {
+    id: 'cheat4',
+    name: 'Homemade Fruit Popsicles',
+    description: 'Refreshing frozen treats made with real fruit and yogurt.',
+    ingredients: [
+      '2 cups mixed berries or fruit',
+      '1/2 cup Greek yogurt',
+      '2 tbsp honey or maple syrup',
+      '1/4 cup fruit juice'
+    ],
+    instructions: [
+      'Blend all ingredients until smooth',
+      'Pour into popsicle molds',
+      'Freeze for at least 4 hours',
+      'Run mold under warm water to release popsicle'
+    ],
+    prepTimeMinutes: 10,
+    calories: 85,
+    protein: 3,
+    carbs: 18,
+    fat: 1
+  },
+  {
+    id: 'cheat5',
+    name: 'Banana Oat Cookies',
+    description: 'Simple cookies made with just a few healthy ingredients.',
+    ingredients: [
+      '2 ripe bananas',
+      '1 cup rolled oats',
+      '1/4 cup dark chocolate chips',
+      '1/4 cup chopped nuts (optional)',
+      '1 tsp cinnamon'
+    ],
+    instructions: [
+      'Preheat oven to 350°F',
+      'Mash bananas in a bowl',
+      'Stir in oats, chocolate chips, nuts, and cinnamon',
+      'Drop spoonfuls onto a baking sheet',
+      'Bake for 12-15 minutes'
+    ],
+    prepTimeMinutes: 10,
+    calories: 120,
+    protein: 3,
+    carbs: 18,
+    fat: 5
+  }
+];
+
+// User preferences storage
+const userPreferences: Record<string, {
+  exercisePreferences: Record<string, number>,
+  mealPreferences: Record<string, number>
+}> = {};
+
 // Helper function to get a seeded random subset of videos/recipes
 const getSeededRandomSubset = (array: any[], count: number, seed: number): any[] => {
   // Simple seeded random function
@@ -403,6 +530,20 @@ export const getExerciseRecommendations = (childProfile: ChildProfile, date = ne
 };
 
 /**
+ * Recommends "cheat meal" recipes that are still relatively healthy
+ */
+export const getCheatMealRecommendations = (childProfile: ChildProfile, date = new Date()): any[] => {
+  // Use the current date as seed for random selection (changes daily)
+  const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  
+  // Get user preferences to potentially influence recommendations
+  const preferences = userPreferences[childProfile.id]?.mealPreferences || {};
+  
+  // Get a random subset of the cheat meals
+  return getSeededRandomSubset(cheatMealRecommendations, 3, seed);
+};
+
+/**
  * Recommends recipes based on child's profile and health status
  */
 export const getRecipeRecommendations = (childProfile: ChildProfile, date = new Date()): Recipe[] => {
@@ -454,7 +595,49 @@ export const getRecipeRecommendations = (childProfile: ChildProfile, date = new 
   return getSeededRandomSubset(healthStatusFiltered, 3, seed);
 };
 
+/**
+ * Records a user preference for a meal or exercise
+ */
+export const recordPreference = (
+  childId: string, 
+  itemId: string, 
+  rating: number, 
+  type: 'meal' | 'exercise'
+): void => {
+  // Initialize if not exists
+  if (!userPreferences[childId]) {
+    userPreferences[childId] = {
+      exercisePreferences: {},
+      mealPreferences: {}
+    };
+  }
+  
+  // Record preference
+  if (type === 'meal') {
+    userPreferences[childId].mealPreferences[itemId] = rating;
+  } else {
+    userPreferences[childId].exercisePreferences[itemId] = rating;
+  }
+  
+  // In a real app, this would be persisted to a database
+  console.log(`Recorded ${type} preference for child ${childId}: ${itemId} = ${rating}`);
+};
+
+/**
+ * Gets user preferences for meals and exercises
+ */
+export const getPreferences = (childId: string) => {
+  return userPreferences[childId] || {
+    exercisePreferences: {},
+    mealPreferences: {}
+  };
+};
+
 export default {
   getExerciseRecommendations,
-  getRecipeRecommendations
+  getRecipeRecommendations,
+  getCheatMealRecommendations,
+  recordPreference,
+  getPreferences
 };
+

@@ -21,10 +21,10 @@ interface MealLog {
 
 interface MealPlanDay {
   date: string;
-  breakfast: Array<{ name: string; portion: string; calories: number }>;
-  lunch: Array<{ name: string; portion: string; calories: number }>;
-  dinner: Array<{ name: string; portion: string; calories: number }>;
-  snacks: Array<{ name: string; portion: string; calories: number }>;
+  breakfast: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
+  lunch: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
+  dinner: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
+  snacks: Array<{ name: string; portion: string; calories: number; protein: number; carbs: number; fat: number }>;
 }
 
 interface NutritionSummary {
@@ -107,97 +107,97 @@ const foodDatabase: FoodItem[] = [
   { id: '44', name: 'Potato Chips', calories: 536, protein: 7, carbs: 53, fat: 35, servingSize: '100g' },
 ];
 
-// Sample meal plans based on diet type
+// Sample meal plans based on diet type with added nutritional information
 const vegetarianMeals = {
   breakfast: [
-    { name: 'Oatmeal with Berries', portion: '1 cup', calories: 220 },
-    { name: 'Greek Yogurt with Honey', portion: '200g', calories: 180 },
-    { name: 'Whole Grain Toast with Avocado', portion: '2 slices', calories: 280 },
-    { name: 'Fruit Smoothie with Spinach', portion: '16oz', calories: 210 },
-    { name: 'Vegetable Omelette', portion: '3 eggs', calories: 290 },
+    { name: 'Oatmeal with Berries', portion: '1 cup', calories: 220, protein: 6, carbs: 38, fat: 4 },
+    { name: 'Greek Yogurt with Honey', portion: '200g', calories: 180, protein: 17, carbs: 16, fat: 5 },
+    { name: 'Whole Grain Toast with Avocado', portion: '2 slices', calories: 280, protein: 8, carbs: 32, fat: 14 },
+    { name: 'Fruit Smoothie with Spinach', portion: '16oz', calories: 210, protein: 5, carbs: 42, fat: 2 },
+    { name: 'Vegetable Omelette', portion: '3 eggs', calories: 290, protein: 20, carbs: 6, fat: 19 },
   ],
   lunch: [
-    { name: 'Quinoa Salad with Vegetables', portion: '1.5 cups', calories: 320 },
-    { name: 'Lentil Soup with Bread', portion: '1 bowl + 1 slice', calories: 350 },
-    { name: 'Veggie Wrap with Hummus', portion: '1 large wrap', calories: 380 },
-    { name: 'Caprese Sandwich', portion: '1 sandwich', calories: 310 },
-    { name: 'Pasta Salad with Vegetables', portion: '1.5 cups', calories: 340 },
+    { name: 'Quinoa Salad with Vegetables', portion: '1.5 cups', calories: 320, protein: 12, carbs: 52, fat: 8 },
+    { name: 'Lentil Soup with Bread', portion: '1 bowl + 1 slice', calories: 350, protein: 18, carbs: 58, fat: 4 },
+    { name: 'Veggie Wrap with Hummus', portion: '1 large wrap', calories: 380, protein: 14, carbs: 48, fat: 16 },
+    { name: 'Caprese Sandwich', portion: '1 sandwich', calories: 310, protein: 12, carbs: 32, fat: 14 },
+    { name: 'Pasta Salad with Vegetables', portion: '1.5 cups', calories: 340, protein: 10, carbs: 54, fat: 9 },
   ],
   dinner: [
-    { name: 'Bean and Vegetable Stir Fry', portion: '1.5 cups', calories: 360 },
-    { name: 'Vegetable Curry with Rice', portion: '1 serving', calories: 420 },
-    { name: 'Stuffed Bell Peppers', portion: '2 peppers', calories: 380 },
-    { name: 'Eggplant Parmesan', portion: '1 serving', calories: 390 },
-    { name: 'Vegetable Lasagna', portion: '1 slice', calories: 410 },
+    { name: 'Bean and Vegetable Stir Fry', portion: '1.5 cups', calories: 360, protein: 15, carbs: 48, fat: 12 },
+    { name: 'Vegetable Curry with Rice', portion: '1 serving', calories: 420, protein: 12, carbs: 68, fat: 10 },
+    { name: 'Stuffed Bell Peppers', portion: '2 peppers', calories: 380, protein: 16, carbs: 42, fat: 14 },
+    { name: 'Eggplant Parmesan', portion: '1 serving', calories: 390, protein: 18, carbs: 32, fat: 20 },
+    { name: 'Vegetable Lasagna', portion: '1 slice', calories: 410, protein: 20, carbs: 45, fat: 16 },
   ],
   snacks: [
-    { name: 'Apple with Peanut Butter', portion: '1 apple + 2 tbsp', calories: 200 },
-    { name: 'Hummus with Carrot Sticks', portion: '1/4 cup + 1 cup', calories: 150 },
-    { name: 'Trail Mix', portion: '1/4 cup', calories: 170 },
-    { name: 'Fruit Smoothie', portion: '8oz', calories: 120 },
-    { name: 'Yogurt with Granola', portion: '6oz + 2 tbsp', calories: 180 },
+    { name: 'Apple with Peanut Butter', portion: '1 apple + 2 tbsp', calories: 200, protein: 7, carbs: 28, fat: 8 },
+    { name: 'Hummus with Carrot Sticks', portion: '1/4 cup + 1 cup', calories: 150, protein: 6, carbs: 18, fat: 6 },
+    { name: 'Trail Mix', portion: '1/4 cup', calories: 170, protein: 5, carbs: 14, fat: 10 },
+    { name: 'Fruit Smoothie', portion: '8oz', calories: 120, protein: 2, carbs: 28, fat: 0 },
+    { name: 'Yogurt with Granola', portion: '6oz + 2 tbsp', calories: 180, protein: 10, carbs: 24, fat: 4 },
   ]
 };
 
 const nonVegetarianMeals = {
   breakfast: [
-    { name: 'Scrambled Eggs with Toast', portion: '2 eggs + 1 slice', calories: 250 },
-    { name: 'Oatmeal with Fruit', portion: '1 cup', calories: 210 },
-    { name: 'Chicken Breakfast Wrap', portion: '1 wrap', calories: 320 },
-    { name: 'Yogurt Parfait', portion: '1 cup', calories: 180 },
-    { name: 'Breakfast Burrito', portion: '1 burrito', calories: 350 },
+    { name: 'Scrambled Eggs with Toast', portion: '2 eggs + 1 slice', calories: 250, protein: 16, carbs: 15, fat: 14 },
+    { name: 'Oatmeal with Fruit', portion: '1 cup', calories: 210, protein: 5, carbs: 40, fat: 3 },
+    { name: 'Chicken Breakfast Wrap', portion: '1 wrap', calories: 320, protein: 22, carbs: 30, fat: 12 },
+    { name: 'Yogurt Parfait', portion: '1 cup', calories: 180, protein: 10, carbs: 26, fat: 4 },
+    { name: 'Breakfast Burrito', portion: '1 burrito', calories: 350, protein: 18, carbs: 38, fat: 14 },
   ],
   lunch: [
-    { name: 'Grilled Chicken Salad', portion: '1 bowl', calories: 310 },
-    { name: 'Turkey Sandwich', portion: '1 sandwich', calories: 340 },
-    { name: 'Beef and Vegetable Soup', portion: '1 bowl', calories: 280 },
-    { name: 'Tuna Wrap', portion: '1 wrap', calories: 330 },
-    { name: 'Chicken Quesadilla', portion: '1 serving', calories: 380 },
+    { name: 'Grilled Chicken Salad', portion: '1 bowl', calories: 310, protein: 28, carbs: 16, fat: 14 },
+    { name: 'Turkey Sandwich', portion: '1 sandwich', calories: 340, protein: 22, carbs: 38, fat: 10 },
+    { name: 'Beef and Vegetable Soup', portion: '1 bowl', calories: 280, protein: 18, carbs: 24, fat: 12 },
+    { name: 'Tuna Wrap', portion: '1 wrap', calories: 330, protein: 26, carbs: 32, fat: 10 },
+    { name: 'Chicken Quesadilla', portion: '1 serving', calories: 380, protein: 24, carbs: 36, fat: 14 },
   ],
   dinner: [
-    { name: 'Grilled Salmon with Vegetables', portion: '1 fillet + sides', calories: 390 },
-    { name: 'Chicken Stir Fry with Rice', portion: '1.5 cups', calories: 420 },
-    { name: 'Beef Tacos', portion: '2 tacos', calories: 380 },
-    { name: 'Baked Chicken with Sweet Potato', portion: '1 serving', calories: 410 },
-    { name: 'Turkey Meatballs with Pasta', portion: '1 serving', calories: 440 },
+    { name: 'Grilled Salmon with Vegetables', portion: '1 fillet + sides', calories: 390, protein: 32, carbs: 18, fat: 18 },
+    { name: 'Chicken Stir Fry with Rice', portion: '1.5 cups', calories: 420, protein: 28, carbs: 52, fat: 8 },
+    { name: 'Beef Tacos', portion: '2 tacos', calories: 380, protein: 26, carbs: 32, fat: 16 },
+    { name: 'Baked Chicken with Sweet Potato', portion: '1 serving', calories: 410, protein: 34, carbs: 36, fat: 12 },
+    { name: 'Turkey Meatballs with Pasta', portion: '1 serving', calories: 440, protein: 30, carbs: 48, fat: 14 },
   ],
   snacks: [
-    { name: 'Greek Yogurt', portion: '1 container', calories: 120 },
-    { name: 'Beef Jerky', portion: '1oz', calories: 80 },
-    { name: 'Hard-Boiled Egg', portion: '1 egg', calories: 70 },
-    { name: 'String Cheese', portion: '1 stick', calories: 80 },
-    { name: 'Trail Mix', portion: '1/4 cup', calories: 170 },
+    { name: 'Greek Yogurt', portion: '1 container', calories: 120, protein: 15, carbs: 8, fat: 0 },
+    { name: 'Beef Jerky', portion: '1oz', calories: 80, protein: 12, carbs: 3, fat: 2 },
+    { name: 'Hard-Boiled Egg', portion: '1 egg', calories: 70, protein: 6, carbs: 0, fat: 5 },
+    { name: 'String Cheese', portion: '1 stick', calories: 80, protein: 7, carbs: 1, fat: 6 },
+    { name: 'Trail Mix', portion: '1/4 cup', calories: 170, protein: 5, carbs: 14, fat: 10 },
   ]
 };
 
 const veganMeals = {
   breakfast: [
-    { name: 'Overnight Oats with Berries', portion: '1 cup', calories: 210 },
-    { name: 'Avocado Toast', portion: '2 slices', calories: 280 },
-    { name: 'Chia Pudding with Fruit', portion: '1 cup', calories: 190 },
-    { name: 'Green Smoothie Bowl', portion: '1 bowl', calories: 220 },
-    { name: 'Tofu Scramble with Vegetables', portion: '1 serving', calories: 240 },
+    { name: 'Overnight Oats with Berries', portion: '1 cup', calories: 210, protein: 5, carbs: 42, fat: 3 },
+    { name: 'Avocado Toast', portion: '2 slices', calories: 280, protein: 6, carbs: 32, fat: 16 },
+    { name: 'Chia Pudding with Fruit', portion: '1 cup', calories: 190, protein: 6, carbs: 32, fat: 6 },
+    { name: 'Green Smoothie Bowl', portion: '1 bowl', calories: 220, protein: 5, carbs: 44, fat: 3 },
+    { name: 'Tofu Scramble with Vegetables', portion: '1 serving', calories: 240, protein: 18, carbs: 14, fat: 12 },
   ],
   lunch: [
-    { name: 'Quinoa Buddha Bowl', portion: '1 bowl', calories: 330 },
-    { name: 'Chickpea Salad Sandwich', portion: '1 sandwich', calories: 310 },
-    { name: 'Lentil Soup', portion: '1 bowl', calories: 280 },
-    { name: 'Falafel Wrap', portion: '1 wrap', calories: 340 },
-    { name: 'Vegetable Sushi Rolls', portion: '6 pieces', calories: 300 },
+    { name: 'Quinoa Buddha Bowl', portion: '1 bowl', calories: 330, protein: 12, carbs: 56, fat: 8 },
+    { name: 'Chickpea Salad Sandwich', portion: '1 sandwich', calories: 310, protein: 10, carbs: 48, fat: 8 },
+    { name: 'Lentil Soup', portion: '1 bowl', calories: 280, protein: 16, carbs: 42, fat: 3 },
+    { name: 'Falafel Wrap', portion: '1 wrap', calories: 340, protein: 12, carbs: 52, fat: 10 },
+    { name: 'Vegetable Sushi Rolls', portion: '6 pieces', calories: 300, protein: 6, carbs: 60, fat: 2 },
   ],
   dinner: [
-    { name: 'Vegetable Stir Fry with Tofu', portion: '1.5 cups', calories: 330 },
-    { name: 'Chickpea and Vegetable Curry', portion: '1 serving', calories: 370 },
-    { name: 'Zucchini Pasta with Lentil Sauce', portion: '1.5 cups', calories: 310 },
-    { name: 'Bean and Rice Burrito Bowl', portion: '1 bowl', calories: 390 },
-    { name: 'Stuffed Portobello Mushrooms', portion: '2 mushrooms', calories: 280 },
+    { name: 'Vegetable Stir Fry with Tofu', portion: '1.5 cups', calories: 330, protein: 18, carbs: 36, fat: 12 },
+    { name: 'Chickpea and Vegetable Curry', portion: '1 serving', calories: 370, protein: 14, carbs: 58, fat: 8 },
+    { name: 'Zucchini Pasta with Lentil Sauce', portion: '1.5 cups', calories: 310, protein: 16, carbs: 45, fat: 6 },
+    { name: 'Bean and Rice Burrito Bowl', portion: '1 bowl', calories: 390, protein: 14, carbs: 65, fat: 8 },
+    { name: 'Stuffed Portobello Mushrooms', portion: '2 mushrooms', calories: 280, protein: 10, carbs: 32, fat: 12 },
   ],
   snacks: [
-    { name: 'Apple with Almond Butter', portion: '1 apple + 1 tbsp', calories: 170 },
-    { name: 'Hummus with Vegetable Sticks', portion: '1/4 cup + vegetables', calories: 150 },
-    { name: 'Trail Mix', portion: '1/4 cup', calories: 170 },
-    { name: 'Roasted Chickpeas', portion: '1/4 cup', calories: 120 },
-    { name: 'Fruit Smoothie', portion: '8oz', calories: 120 },
+    { name: 'Apple with Almond Butter', portion: '1 apple + 1 tbsp', calories: 170, protein: 4, carbs: 25, fat: 8 },
+    { name: 'Hummus with Vegetable Sticks', portion: '1/4 cup + vegetables', calories: 150, protein: 6, carbs: 18, fat: 6 },
+    { name: 'Trail Mix', portion: '1/4 cup', calories: 170, protein: 5, carbs: 14, fat: 10 },
+    { name: 'Roasted Chickpeas', portion: '1/4 cup', calories: 120, protein: 6, carbs: 18, fat: 2 },
+    { name: 'Fruit Smoothie', portion: '8oz', calories: 120, protein: 2, carbs: 28, fat: 0 },
   ]
 };
 
