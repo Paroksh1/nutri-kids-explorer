@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, logout } from '../auth/AuthForm';
 import { getChildProfiles, ChildProfile } from '../onboarding/ChildProfileForm';
-import { Plus, LogOut, User, Apple, Utensils, Calendar, Activity } from 'lucide-react';
+import { Plus, LogOut, User, Apple, Utensils, Calendar, Activity, GraduationCap } from 'lucide-react';
 import MealTracker from '../meal/MealTracker';
 import { getNutritionSummary } from '../meal/MealService';
 import RecommendationsDisplay from '../recommendations/RecommendationsDisplay';
@@ -31,7 +30,6 @@ const Dashboard: React.FC = () => {
     if (profiles.length > 0) {
       setActiveChild(profiles[0]);
       
-      // Get nutrition summary for the active child
       const summary = getNutritionSummary(profiles[0].id);
       setNutritionSummary(summary);
     }
@@ -60,6 +58,10 @@ const Dashboard: React.FC = () => {
     navigate('/recommendations');
   };
   
+  const navigateToEducation = () => {
+    navigate('/education');
+  };
+  
   if (!activeChild && childProfiles.length === 0) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -84,7 +86,6 @@ const Dashboard: React.FC = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-        {/* Sidebar */}
         <Card className="w-full md:w-64 lg:w-72">
           <CardHeader>
             <CardTitle className="text-xl">NutriYouth</CardTitle>
@@ -128,7 +129,6 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Main Content */}
         <div className="flex-1">
           {activeChild && (
             <>
@@ -193,7 +193,7 @@ const Dashboard: React.FC = () => {
                     </CardContent>
                   </Card>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="hover:shadow-md transition-all duration-300 bg-gradient-to-br from-background to-primary/5">
                       <CardHeader>
                         <CardTitle>Meal Planning</CardTitle>
@@ -227,6 +227,25 @@ const Dashboard: React.FC = () => {
                           onClick={navigateToRecommendations}
                         >
                           <Activity className="mr-2 h-4 w-4" /> View Recommendations
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="hover:shadow-md transition-all duration-300 bg-gradient-to-br from-background to-amber-500/5">
+                      <CardHeader>
+                        <CardTitle>Nutrition Education</CardTitle>
+                        <CardDescription>Fun facts and quizzes for kids</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm mb-4">
+                          Explore fun nutrition facts and interactive quizzes to help {activeChild.name} learn about healthy eating.
+                        </p>
+                        <Button 
+                          variant="outline"
+                          className="w-full justify-start border-amber-500 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600"
+                          onClick={navigateToEducation}
+                        >
+                          <GraduationCap className="mr-2 h-4 w-4" /> Learn About Nutrition
                         </Button>
                       </CardContent>
                     </Card>
