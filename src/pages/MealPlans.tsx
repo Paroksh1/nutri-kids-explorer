@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,8 @@ import { toast } from '@/hooks/use-toast';
 import CuisinePreferenceForm from '@/components/meal/CuisinePreferenceForm';
 import { getCuisinePreferences, saveCuisinePreferences, getAIRecommendations } from '@/services/AIRecommendationService';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { getRecipeRecommendations, getExerciseRecommendations } from '@/components/recommendations/RecommendationsService';
+import { assessChildHealth } from '@/utils/healthAssessment';
 
 const MealPlans: React.FC = () => {
   const [activeChild, setActiveChild] = useState<ChildProfile | null>(null);
@@ -21,6 +24,8 @@ const MealPlans: React.FC = () => {
   const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
   const [hasSetPreferences, setHasSetPreferences] = useState(false);
   const [showPreferencesMessage, setShowPreferencesMessage] = useState(false);
+  const [mealPlans, setMealPlans] = useState<any[]>([]);
+  const [exerciseRecommendations, setExerciseRecommendations] = useState<any[]>([]);
   
   useEffect(() => {
     const profiles = getChildProfiles();
@@ -31,6 +36,7 @@ const MealPlans: React.FC = () => {
       
       if (profiles[0] && getCuisinePreferences(profiles[0].id)) {
         setHasSetPreferences(true);
+        generatePersonalizedPlans(profiles[0]);
       } else {
         setShowPreferencesDialog(true);
         setShowPreferencesMessage(true);
@@ -43,16 +49,44 @@ const MealPlans: React.FC = () => {
       const hasPreferences = !!getCuisinePreferences(activeChild.id);
       setHasSetPreferences(hasPreferences);
       
-      if (!hasPreferences) {
-        setShowPreferencesMessage(true);
-      } else {
+      if (hasPreferences) {
         setShowPreferencesMessage(false);
+        generatePersonalizedPlans(activeChild);
+      } else {
+        setShowPreferencesMessage(true);
+        setMealPlans([]);
+        setExerciseRecommendations([]);
       }
     }
   }, [activeChild]);
   
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
+  }
+
+  const generatePersonalizedPlans = async (child: ChildProfile) => {
+    // Get health assessment to use for personalization
+    const healthAssessment = assessChildHealth(child);
+    
+    try {
+      // Generate recipes based on child's profile and health assessment
+      const recipeResponse = await getRecipeRecommendations(child);
+      const exerciseResponse = await getExerciseRecommendations(child);
+      
+      setMealPlans(recipeResponse.recommendations || []);
+      setExerciseRecommendations(exerciseResponse.recommendations || []);
+      
+      console.log("Generated personalized plans for child:", child.name);
+      console.log("Health status:", healthAssessment.status);
+      console.log("Recommended focus:", healthAssessment.recommendedFocus);
+    } catch (error) {
+      console.error("Error generating personalized plans:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate personalized plans. Please try again.",
+        variant: "destructive",
+      });
+    }
   }
   
   const handleGenerateNew = () => {
@@ -61,15 +95,18 @@ const MealPlans: React.FC = () => {
       return;
     }
     
+    if (!activeChild) return;
+    
     setIsGenerating(true);
     
-    setTimeout(() => {
+    // Actually generate personalized plans
+    generatePersonalizedPlans(activeChild).finally(() => {
       setIsGenerating(false);
       toast({
         title: "AI-Generated Meal Plan Ready!",
-        description: "Your personalized meal plan has been created using advanced AI nutritional models.",
+        description: `Personalized meal plan for ${activeChild.name} created based on their unique profile and needs.`,
       });
-    }, 500);
+    });
   };
   
   const handleExport = () => {
@@ -250,7 +287,36 @@ const MealPlans: React.FC = () => {
               </CardContent>
             </Card>
             
-            <MealPlanDisplay childId={activeChild.id} />
+            {activeChild && (
+              <div className="mb-6">
+                <Card className="p-4 mb-6">
+                  <CardTitle className="text-xl mb-4">Personalized Health Profile</CardTitle>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-3 bg-muted rounded-lg">
+                      <h3 className="font-semibold text-primary">Physical Profile</h3>
+                      <p className="text-sm">Age: {activeChild.age} years</p>
+                      <p className="text-sm">Height: {activeChild.height} cm</p>
+                      <p className="text-sm">Weight: {activeChild.weight} kg</p>
+                      <p className="text-sm">Gender: {activeChild.gender}</p>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <h3 className="font-semibold text-primary">Activity & Diet</h3>
+                      <p className="text-sm">Activity: {activeChild.activityLevel}</p>
+                      <p className="text-sm">Diet Type: {activeChild.dietType}</p>
+                      {activeChild.hasAllergies && (
+                        <p className="text-sm">Allergies: {activeChild.allergies.join(', ')}</p>
+                      )}
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <h3 className="font-semibold text-primary">Recommendations Focus</h3>
+                      <p className="text-sm">{assessChildHealth(activeChild).dietRecommendation}</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            )}
+            
+            <MealPlanDisplay childId={activeChild.id} customMealPlans={mealPlans} customExerciseRecommendations={exerciseRecommendations} />
           </div>
         ) : (
           <Card>
