@@ -144,8 +144,8 @@ const MealPlanDisplay: React.FC<MealPlanDisplayProps> = ({ childId }) => {
                 <Button variant="outline" size="sm">
                   <Info className="h-4 w-4 mr-1" />
                   AI Details
-                </TooltipTrigger>
-              </TooltipContent>
+                </Button>
+              </TooltipTrigger>
               <TooltipContent className="w-80">
                 <div className="space-y-2">
                   <p className="font-medium">AI Personalization Score: {personalizationScore}%</p>
