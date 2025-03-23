@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,16 +63,115 @@ const MealPlans: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
+  const assignMealTypes = (recommendations: any[]): any[] => {
+    if (!recommendations || recommendations.length === 0) return [];
+    
+    const totalMeals = recommendations.length;
+    const breakfastCount = Math.ceil(totalMeals * 0.25);
+    const lunchCount = Math.ceil(totalMeals * 0.25);
+    const dinnerCount = Math.ceil(totalMeals * 0.25);
+    const snackCount = totalMeals - breakfastCount - lunchCount - dinnerCount;
+    
+    let assignedMeals = [...recommendations];
+    let mealTypeIndex = 0;
+    
+    const withExplicitType = assignedMeals.filter(meal => meal.mealType && 
+      ['breakfast', 'lunch', 'dinner', 'snack'].includes(meal.mealType));
+    
+    const needsType = assignedMeals.filter(meal => !meal.mealType || 
+      !['breakfast', 'lunch', 'dinner', 'snack'].includes(meal.mealType));
+    
+    const existingBreakfast = withExplicitType.filter(m => m.mealType === 'breakfast').length;
+    const existingLunch = withExplicitType.filter(m => m.mealType === 'lunch').length;
+    const existingDinner = withExplicitType.filter(m => m.mealType === 'dinner').length;
+    const existingSnack = withExplicitType.filter(m => m.mealType === 'snack').length;
+    
+    const neededBreakfast = Math.max(0, breakfastCount - existingBreakfast);
+    const neededLunch = Math.max(0, lunchCount - existingLunch);
+    const neededDinner = Math.max(0, dinnerCount - existingDinner);
+    const neededSnack = Math.max(0, snackCount - existingSnack);
+    
+    let currentIndex = 0;
+    
+    for (let i = 0; i < neededBreakfast && currentIndex < needsType.length; i++) {
+      needsType[currentIndex].mealType = 'breakfast';
+      currentIndex++;
+    }
+    
+    for (let i = 0; i < neededLunch && currentIndex < needsType.length; i++) {
+      needsType[currentIndex].mealType = 'lunch';
+      currentIndex++;
+    }
+    
+    for (let i = 0; i < neededDinner && currentIndex < needsType.length; i++) {
+      needsType[currentIndex].mealType = 'dinner';
+      currentIndex++;
+    }
+    
+    while (currentIndex < needsType.length) {
+      needsType[currentIndex].mealType = 'snack';
+      currentIndex++;
+    }
+    
+    return [...withExplicitType, ...needsType];
+  };
+
   const generatePersonalizedPlans = async (child: ChildProfile) => {
-    // Get health assessment to use for personalization
     const healthAssessment = assessChildHealth(child);
     
     try {
-      // Generate recipes based on child's profile and health assessment
+      const cuisinePrefs = getCuisinePreferences(child.id);
+      
       const recipeResponse = await getRecipeRecommendations(child);
       const exerciseResponse = await getExerciseRecommendations(child);
       
-      setMealPlans(recipeResponse.recommendations || []);
+      const typedMealPlans = assignMealTypes(recipeResponse.recommendations || []);
+      
+      const enhancedMealPlans = typedMealPlans.map(meal => {
+        if (!meal.nutritionInfo) {
+          const defaultNutrition: {[key: string]: any} = {
+            breakfast: {
+              calories: 350,
+              protein: "10g",
+              carbs: "45g",
+              fat: "12g",
+              calcium: "200mg",
+              iron: "2mg"
+            },
+            lunch: {
+              calories: 450,
+              protein: "20g",
+              carbs: "55g",
+              fat: "15g",
+              calcium: "150mg",
+              iron: "3mg"
+            },
+            dinner: {
+              calories: 500,
+              protein: "25g",
+              carbs: "60g",
+              fat: "18g",
+              calcium: "250mg",
+              iron: "4mg"
+            },
+            snack: {
+              calories: 150,
+              protein: "5g",
+              carbs: "20g",
+              fat: "5g",
+              calcium: "100mg",
+              iron: "1mg"
+            }
+          };
+          
+          const mealType = meal.mealType || 'lunch';
+          meal.nutritionInfo = defaultNutrition[mealType] || defaultNutrition.lunch;
+        }
+        
+        return meal;
+      });
+      
+      setMealPlans(enhancedMealPlans);
       setExerciseRecommendations(exerciseResponse.recommendations || []);
       
       console.log("Generated personalized plans for child:", child.name);
@@ -99,7 +197,6 @@ const MealPlans: React.FC = () => {
     
     setIsGenerating(true);
     
-    // Actually generate personalized plans
     generatePersonalizedPlans(activeChild).finally(() => {
       setIsGenerating(false);
       toast({
@@ -150,10 +247,10 @@ const MealPlans: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold flex items-center">
-              Instant Meal Plans
+              Complete Meal Plans
               <Sparkles className="h-5 w-5 ml-2 text-yellow-500" />
             </h1>
-            <p className="text-muted-foreground">Personalized nutrition delivered instantly for optimal growth</p>
+            <p className="text-muted-foreground">Breakfast, lunch, dinner & snacks - all personalized for optimal growth</p>
           </div>
           
           <div className="flex items-center gap-2 mt-4 md:mt-0">
@@ -171,13 +268,13 @@ const MealPlans: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <PlusCircle className="h-4 w-4 mr-2" /> Generate Instantly
+                        <PlusCircle className="h-4 w-4 mr-2" /> Generate Complete Menu
                       </>
                     )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Create a new instant meal plan</p>
+                  <p>Create a new complete meal plan with all meal types</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
