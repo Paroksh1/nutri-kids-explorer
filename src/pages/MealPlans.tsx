@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,18 +29,15 @@ const MealPlans: React.FC = () => {
     if (profiles.length > 0) {
       setActiveChild(profiles[0]);
       
-      // Check if this child already has preferences set
       if (profiles[0] && getCuisinePreferences(profiles[0].id)) {
         setHasSetPreferences(true);
       } else {
-        // Show preferences dialog on first load if no preferences set
         setShowPreferencesDialog(true);
         setShowPreferencesMessage(true);
       }
     }
   }, []);
   
-  // Update preferences status when active child changes
   useEffect(() => {
     if (activeChild) {
       const hasPreferences = !!getCuisinePreferences(activeChild.id);
@@ -67,14 +63,13 @@ const MealPlans: React.FC = () => {
     
     setIsGenerating(true);
     
-    // Generate AI-powered meal plan
     setTimeout(() => {
       setIsGenerating(false);
       toast({
         title: "AI-Generated Meal Plan Ready!",
         description: "Your personalized meal plan has been created using advanced AI nutritional models.",
       });
-    }, 2000);
+    }, 500);
   };
   
   const handleExport = () => {
@@ -106,7 +101,6 @@ const MealPlans: React.FC = () => {
         description: "We'll use these preferences to generate more personalized meal plans.",
       });
       
-      // Auto-generate after setting preferences
       handleGenerateNew();
     }
   };
@@ -119,10 +113,10 @@ const MealPlans: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold flex items-center">
-              AI-Powered Meal Plans
+              Instant Meal Plans
               <Sparkles className="h-5 w-5 ml-2 text-yellow-500" />
             </h1>
-            <p className="text-muted-foreground">Personalized nutrition driven by advanced AI for optimal growth</p>
+            <p className="text-muted-foreground">Personalized nutrition delivered instantly for optimal growth</p>
           </div>
           
           <div className="flex items-center gap-2 mt-4 md:mt-0">
@@ -136,17 +130,17 @@ const MealPlans: React.FC = () => {
                   >
                     {isGenerating ? (
                       <>
-                        <Brain className="h-4 w-4 mr-2 animate-pulse" /> AI Generating...
+                        <Brain className="h-4 w-4 mr-2 animate-pulse" /> Generating...
                       </>
                     ) : (
                       <>
-                        <PlusCircle className="h-4 w-4 mr-2" /> Generate New Plan
+                        <PlusCircle className="h-4 w-4 mr-2" /> Generate Instantly
                       </>
                     )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Create a new AI-generated meal plan</p>
+                  <p>Create a new instant meal plan</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
