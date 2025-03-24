@@ -12,7 +12,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle
 } from '@/components/ui/navigation-menu';
-import { ChevronDown, Apple, Calculator, BarChart2, Book, User } from 'lucide-react';
+import { Apple, Calculator, BarChart2, Book, User } from 'lucide-react';
 import { isAuthenticated } from '@/components/auth/AuthForm';
 
 const NavMenu: React.FC = () => {
