@@ -21,6 +21,11 @@ const GlobalNav: React.FC<GlobalNavProps> = ({ className }) => {
     return null;
   }
   
+  // Don't show on login page (it already has back button in navbar)
+  if (location.pathname === '/login') {
+    return null;
+  }
+  
   // Different nav for dashboard pages (they have their own nav)
   const isDashboardPage = location.pathname.includes('/dashboard') || 
                           location.pathname.includes('/meal-plans') || 
@@ -31,7 +36,7 @@ const GlobalNav: React.FC<GlobalNavProps> = ({ className }) => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={cn("fixed top-4 left-4 z-50", className)}
+      className={cn("fixed bottom-4 left-4 z-50", className)}
     >
       <Link to="/">
         <Button 
@@ -39,21 +44,12 @@ const GlobalNav: React.FC<GlobalNavProps> = ({ className }) => {
           size="sm" 
           className="bg-white/90 hover:bg-white shadow-md"
         >
-          {location.pathname === '/login' ? (
-            <>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </>
-          ) : (
-            <>
-              <Home className="h-4 w-4 mr-2" />
-              Home
-            </>
-          )}
+          <Home className="h-4 w-4 mr-2" />
+          Home
         </Button>
       </Link>
       
-      {!isAuthenticated_ && location.pathname !== '/login' && (
+      {!isAuthenticated_ && (
         <Link to="/login" className="ml-2">
           <Button 
             variant="outline" 

@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, Info, AlertCircle } from 'lucide-react';
+import { Check, Info, AlertCircle, HelpCircle } from 'lucide-react';
 import DietaryDiversityResults from './DietaryDiversityResults';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
+import { processFoodText } from '@/utils/foodNameMapper';
 
 export const foodGroups = [
   {
@@ -169,38 +171,21 @@ const DietaryDiversityCalculator: React.FC = () => {
     setFoodGroupsChecked(foodGroups.map(group => ({ ...group, value: false })));
     
     const allFoodText = Object.values(meals)
-      .map(meal => meal.foods.toLowerCase())
+      .map(meal => meal.foods)
       .join(' ');
     
-    const keywordMapping: Record<number, string[]> = {
-      1: ['rice', 'bread', 'wheat', 'corn', 'maize', 'pasta', 'noodle', 'cereal', 'oat', 'porridge'],
-      2: ['potato', 'yam', 'cassava', 'tuber'],
-      3: ['carrot', 'pumpkin', 'squash', 'sweet potato', 'orange'],
-      4: ['spinach', 'kale', 'leafy', 'green', 'amaranth'],
-      5: ['tomato', 'onion', 'eggplant', 'cucumber', 'pepper', 'vegetable'],
-      6: ['mango', 'papaya', 'apricot', 'cantaloupe'],
-      7: ['apple', 'banana', 'orange', 'fruit', 'berry', 'grapes'],
-      8: ['liver', 'kidney', 'heart', 'organ meat'],
-      9: ['beef', 'pork', 'chicken', 'meat', 'lamb', 'goat', 'duck'],
-      10: ['egg'],
-      11: ['fish', 'seafood', 'shrimp', 'prawn', 'crab', 'lobster'],
-      12: ['bean', 'pea', 'lentil', 'nut', 'seed', 'peanut', 'almond', 'cashew'],
-      13: ['milk', 'cheese', 'yogurt', 'dairy'],
-      14: ['oil', 'fat', 'butter', 'ghee', 'margarine'],
-      15: ['sugar', 'sweet', 'candy', 'chocolate', 'cake', 'dessert', 'cookie', 'honey'],
-      16: ['spice', 'salt', 'pepper', 'sauce', 'coffee', 'tea']
-    };
+    const detectedGroups = processFoodText(allFoodText);
     
-    Object.entries(keywordMapping).forEach(([groupId, keywords]) => {
-      const id = parseInt(groupId);
-      if (keywords.some(keyword => allFoodText.includes(keyword))) {
-        setFoodGroupsChecked(prev => 
-          prev.map(group => 
-            group.id === id ? { ...group, value: true } : group
-          )
-        );
-      }
-    });
+    if (detectedGroups.length > 0) {
+      const updatedGroups = [...foodGroupsChecked];
+      detectedGroups.forEach(groupId => {
+        const index = updatedGroups.findIndex(group => group.id === groupId);
+        if (index >= 0) {
+          updatedGroups[index] = { ...updatedGroups[index], value: true };
+        }
+      });
+      setFoodGroupsChecked(updatedGroups);
+    }
     
     if (userProfile) {
       console.log(`Analyzing food entries for ${userProfile.firstName} ${userProfile.lastName}`);
@@ -306,6 +291,20 @@ const DietaryDiversityCalculator: React.FC = () => {
               </p>
             </div>
             
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-medium flex items-center text-blue-800 mb-2">
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Food Entry Tips
+              </h4>
+              <ul className="space-y-1 text-sm text-blue-700">
+                <li>• You can enter food names in Hindi or English (e.g. "आलू" or "potato")</li>
+                <li>• For dishes like "dal rice", list both components</li>
+                <li>• Use common names like "chapati" (for wheat) or "roti"</li>
+                <li>• Include all ingredients for composite dishes</li>
+                <li>• Separate different foods with commas</li>
+              </ul>
+            </div>
+            
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
                 <TabsTrigger value="breakfast">Breakfast</TabsTrigger>
@@ -336,6 +335,9 @@ const DietaryDiversityCalculator: React.FC = () => {
                       value={meal.foods}
                       onChange={(e) => updateMeal(mealType as keyof typeof meals, e.target.value)}
                     />
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Example: chapati, dal, rice, vegetables, yogurt
+                    </div>
                   </div>
                 </TabsContent>
               ))}
@@ -397,14 +399,23 @@ const DietaryDiversityCalculator: React.FC = () => {
                       <td className="py-3 px-4 font-medium">{group.name}</td>
                       <td className="py-3 px-4 text-sm">{group.examples}</td>
                       <td className="py-3 px-4 text-center">
-                        <Button 
-                          variant={group.value ? "default" : "outline"} 
-                          size="sm"
-                          className="w-12"
-                          onClick={() => toggleFoodGroup(group.id)}
-                        >
-                          {group.value ? "1" : "0"}
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant={group.value ? "default" : "outline"} 
+                                size="sm"
+                                className="w-12"
+                                onClick={() => toggleFoodGroup(group.id)}
+                              >
+                                {group.value ? "1" : "0"}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Click to {group.value ? 'remove' : 'add'} this food group</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </td>
                     </tr>
                   ))}
