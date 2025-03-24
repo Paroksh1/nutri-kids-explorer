@@ -111,7 +111,6 @@ export const foodNameMap: FoodMapping = {
   "chappati": "chapati",
   "yoghurt": "yogurt",
   "curd": "yogurt",
-  "paneer": "cheese",
   "tomatoe": "tomato",
   "tomatos": "tomato",
   "potatoe": "potato",
@@ -180,7 +179,6 @@ export const foodToGroupMap: {[key: string]: string} = {
   "ghee": "dairy",
   "cream": "dairy",
   "ice cream": "dairy",
-  "paneer": "dairy",
   "curd": "dairy",
   "buttermilk": "dairy",
   "lassi": "dairy",
@@ -308,4 +306,64 @@ export const getFoodGroup = (food: string): string => {
 // Helper function to check if a food belongs to a specific group
 export const isFoodInGroup = (food: string, group: string): boolean => {
   return getFoodGroup(food) === group;
+};
+
+// Map food groups to their corresponding ID in the foodGroups array
+const foodGroupToIdMap: {[key: string]: number} = {
+  "starchy_staples": 1, // CEREALS + WHITE ROOTS AND TUBERS
+  "vitamin_a_fruits_vegetables": 3, // VITAMIN A RICH VEGETABLES AND TUBERS
+  "beans_and_peas": 12, // LEGUMES, NUTS AND SEEDS
+  "nuts_and_seeds": 12, // LEGUMES, NUTS AND SEEDS
+  "dairy": 13, // MILK AND MILK PRODUCTS
+  "flesh_foods": 9, // FLESH MEATS
+  "eggs": 10, // EGGS
+  "other_vegetables": 5, // OTHER VEGETABLES
+  "other_fruits": 7, // OTHER FRUITS
+};
+
+// Function to process food text and suggest food groups that were likely consumed
+export const processFoodText = (foodText: string): number[] => {
+  if (!foodText || foodText.trim() === '') {
+    return [];
+  }
+  
+  // Split the input into individual food items
+  const foodItems = foodText.split(/[,;\n]+/).filter(item => item.trim().length > 0);
+  
+  // Map each food to its standardized name and get its food group
+  const detectedGroups = new Set<number>();
+  
+  foodItems.forEach(item => {
+    const food = item.trim();
+    const group = getFoodGroup(food);
+    
+    if (group !== "unknown" && foodGroupToIdMap[group]) {
+      detectedGroups.add(foodGroupToIdMap[group]);
+      
+      // Special case handling
+      if (group === "starchy_staples") {
+        // Both CEREALS and WHITE ROOTS AND TUBERS might be detected
+        detectedGroups.add(1); // CEREALS
+        detectedGroups.add(2); // WHITE ROOTS AND TUBERS
+      }
+      
+      // For vitamin A rich vegetables, also mark dark green leafy ones
+      if (group === "vitamin_a_fruits_vegetables" && 
+          (food.includes("spinach") || food.includes("kale") || 
+           food.includes("amaranth") || food.includes("collard"))) {
+        detectedGroups.add(4); // DARK GREEN LEAFY VEGETABLES
+      }
+      
+      // For other special cases
+      if (food.includes("liver") || food.includes("kidney") || food.includes("heart")) {
+        detectedGroups.add(8); // ORGAN MEAT
+      }
+      
+      if (food.includes("fish") || food.includes("seafood") || food.includes("prawn") || food.includes("shrimp")) {
+        detectedGroups.add(11); // FISH AND SEAFOOD
+      }
+    }
+  });
+  
+  return Array.from(detectedGroups);
 };
