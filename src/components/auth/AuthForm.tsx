@@ -54,7 +54,7 @@ const AuthForm: React.FC = () => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       currentUser = JSON.parse(storedUser);
-      navigate('/dashboard');
+      navigate('/dietary-diversity');
     }
   }, [navigate]);
   
@@ -69,7 +69,7 @@ const AuthForm: React.FC = () => {
         currentUser = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
         toast.success('Logged in successfully!');
-        navigate('/onboarding');
+        navigate('/dietary-diversity');
       } else {
         toast.error('Invalid email or password');
       }
@@ -109,7 +109,7 @@ const AuthForm: React.FC = () => {
       localStorage.setItem('currentUser', JSON.stringify(newUser));
       
       toast.success('Account created successfully!');
-      navigate('/onboarding');
+      navigate('/dietary-diversity');
       
       setIsLoading(false);
     }, 1000);

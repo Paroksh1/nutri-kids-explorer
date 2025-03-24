@@ -13,6 +13,8 @@ interface BMIResult {
   bmi: number;
   category: string;
   percentile?: number;
+  zScore?: number;
+  isAdult: boolean;
 }
 
 const BMICalculator: React.FC = () => {
@@ -32,54 +34,109 @@ const BMICalculator: React.FC = () => {
     const weightValue = parseFloat(weight);
     const heightValue = parseFloat(height) / 100; // Convert cm to m
     
-    if (ageValue > 18) {
-      toast.error('This calculator is designed for individuals under 18 years old');
-      return;
-    }
-    
     // Calculate BMI
     const bmi = weightValue / (heightValue * heightValue);
+    const roundedBmi = parseFloat(bmi.toFixed(1));
     
-    // Determine BMI category (simplified for this example)
     let category = '';
     let percentile = 50; // Default to median
+    let zScore = 0;
+    const isAdult = ageValue >= 18;
     
-    // Very simplified categorization - in a real app, this would use CDC or WHO growth charts
-    if (bmi < 5) {
-      category = 'Invalid BMI value';
-      percentile = 0;
-    } else if (bmi < 14) {
-      category = 'Severely underweight';
-      percentile = 3;
-    } else if (bmi < 16) {
-      category = 'Underweight';
-      percentile = 15;
-    } else if (bmi < 18) {
-      category = 'Slightly underweight';
-      percentile = 30;
-    } else if (bmi < 22) {
-      category = 'Normal weight';
-      percentile = 50;
-    } else if (bmi < 25) {
-      category = 'Normal weight (upper range)';
-      percentile = 75;
-    } else if (bmi < 30) {
-      category = 'Overweight';
-      percentile = 85;
+    if (isAdult) {
+      // Adult BMI categorization
+      if (bmi < 16) {
+        category = 'Severely underweight';
+      } else if (bmi < 18.5) {
+        category = 'Underweight';
+      } else if (bmi < 25) {
+        category = 'Normal weight';
+      } else if (bmi < 30) {
+        category = 'Overweight';
+      } else if (bmi < 35) {
+        category = 'Obese Class I';
+      } else if (bmi < 40) {
+        category = 'Obese Class II';
+      } else {
+        category = 'Obese Class III';
+      }
     } else {
-      category = 'Obese';
-      percentile = 97;
+      // Children BMI categorization with z-score estimation
+      // This is a simplified version - in real applications, this would use WHO growth charts
+      
+      // Calculate estimated z-score based on age and gender
+      // These are approximate calculations and should be replaced with proper WHO standards
+      const medianBMI = gender === 'male' 
+        ? 15 + (ageValue * 0.4) // Simplified median BMI for boys by age
+        : 14.5 + (ageValue * 0.4); // Simplified median BMI for girls by age
+        
+      const sdBMI = 2; // Simplified standard deviation
+      zScore = (bmi - medianBMI) / sdBMI;
+      
+      // Convert z-score to percentile (approximate)
+      percentile = Math.min(Math.max(Math.round(normalcdfToPercentile(zScore)), 1), 99);
+      
+      // Categorize based on z-score
+      if (zScore < -3) {
+        category = 'Severely wasted';
+      } else if (zScore < -2) {
+        category = 'Wasted';
+      } else if (zScore < -1) {
+        category = 'Risk of underweight';
+      } else if (zScore <= 1) {
+        category = 'Normal weight';
+      } else if (zScore <= 2) {
+        category = 'Risk of overweight';
+      } else if (zScore <= 3) {
+        category = 'Overweight';
+      } else {
+        category = 'Obesity';
+      }
     }
     
-    setResults({ bmi, category, percentile });
+    setResults({ 
+      bmi: roundedBmi, 
+      category, 
+      percentile, 
+      zScore: parseFloat(zScore.toFixed(2)),
+      isAdult 
+    });
   }, [age, weight, height, gender]);
   
-  const getBMIColor = (bmi: number): string => {
-    if (bmi < 14) return 'text-blue-500';
-    if (bmi < 18) return 'text-teal-500';
-    if (bmi < 25) return 'text-green-500';
-    if (bmi < 30) return 'text-amber-500';
-    return 'text-red-500';
+  // Function to convert z-score to percentile
+  const normalcdfToPercentile = (z: number): number => {
+    // Approximation of the cumulative distribution function for normal distribution
+    const b1 = 0.31938153;
+    const b2 = -0.356563782;
+    const b3 = 1.781477937;
+    const b4 = -1.821255978;
+    const b5 = 1.330274429;
+    const p = 0.2316419;
+    const c = 0.39894228;
+    
+    if (z >= 0) {
+      const t = 1.0 / (1.0 + p * z);
+      return (1.0 - c * Math.exp(-z * z / 2.0) * t * (t * (t * (t * (t * b5 + b4) + b3) + b2) + b1)) * 100;
+    } else {
+      const t = 1.0 / (1.0 - p * z);
+      return (c * Math.exp(-z * z / 2.0) * t * (t * (t * (t * (t * b5 + b4) + b3) + b2) + b1)) * 100;
+    }
+  };
+  
+  const getBMIColor = (bmi: number, isAdult: boolean): string => {
+    if (isAdult) {
+      if (bmi < 18.5) return 'text-blue-500';
+      if (bmi < 25) return 'text-green-500';
+      if (bmi < 30) return 'text-amber-500';
+      return 'text-red-500';
+    } else {
+      // For children, color based on z-score ranges
+      const zScore = results?.zScore || 0;
+      if (zScore < -2) return 'text-blue-500';
+      if (zScore <= 1) return 'text-green-500';
+      if (zScore <= 2) return 'text-amber-500';
+      return 'text-red-500';
+    }
   };
   
   const getProgressColor = (percentile: number): string => {
@@ -106,7 +163,7 @@ const BMICalculator: React.FC = () => {
               id="age-bmi"
               type="number"
               min="0"
-              max="18"
+              max="120"
               placeholder="Enter age"
               value={age}
               onChange={(e) => setAge(e.target.value)}
@@ -167,7 +224,7 @@ const BMICalculator: React.FC = () => {
           onClick={calculateBMI}
           className="w-full bg-primary button-hover"
         >
-          Calculate BMI
+          Calculate
         </Button>
         
         {results && (
@@ -175,7 +232,7 @@ const BMICalculator: React.FC = () => {
             <div className="text-center mb-4">
               <h3 className="text-xl font-semibold mb-1">Results</h3>
               <div className="flex items-center justify-center">
-                <span className={`text-3xl font-bold ${getBMIColor(results.bmi)}`}>
+                <span className={`text-3xl font-bold ${getBMIColor(results.bmi, results.isAdult)}`}>
                   <AnimatedCounter 
                     value={results.bmi} 
                     duration={1200}
@@ -187,11 +244,15 @@ const BMICalculator: React.FC = () => {
               <p className="text-foreground/80 font-medium mt-2">{results.category}</p>
             </div>
             
-            {results.percentile && (
+            {!results.isAdult && results.percentile && (
               <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Z-Score: {results.zScore}</span>
+                  <span className="font-medium">Percentile: {results.percentile}%</span>
+                </div>
                 <div className="flex justify-between text-sm">
                   <span>0%</span>
-                  <span className="font-medium">Percentile: {results.percentile}%</span>
+                  <span>50%</span>
                   <span>100%</span>
                 </div>
                 <Progress 
@@ -199,15 +260,52 @@ const BMICalculator: React.FC = () => {
                   className={cn("h-2", getProgressColor(results.percentile))}
                 />
                 <p className="text-xs text-muted-foreground mt-2">
-                  This indicates where your child's BMI falls compared to other children of the same age and gender.
+                  {results.isAdult ? 
+                    "BMI is a measure of body fat based on height and weight for adults." :
+                    "This indicates where your child's BMI falls compared to other children of the same age and gender."}
                 </p>
               </div>
             )}
+            
+            <div className="mt-4 bg-muted/40 p-3 rounded-md text-sm">
+              <p className="font-medium mb-1">{results.isAdult ? "Interpretation:" : "Growth Assessment:"}</p>
+              {results.isAdult ? (
+                <p>Your BMI of {results.bmi} indicates {results.category.toLowerCase()}. {getBMIRecommendation(results.bmi, true)}</p>
+              ) : (
+                <p>Your child's BMI is at the {results.percentile}th percentile, indicating {results.category.toLowerCase()}. {getBMIRecommendation(results.bmi, false, results.zScore)}</p>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
   );
+};
+
+// Helper function to get recommendations based on BMI
+const getBMIRecommendation = (bmi: number, isAdult: boolean, zScore?: number): string => {
+  if (isAdult) {
+    if (bmi < 18.5) {
+      return "Consider consulting with a healthcare provider about healthy ways to gain weight.";
+    } else if (bmi < 25) {
+      return "Continue maintaining a balanced diet and regular physical activity.";
+    } else if (bmi < 30) {
+      return "Consider modest weight loss through healthy eating and increased physical activity.";
+    } else {
+      return "It's advisable to speak with a healthcare provider about a weight management plan.";
+    }
+  } else {
+    // For children (using z-score)
+    if (zScore && zScore < -2) {
+      return "Consult with a pediatrician about nutrition support for healthy weight gain.";
+    } else if (zScore && zScore <= 1) {
+      return "Continue supporting your child's healthy growth with balanced nutrition and physical activity.";
+    } else if (zScore && zScore <= 2) {
+      return "Monitor your child's growth and ensure they have a balanced diet and regular physical activity.";
+    } else {
+      return "It's recommended to discuss your child's growth with their healthcare provider.";
+    }
+  }
 };
 
 export default BMICalculator;

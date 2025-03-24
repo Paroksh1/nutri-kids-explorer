@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,8 +9,8 @@ import { Check, Info, AlertCircle } from 'lucide-react';
 import DietaryDiversityResults from './DietaryDiversityResults';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { getCurrentUser } from './auth/AuthForm';
 
-// Define the food groups based on the provided image
 export const foodGroups = [
   {
     id: 1,
@@ -138,7 +137,15 @@ const DietaryDiversityCalculator: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<'meals' | 'groups'>('meals');
   const [activeTab, setActiveTab] = useState<string>('breakfast');
   const [ateOutside, setAteOutside] = useState<boolean | null>(null);
-  
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user) {
+      setUserProfile(user);
+    }
+  }, []);
+
   const updateMeal = (mealType: keyof typeof meals, foods: string) => {
     setMeals(prev => ({
       ...prev,
@@ -159,15 +166,12 @@ const DietaryDiversityCalculator: React.FC = () => {
   };
 
   const analyzeAndSuggestFoodGroups = () => {
-    // Reset food groups
     setFoodGroupsChecked(foodGroups.map(group => ({ ...group, value: false })));
     
-    // This is a simplified algorithm. In a real app, this would use NLP or a food database
     const allFoodText = Object.values(meals)
       .map(meal => meal.foods.toLowerCase())
       .join(' ');
     
-    // Simple keyword matching for each food group
     const keywordMapping: Record<number, string[]> = {
       1: ['rice', 'bread', 'wheat', 'corn', 'maize', 'pasta', 'noodle', 'cereal', 'oat', 'porridge'],
       2: ['potato', 'yam', 'cassava', 'tuber'],
@@ -187,11 +191,9 @@ const DietaryDiversityCalculator: React.FC = () => {
       16: ['spice', 'salt', 'pepper', 'sauce', 'coffee', 'tea']
     };
     
-    // Check for each keyword
     Object.entries(keywordMapping).forEach(([groupId, keywords]) => {
       const id = parseInt(groupId);
       if (keywords.some(keyword => allFoodText.includes(keyword))) {
-        // Update the food group to checked
         setFoodGroupsChecked(prev => 
           prev.map(group => 
             group.id === id ? { ...group, value: true } : group
@@ -200,6 +202,10 @@ const DietaryDiversityCalculator: React.FC = () => {
       }
     });
     
+    if (userProfile) {
+      console.log(`Analyzing food entries for ${userProfile.firstName} ${userProfile.lastName}`);
+    }
+    
     setCurrentStep('groups');
     toast.success("Foods have been analyzed! Please review and adjust the food groups.");
   };
@@ -207,17 +213,23 @@ const DietaryDiversityCalculator: React.FC = () => {
   const calculateDietaryDiversityScore = () => {
     setIsCalculating(true);
     
-    // For the 9 food group scoring, we need to use specific groups from the 16 groups
-    // According to the third image, these are the 9 groups:
-    // 1. Starchy staples (Group 1 + Group 2)
-    // 2. Dark green leafy vegetables (Group 4)
-    // 3. Vitamin A rich fruits and vegetables (Group 3 + Group 6)
-    // 4. Other fruits and vegetables (Group 5 + Group 7)
-    // 5. Organ meat (Group 8)
-    // 6. Meat and fish (Group 9 + Group 11)
-    // 7. Eggs (Group 10)
-    // 8. Legumes, nuts and seeds (Group 12)
-    // 9. Milk and milk products (Group 13)
+    const nineGroupScore = [
+      foodGroupsChecked[0].value || foodGroupsChecked[1].value ? 1 : 0,
+      foodGroupsChecked[3].value ? 1 : 0,
+      foodGroupsChecked[2].value || foodGroupsChecked[5].value ? 1 : 0,
+      foodGroupsChecked[4].value || foodGroupsChecked[6].value ? 1 : 0,
+      foodGroupsChecked[7].value ? 1 : 0,
+      foodGroupsChecked[8].value || foodGroupsChecked[10].value ? 1 : 0,
+      foodGroupsChecked[9].value ? 1 : 0,
+      foodGroupsChecked[11].value ? 1 : 0,
+      foodGroupsChecked[12].value ? 1 : 0
+    ];
+    
+    const totalScore = nineGroupScore.reduce((sum, val) => sum + val, 0);
+    
+    if (userProfile) {
+      console.log(`Saving dietary diversity score for ${userProfile.firstName} ${userProfile.lastName}`);
+    }
     
     setTimeout(() => {
       setIsCalculating(false);
@@ -242,25 +254,15 @@ const DietaryDiversityCalculator: React.FC = () => {
   };
 
   if (showResults) {
-    // Calculate score based on the 9 food groups from the third image
     const nineGroupScore = [
-      // Group 1: Starchy staples (cereals + white roots and tubers)
       foodGroupsChecked[0].value || foodGroupsChecked[1].value ? 1 : 0,
-      // Group 2: Dark green leafy vegetables
       foodGroupsChecked[3].value ? 1 : 0,
-      // Group 3: Vitamin A rich fruits and vegetables
       foodGroupsChecked[2].value || foodGroupsChecked[5].value ? 1 : 0,
-      // Group 4: Other fruits and vegetables
       foodGroupsChecked[4].value || foodGroupsChecked[6].value ? 1 : 0,
-      // Group 5: Organ meat
       foodGroupsChecked[7].value ? 1 : 0,
-      // Group 6: Meat and fish
       foodGroupsChecked[8].value || foodGroupsChecked[10].value ? 1 : 0,
-      // Group 7: Eggs
       foodGroupsChecked[9].value ? 1 : 0,
-      // Group 8: Legumes, nuts and seeds
       foodGroupsChecked[11].value ? 1 : 0,
-      // Group 9: Milk and milk products
       foodGroupsChecked[12].value ? 1 : 0
     ];
     
@@ -275,7 +277,8 @@ const DietaryDiversityCalculator: React.FC = () => {
         rawData={{
           meals,
           foodGroups: foodGroupsChecked,
-          ateOutside
+          ateOutside,
+          user: userProfile
         }}
       />
     );
@@ -286,7 +289,10 @@ const DietaryDiversityCalculator: React.FC = () => {
       <CardHeader>
         <CardTitle className="heading-md text-center">DIETARY DIVERSITY QUESTIONNAIRE</CardTitle>
         <CardDescription className="text-center">
-          Please describe the foods (meals and snacks) that you ate or drank yesterday during the day and night, whether at home or outside the home.
+          {userProfile ? 
+            `Hi ${userProfile.firstName}! Please describe the foods (meals and snacks) that you ate yesterday during the day and night.` :
+            `Please describe the foods (meals and snacks) that you ate yesterday during the day and night, whether at home or outside the home.`
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>

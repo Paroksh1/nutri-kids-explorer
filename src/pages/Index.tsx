@@ -2,7 +2,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import DietaryDiversityCalculator from '@/components/DietaryDiversityCalculator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Apple, BarChart2, Book, Calculator, Check } from 'lucide-react';
 
@@ -18,7 +17,7 @@ const Index: React.FC = () => {
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg" className="bg-primary">
-                <Link to="/dietary-diversity">Get Started</Link>
+                <Link to="/login">Get Started</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link to="/education">Learn More</Link>
@@ -37,7 +36,21 @@ const Index: React.FC = () => {
             </p>
           </div>
           
-          <DietaryDiversityCalculator />
+          <div className="max-w-3xl mx-auto">
+            <Card className="glass-panel">
+              <CardContent className="p-6">
+                <div className="text-center space-y-4 py-8">
+                  <h3 className="text-2xl font-bold">Track Your Nutritional Intake</h3>
+                  <p className="text-muted-foreground">
+                    Sign up or log in to access our dietary diversity calculator and get personalized recommendations.
+                  </p>
+                  <Button asChild size="lg" className="mt-4">
+                    <Link to="/login">Sign Up / Login</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
       
@@ -175,8 +188,8 @@ const Index: React.FC = () => {
                 
                 <div className="mt-6 flex justify-center">
                   <Button asChild size="lg">
-                    <Link to="/dietary-diversity">
-                      <Book className="mr-2 h-5 w-5" /> Learn More About Nutrition
+                    <Link to="/login">
+                      <Book className="mr-2 h-5 w-5" /> Sign Up to Get Started
                     </Link>
                   </Button>
                 </div>

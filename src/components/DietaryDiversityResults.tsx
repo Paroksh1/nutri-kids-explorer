@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,6 @@ interface DietaryDiversityResultsProps {
   rawData: any;
 }
 
-// 9 food groups as shown in the third image
 const foodGroupLabels = [
   'Starchy staples',
   'Dark green leafy vegetables',
@@ -27,6 +25,47 @@ const foodGroupLabels = [
   'Milk and milk products'
 ];
 
+const generatePersonalizedRecommendations = (score: number, foodGroups: number[], userData: any) => {
+  let recommendations = [];
+  
+  if (score <= 3) {
+    recommendations.push("Your diet has low diversity. Try to include foods from more different food groups each day.");
+  } else if (score <= 6) {
+    recommendations.push("You have moderate dietary diversity. Adding just a few more food groups could greatly benefit your nutrition.");
+  } else {
+    recommendations.push("Great job! You have good dietary diversity. Maintaining this variety is excellent for your health.");
+  }
+  
+  const missingGroups = [];
+  foodGroups.forEach((value, index) => {
+    if (value === 0) {
+      missingGroups.push(foodGroupLabels[index]);
+    }
+  });
+  
+  if (missingGroups.length > 0) {
+    recommendations.push(`Consider including these food groups in your diet: ${missingGroups.join(', ')}.`);
+  }
+  
+  if (userData && userData.age) {
+    const age = parseInt(userData.age);
+    
+    if (age < 18) {
+      recommendations.push("For growing children and teens, dietary diversity is especially important for proper development.");
+      if (score < 5) {
+        recommendations.push("Growing bodies need nutrients from a wide variety of foods. Try to include different colored vegetables and fruits daily.");
+      }
+    } else if (age > 65) {
+      recommendations.push("For older adults, maintaining dietary diversity helps support immune function and overall health.");
+      if (foodGroups[2] === 0) {
+        recommendations.push("Dark green leafy vegetables are particularly important for maintaining bone health as we age.");
+      }
+    }
+  }
+  
+  return recommendations;
+};
+
 const DietaryDiversityResults: React.FC<DietaryDiversityResultsProps> = ({ 
   score, 
   maxScore, 
@@ -36,7 +75,6 @@ const DietaryDiversityResults: React.FC<DietaryDiversityResultsProps> = ({
 }) => {
   const percentage = (score / maxScore) * 100;
   
-  // Prepare data for the chart
   const chartData = foodGroupLabels.map((label, index) => ({
     name: label,
     value: foodGroups[index],
@@ -45,16 +83,13 @@ const DietaryDiversityResults: React.FC<DietaryDiversityResultsProps> = ({
   
   const handleDownload = () => {
     try {
-      // Create a JSON blob
       const dataStr = JSON.stringify(rawData, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       
-      // Create a download link
       const downloadLink = document.createElement('a');
       downloadLink.href = URL.createObjectURL(dataBlob);
       downloadLink.download = `dietary-diversity-results-${new Date().toISOString().split('T')[0]}.json`;
       
-      // Trigger download
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
@@ -75,12 +110,16 @@ const DietaryDiversityResults: React.FC<DietaryDiversityResultsProps> = ({
     }
   };
 
+  const personalizedRecommendations = generatePersonalizedRecommendations(score, foodGroups, rawData.user);
+
   return (
     <Card className="w-full max-w-4xl mx-auto glass-panel">
       <CardHeader className="text-center">
         <CardTitle className="heading-md">Dietary Diversity Score Results</CardTitle>
         <CardDescription>
-          Based on the foods consumed in the last 24 hours
+          {rawData.user ? 
+            `Based on your food consumption in the last 24 hours, ${rawData.user.firstName}` : 
+            'Based on the foods consumed in the last 24 hours'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
@@ -168,25 +207,15 @@ const DietaryDiversityResults: React.FC<DietaryDiversityResultsProps> = ({
         </div>
         
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-          <h3 className="font-semibold text-blue-800 mb-2">Recommendations</h3>
-          {score <= 3 && (
-            <p className="text-sm text-blue-800">
-              Try to include more variety in your diet, particularly adding dark green leafy vegetables, 
-              vitamin A-rich fruits and vegetables, and protein sources like eggs, meat, or legumes.
-            </p>
-          )}
-          {score > 3 && score <= 6 && (
-            <p className="text-sm text-blue-800">
-              You have a moderately diverse diet. Consider adding food groups you're not currently consuming, 
-              especially nutrient-dense foods like dark green vegetables and vitamin A-rich foods.
-            </p>
-          )}
-          {score > 6 && (
-            <p className="text-sm text-blue-800">
-              You have a highly diverse diet! Continue maintaining this variety while ensuring 
-              balanced portions and adequate intake from all food groups.
-            </p>
-          )}
+          <h3 className="font-semibold text-blue-800 mb-2">Personalized Recommendations</h3>
+          <ul className="space-y-2">
+            {personalizedRecommendations.map((recommendation, index) => (
+              <li key={index} className="text-sm text-blue-800 flex items-start">
+                <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mt-1 mr-2 flex-shrink-0"></span>
+                {recommendation}
+              </li>
+            ))}
+          </ul>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
