@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -80,8 +81,13 @@ const MealPlanDisplay: React.FC<MealPlanDisplayProps> = ({
             calculateDailyNutrients(customMealPlans);
           } else {
             const mealResponse = await getRecipeRecommendations(profile);
-            setMealPlans(mealResponse.recommendations || []);
-            calculateDailyNutrients(mealResponse.recommendations || []);
+            // Convert the response to ensure it has the mealType property
+            const formattedMeals = (mealResponse.recommendations || []).map((item: any) => ({
+              ...item,
+              mealType: item.mealType || 'breakfast' // Default to breakfast if not specified
+            }));
+            setMealPlans(formattedMeals);
+            calculateDailyNutrients(formattedMeals);
           }
           
           if (customExerciseRecommendations && customExerciseRecommendations.length > 0) {
@@ -192,7 +198,7 @@ const MealPlanDisplay: React.FC<MealPlanDisplayProps> = ({
   const getMealsByType = (type: MealType): MealItem[] => {
     return mealPlans.filter(meal => 
       meal.mealType === type || 
-      ((!meal.mealType || meal.mealType === '') && 
+      (meal.mealType === undefined && 
        ((type === 'breakfast' && (meal.title?.toLowerCase().includes('breakfast') || meal.name?.toLowerCase().includes('breakfast'))) ||
         (type === 'lunch' && (meal.title?.toLowerCase().includes('lunch') || meal.name?.toLowerCase().includes('lunch'))) ||
         (type === 'dinner' && (meal.title?.toLowerCase().includes('dinner') || meal.name?.toLowerCase().includes('dinner'))) ||
