@@ -13,6 +13,7 @@ import Onboarding from "./pages/Onboarding";
 import Recommendations from "./pages/Recommendations";
 import MealPlans from "./pages/MealPlans";
 import Education from "./pages/Education";
+import DietaryDiversity from "./pages/DietaryDiversity";
 import { isAuthenticated } from "./components/auth/AuthForm";
 
 const queryClient = new QueryClient();
@@ -41,13 +42,14 @@ const App = () => (
       <BrowserRouter>
         <GlobalNav />
         <Routes>
-          <Route path="/" element={<PublicRoute><Index /></PublicRoute>} />
+          <Route path="/" element={<Index />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
           <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
           <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
+          <Route path="/dietary-diversity" element={<DietaryDiversity />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
