@@ -5,13 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, Info, AlertCircle, HelpCircle } from 'lucide-react';
+import { Check, Info, AlertCircle, HelpCircle, Search } from 'lucide-react';
 import DietaryDiversityResults from './DietaryDiversityResults';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
-import { processFoodText } from '@/utils/foodNameMapper';
+import { processFoodText, getIngredientsForDish, getFoodGroup } from '@/utils/foodNameMapper';
 
 export const foodGroups = [
   {
@@ -140,6 +140,11 @@ const DietaryDiversityCalculator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('breakfast');
   const [ateOutside, setAteOutside] = useState<boolean | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [analysisDetails, setAnalysisDetails] = useState<{
+    dish: string;
+    ingredients: string[];
+    groups: string[];
+  } | null>(null);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -185,6 +190,21 @@ const DietaryDiversityCalculator: React.FC = () => {
         }
       });
       setFoodGroupsChecked(updatedGroups);
+      
+      const foodItems = allFoodText.split(/[,;\n]+/).filter(item => item.trim().length > 0);
+      if (foodItems.length > 0) {
+        const sampleDish = foodItems[0].trim();
+        const ingredients = getIngredientsForDish(sampleDish);
+        const groups = ingredients.map(ing => getFoodGroup(ing)).filter(g => g !== "unknown");
+        
+        setAnalysisDetails({
+          dish: sampleDish,
+          ingredients,
+          groups
+        });
+        
+        toast.success(`Successfully analyzed ${foodItems.length} food items!`);
+      }
     }
     
     if (userProfile) {
@@ -305,6 +325,22 @@ const DietaryDiversityCalculator: React.FC = () => {
               </ul>
             </div>
             
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <h4 className="font-medium flex items-center text-green-800 mb-2">
+                <Search className="h-4 w-4 mr-2" />
+                Ingredient Analysis
+              </h4>
+              <p className="text-sm text-green-700 mb-2">
+                Our system automatically analyzes dishes to identify their ingredients and food groups!
+                For example:
+              </p>
+              <ul className="space-y-1 text-sm text-green-700">
+                <li>• "chapati" → wheat → starchy staples</li>
+                <li>• "palak paneer" → spinach, cheese → vitamin A rich vegetables, dairy</li>
+                <li>• "aloo gobhi" → potato, cauliflower → starchy staples, other vegetables</li>
+              </ul>
+            </div>
+            
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
                 <TabsTrigger value="breakfast">Breakfast</TabsTrigger>
@@ -381,6 +417,18 @@ const DietaryDiversityCalculator: React.FC = () => {
                 We've pre-checked some based on your entries, but please review and adjust as needed.
               </p>
             </div>
+            
+            {analysisDetails && (
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-medium text-green-800 mb-2">Food Analysis Example</h4>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Dish:</span> {analysisDetails.dish}</p>
+                  <p><span className="font-medium">Contains:</span> {analysisDetails.ingredients.join(', ')}</p>
+                  <p><span className="font-medium">Food Groups:</span> {analysisDetails.groups.length > 0 ? 
+                    analysisDetails.groups.join(', ') : 'No specific groups detected'}</p>
+                </div>
+              </div>
+            )}
             
             <div className="border rounded-md">
               <table className="w-full">

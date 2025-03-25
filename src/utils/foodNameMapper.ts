@@ -1,3 +1,4 @@
+
 // A utility to map common food names to standardized names for better recognition
 // Includes Hindi to English translations and food group mappings
 
@@ -115,6 +116,42 @@ export const foodNameMap: FoodMapping = {
   "tomatos": "tomato",
   "potatoe": "potato",
   "potatos": "potato"
+};
+
+// Dish to ingredients mapping for more detailed analysis
+export const dishToIngredientsMap: {[key: string]: string[]} = {
+  "chapati": ["wheat"],
+  "roti": ["wheat"],
+  "naan": ["wheat", "yogurt"],
+  "paratha": ["wheat", "oil"],
+  "dal": ["lentils"],
+  "rice": ["rice"],
+  "dal rice": ["lentils", "rice"],
+  "curd rice": ["rice", "yogurt"],
+  "khichdi": ["rice", "lentils"],
+  "idli": ["rice", "lentils"],
+  "dosa": ["rice", "lentils"],
+  "upma": ["semolina", "vegetables"],
+  "poha": ["rice", "peanuts", "vegetables"],
+  "pulao": ["rice", "vegetables", "spices"],
+  "biryani": ["rice", "vegetables", "spices"],
+  "samosa": ["wheat", "potato", "peas"],
+  "pakora": ["chickpeas", "vegetables", "oil"],
+  "aloo gobhi": ["potato", "cauliflower", "spices"],
+  "aloo matar": ["potato", "peas", "spices"],
+  "palak paneer": ["spinach", "cheese", "spices"],
+  "paneer butter masala": ["cheese", "tomato", "butter", "spices"],
+  "butter chicken": ["chicken", "butter", "tomato", "spices"],
+  "chicken curry": ["chicken", "tomato", "spices"],
+  "fish curry": ["fish", "tomato", "spices"],
+  "egg curry": ["egg", "tomato", "spices"],
+  "mutton curry": ["mutton", "tomato", "spices"],
+  "rajma": ["beans", "tomato", "spices"],
+  "chole": ["chickpeas", "tomato", "spices"],
+  "lassi": ["yogurt", "sugar"],
+  "fruit salad": ["mixed fruits"],
+  "mix veg": ["mixed vegetables"],
+  "omelette": ["egg", "vegetables"]
 };
 
 // Maps foods to their food groups for dietary diversity calculation
@@ -270,7 +307,10 @@ export const foodToGroupMap: {[key: string]: string} = {
   "garlic": "other_vegetables",
   "ginger": "other_vegetables",
   "mushroom": "other_vegetables",
-  "turnip": "other_vegetables"
+  "turnip": "other_vegetables",
+  "mixed vegetables": "other_vegetables",
+  "vegetables": "other_vegetables",
+  "spices": "other_vegetables"
 };
 
 // Helper function to map a food name to its standardized version
@@ -308,6 +348,34 @@ export const isFoodInGroup = (food: string, group: string): boolean => {
   return getFoodGroup(food) === group;
 };
 
+// Get all ingredients for a dish and return their food groups
+export const getIngredientsForDish = (dish: string): string[] => {
+  const standardizedDish = mapFoodName(dish);
+  
+  // Check if we have a mapping for this dish
+  if (dishToIngredientsMap[standardizedDish]) {
+    return dishToIngredientsMap[standardizedDish];
+  }
+  
+  // If no specific mapping, return the dish itself as the ingredient
+  return [standardizedDish];
+};
+
+// Get all food groups for a dish by analyzing its ingredients
+export const getFoodGroupsForDish = (dish: string): string[] => {
+  const ingredients = getIngredientsForDish(dish);
+  const groups = new Set<string>();
+  
+  ingredients.forEach(ingredient => {
+    const group = getFoodGroup(ingredient);
+    if (group !== "unknown") {
+      groups.add(group);
+    }
+  });
+  
+  return Array.from(groups);
+};
+
 // Map food groups to their corresponding ID in the foodGroups array
 const foodGroupToIdMap: {[key: string]: number} = {
   "starchy_staples": 1, // CEREALS + WHITE ROOTS AND TUBERS
@@ -335,33 +403,37 @@ export const processFoodText = (foodText: string): number[] => {
   
   foodItems.forEach(item => {
     const food = item.trim();
-    const group = getFoodGroup(food);
     
-    if (group !== "unknown" && foodGroupToIdMap[group]) {
-      detectedGroups.add(foodGroupToIdMap[group]);
-      
-      // Special case handling
-      if (group === "starchy_staples") {
-        // Both CEREALS and WHITE ROOTS AND TUBERS might be detected
-        detectedGroups.add(1); // CEREALS
-        detectedGroups.add(2); // WHITE ROOTS AND TUBERS
+    // Get all food groups for this dish by analyzing its ingredients
+    const foodGroups = getFoodGroupsForDish(food);
+    
+    foodGroups.forEach(group => {
+      if (foodGroupToIdMap[group]) {
+        detectedGroups.add(foodGroupToIdMap[group]);
+        
+        // Special case handling
+        if (group === "starchy_staples") {
+          // Both CEREALS and WHITE ROOTS AND TUBERS might be detected
+          detectedGroups.add(1); // CEREALS
+          detectedGroups.add(2); // WHITE ROOTS AND TUBERS
+        }
       }
-      
-      // For vitamin A rich vegetables, also mark dark green leafy ones
-      if (group === "vitamin_a_fruits_vegetables" && 
-          (food.includes("spinach") || food.includes("kale") || 
-           food.includes("amaranth") || food.includes("collard"))) {
-        detectedGroups.add(4); // DARK GREEN LEAFY VEGETABLES
-      }
-      
-      // For other special cases
-      if (food.includes("liver") || food.includes("kidney") || food.includes("heart")) {
-        detectedGroups.add(8); // ORGAN MEAT
-      }
-      
-      if (food.includes("fish") || food.includes("seafood") || food.includes("prawn") || food.includes("shrimp")) {
-        detectedGroups.add(11); // FISH AND SEAFOOD
-      }
+    });
+    
+    // Additional special case handling for specific foods
+    if (food.includes("spinach") || food.includes("kale") || 
+        food.includes("amaranth") || food.includes("collard") ||
+        food.includes("palak")) {
+      detectedGroups.add(4); // DARK GREEN LEAFY VEGETABLES
+    }
+    
+    if (food.includes("liver") || food.includes("kidney") || food.includes("heart")) {
+      detectedGroups.add(8); // ORGAN MEAT
+    }
+    
+    if (food.includes("fish") || food.includes("seafood") || food.includes("prawn") || 
+        food.includes("shrimp") || food.includes("machli") || food.includes("मछली")) {
+      detectedGroups.add(11); // FISH AND SEAFOOD
     }
   });
   
