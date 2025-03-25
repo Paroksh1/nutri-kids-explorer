@@ -15,8 +15,7 @@ import MealPlans from "./pages/MealPlans";
 import Education from "./pages/Education";
 import DietaryDiversity from "./pages/DietaryDiversity";
 import { isAuthenticated } from "./components/auth/AuthForm";
-
-const queryClient = new QueryClient();
+import React from "react";
 
 // Auth guard for public routes
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
@@ -34,28 +33,35 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <TooltipProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-          <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
-          <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
-          <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
-          <Route path="/dietary-diversity" element={<ProtectedRoute><DietaryDiversity /></ProtectedRoute>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <GlobalNav />
-        <Toaster />
-        <Sonner />
-      </TooltipProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Create a client
+  const queryClient = new QueryClient();
+  
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <TooltipProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+              <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
+              <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
+              <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
+              <Route path="/dietary-diversity" element={<ProtectedRoute><DietaryDiversity /></ProtectedRoute>} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <GlobalNav />
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;

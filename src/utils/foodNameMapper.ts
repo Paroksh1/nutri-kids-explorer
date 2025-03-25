@@ -1,216 +1,229 @@
 // A utility to map common food names to standardized names for better recognition
 // Includes Hindi to English translations and food group mappings
 
-type FoodMapping = {
-  [key: string]: string;
-};
-
-// Maps common food names, including Hindi names, to standardized food names
-export const foodNameMap: FoodMapping = {
-  // Hindi to English mappings
-  "aloo": "potato",
-  "aaloo": "potato",
-  "आलू": "potato",
+// Hindi to English translation map
+const hindiToEnglishMap: Record<string, string> = {
   "चावल": "rice",
-  "chawal": "rice",
-  "दाल": "lentils",
-  "dal": "lentils",
-  "रोटी": "chapati",
-  "roti": "chapati",
-  "चपाती": "chapati",
-  "पालक": "spinach",
-  "palak": "spinach",
-  "गोभी": "cauliflower",
-  "gobhi": "cauliflower",
-  "मटर": "peas",
-  "matar": "peas",
-  "टमाटर": "tomato",
-  "tamatar": "tomato",
+  "आलू": "potato",
   "प्याज": "onion",
-  "pyaaj": "onion",
+  "टमाटर": "tomato",
+  "गोभी": "cabbage",
+  "फूलगोभी": "cauliflower",
+  "मटर": "peas",
   "गाजर": "carrot",
-  "gajar": "carrot",
+  "भिंडी": "okra",
+  "बैंगन": "eggplant",
+  "मिर्च": "chili",
   "अदरक": "ginger",
-  "adrak": "ginger",
   "लहसुन": "garlic",
-  "lahsun": "garlic",
-  "केला": "banana",
-  "kela": "banana",
-  "सेब": "apple",
-  "seb": "apple",
-  "अंगूर": "grapes",
-  "angoor": "grapes",
-  "अमरूद": "guava",
-  "amrood": "guava",
-  "पपीता": "papaya",
-  "papeeta": "papaya",
-  "दूध": "milk",
-  "doodh": "milk",
-  "दही": "yogurt",
-  "dahi": "yogurt",
+  "धनिया": "coriander",
+  "जीरा": "cumin",
+  "हल्दी": "turmeric",
+  "दाल": "lentil",
+  "चना": "chickpea",
+  "राजमा": "kidney beans",
+  "मूंग": "mung beans",
   "पनीर": "cheese",
-  "paneer": "cheese",
-  "मक्खन": "butter",
-  "makkhan": "butter",
+  "दही": "yogurt",
   "घी": "ghee",
-  "ghee": "ghee",
+  "मक्खन": "butter",
+  "दूध": "milk",
   "अंडा": "egg",
-  "anda": "egg",
   "मुर्गी": "chicken",
-  "murgi": "chicken",
-  "चिकन": "chicken",
   "मछली": "fish",
-  "machli": "fish",
-  "मटन": "mutton",
-  "mutton": "mutton",
-
-  // Common dish to ingredient mappings
-  "dal rice": "lentils and rice",
-  "dal chawal": "lentils and rice",
-  "chapati": "wheat",
-  "roti": "wheat",
-  "naan": "wheat",
-  "paratha": "wheat",
-  "bread": "wheat",
-  "pasta": "wheat",
-  "noodles": "wheat",
-  "idli": "rice",
-  "dosa": "rice",
-  "poha": "rice",
-  "upma": "semolina",
-  "khichdi": "rice and lentils",
-  "pulao": "rice",
-  "biryani": "rice",
-  "curd rice": "rice and yogurt",
-  "rajma": "beans",
-  "chole": "chickpeas",
-  "chana": "chickpeas",
-  "paneer butter masala": "cheese",
-  "palak paneer": "spinach and cheese",
-  "aloo gobhi": "potato and cauliflower",
-  "aloo matar": "potato and peas",
-  "mix veg": "mixed vegetables",
-  "mixed vegetables": "mixed vegetables",
-  "salad": "mixed vegetables",
-  "fruit salad": "mixed fruits",
-  "lassi": "yogurt",
-  "butter chicken": "chicken",
-  "chicken curry": "chicken",
-  "fish curry": "fish",
-  "egg curry": "egg",
-  "omelette": "egg",
-  "mutton curry": "mutton",
-  "chicken biryani": "chicken and rice",
-  "veg biryani": "rice and vegetables",
-  "samosa": "potato",
-  "pakora": "vegetables",
-  "bhaji": "vegetables",
-
-  // Common variations and misspellings
-  "chapathi": "chapati",
-  "chappati": "chapati",
-  "yoghurt": "yogurt",
-  "curd": "yogurt",
-  "tomatoe": "tomato",
-  "tomatos": "tomato",
-  "potatoe": "potato",
-  "potatos": "potato"
+  "चपाती": "chapati",
+  "रोटी": "roti",
+  "नान": "naan",
+  "परांठा": "paratha",
+  "पुलाव": "pilaf",
+  "बिरयानी": "biryani",
+  "समोसा": "samosa",
+  "पकोड़ा": "pakora",
+  "खीर": "rice pudding",
+  "हलवा": "halwa",
+  "जलेबी": "jalebi",
+  "गुलाब जामुन": "gulab jamun",
+  "रसगुल्ला": "rasgulla",
+  "पेड़ा": "peda",
+  "केला": "banana",
+  "सेब": "apple",
+  "संतरा": "orange",
+  "अंगूर": "grapes",
+  "आम": "mango",
+  "पपीता": "papaya",
+  "तरबूज": "watermelon",
+  "खरबूजा": "muskmelon",
+  "अनार": "pomegranate",
+  "अनानास": "pineapple",
+  "चाय": "tea",
+  "कॉफी": "coffee",
+  "पानी": "water",
+  "लस्सी": "lassi",
+  "नींबू पानी": "lemon water"
 };
 
-// Dish to ingredients mapping for more detailed analysis
-export const dishToIngredientsMap: {[key: string]: string[]} = {
-  "chapati": ["wheat"],
-  "roti": ["wheat"],
-  "naan": ["wheat", "yogurt"],
-  "paratha": ["wheat", "oil"],
-  "dal": ["lentils"],
-  "rice": ["rice"],
-  "dal rice": ["lentils", "rice"],
-  "curd rice": ["rice", "yogurt"],
-  "khichdi": ["rice", "lentils"],
-  "idli": ["rice", "lentils"],
-  "dosa": ["rice", "lentils"],
-  "upma": ["semolina", "vegetables"],
-  "poha": ["rice", "peanuts", "vegetables"],
-  "pulao": ["rice", "vegetables", "spices"],
-  "biryani": ["rice", "vegetables", "spices"],
-  "samosa": ["wheat", "potato", "peas"],
-  "pakora": ["chickpeas", "vegetables", "oil"],
-  "aloo gobhi": ["potato", "cauliflower", "spices"],
-  "aloo matar": ["potato", "peas", "spices"],
-  "palak paneer": ["spinach", "cheese", "spices"],
-  "paneer butter masala": ["cheese", "tomato", "butter", "spices"],
-  "butter chicken": ["chicken", "butter", "tomato", "spices"],
-  "chicken curry": ["chicken", "tomato", "spices"],
-  "fish curry": ["fish", "tomato", "spices"],
-  "egg curry": ["egg", "tomato", "spices"],
-  "mutton curry": ["mutton", "tomato", "spices"],
-  "rajma": ["beans", "tomato", "spices"],
-  "chole": ["chickpeas", "tomato", "spices"],
-  "lassi": ["yogurt", "sugar"],
-  "fruit salad": ["mixed fruits"],
-  "mix veg": ["mixed vegetables"],
-  "omelette": ["egg", "vegetables"]
-};
-
-// Maps foods to their food groups for dietary diversity calculation
-export const foodToGroupMap: {[key: string]: string} = {
-  // Starchy staples
+// Map of food names to their food groups (using the WHO/FAO dietary diversity groups)
+const foodGroupMap: Record<string, string> = {
+  // Starchy staples (cereals and tubers)
   "rice": "starchy_staples",
   "wheat": "starchy_staples",
-  "maize": "starchy_staples",
-  "corn": "starchy_staples",
-  "potato": "starchy_staples",
-  "sweet potato": "starchy_staples",
-  "yam": "starchy_staples",
-  "cassava": "starchy_staples",
   "bread": "starchy_staples",
   "pasta": "starchy_staples",
-  "noodles": "starchy_staples",
-  "semolina": "starchy_staples",
-  "oats": "starchy_staples",
   "barley": "starchy_staples",
-  "quinoa": "starchy_staples",
-  "millet": "starchy_staples",
-  "sorghum": "starchy_staples",
-  "taro": "starchy_staples",
+  "oats": "starchy_staples",
+  "corn": "starchy_staples",
+  "maize": "starchy_staples",
+  "potato": "starchy_staples",
+  "cassava": "starchy_staples",
+  "yam": "starchy_staples",
   "plantain": "starchy_staples",
-
-  // Beans and peas
-  "lentils": "beans_and_peas",
-  "beans": "beans_and_peas",
-  "chickpeas": "beans_and_peas",
-  "peas": "beans_and_peas",
-  "soybeans": "beans_and_peas",
-  "kidney beans": "beans_and_peas",
-  "black beans": "beans_and_peas",
-  "pinto beans": "beans_and_peas",
-  "lima beans": "beans_and_peas",
-  "broad beans": "beans_and_peas",
-  "split peas": "beans_and_peas",
-  "mung beans": "beans_and_peas",
-  "black-eyed peas": "beans_and_peas",
+  "chapati": "starchy_staples",
+  "roti": "starchy_staples",
+  "naan": "starchy_staples",
+  "paratha": "starchy_staples",
+  "dosa": "starchy_staples",
+  "idli": "starchy_staples",
+  "semolina": "starchy_staples",
+  "couscous": "starchy_staples",
+  "quinoa": "starchy_staples",
+  "tapioca": "starchy_staples",
   
-  // Nuts and seeds
-  "almonds": "nuts_and_seeds",
-  "walnuts": "nuts_and_seeds",
-  "cashews": "nuts_and_seeds",
-  "pistachios": "nuts_and_seeds",
-  "peanuts": "nuts_and_seeds",
-  "hazelnuts": "nuts_and_seeds",
-  "pecans": "nuts_and_seeds",
-  "sunflower seeds": "nuts_and_seeds",
-  "pumpkin seeds": "nuts_and_seeds",
-  "sesame seeds": "nuts_and_seeds",
-  "flax seeds": "nuts_and_seeds",
-  "chia seeds": "nuts_and_seeds",
-  "pine nuts": "nuts_and_seeds",
-  "macadamia nuts": "nuts_and_seeds",
+  // Dark green leafy vegetables
+  "spinach": "dark_green_leafy_veg",
+  "kale": "dark_green_leafy_veg",
+  "collard greens": "dark_green_leafy_veg",
+  "mustard greens": "dark_green_leafy_veg",
+  "broccoli": "dark_green_leafy_veg",
+  "amaranth leaves": "dark_green_leafy_veg",
+  "lettuce": "dark_green_leafy_veg",
+  "arugula": "dark_green_leafy_veg",
+  "chard": "dark_green_leafy_veg",
+  "methi": "dark_green_leafy_veg",
+  "sarson ka saag": "dark_green_leafy_veg",
+  "bathua": "dark_green_leafy_veg",
   
-  // Dairy
+  // Vitamin A rich fruits and vegetables
+  "carrot": "vitamin_a_fruits_vegetables",
+  "pumpkin": "vitamin_a_fruits_vegetables",
+  "squash": "vitamin_a_fruits_vegetables",
+  "sweet potato": "vitamin_a_fruits_vegetables",
+  "papaya": "vitamin_a_fruits_vegetables",
+  "mango": "vitamin_a_fruits_vegetables",
+  "cantaloupe": "vitamin_a_fruits_vegetables",
+  "apricot": "vitamin_a_fruits_vegetables",
+  "red bell pepper": "vitamin_a_fruits_vegetables",
+  
+  // Other vegetables
+  "tomato": "other_vegetables",
+  "onion": "other_vegetables",
+  "eggplant": "other_vegetables",
+  "cabbage": "other_vegetables",
+  "cauliflower": "other_vegetables",
+  "green beans": "other_vegetables",
+  "cucumber": "other_vegetables",
+  "zucchini": "other_vegetables",
+  "peas": "other_vegetables",
+  "bell pepper": "other_vegetables",
+  "okra": "other_vegetables",
+  "celery": "other_vegetables",
+  "radish": "other_vegetables",
+  "turnip": "other_vegetables",
+  "mushroom": "other_vegetables",
+  "gourd": "other_vegetables",
+  "bittergourd": "other_vegetables",
+  "ridgegourd": "other_vegetables",
+  "bottlegourd": "other_vegetables",
+  
+  // Other fruits
+  "apple": "other_fruits",
+  "banana": "other_fruits",
+  "orange": "other_fruits",
+  "grapefruit": "other_fruits",
+  "lemon": "other_fruits",
+  "lime": "other_fruits",
+  "pear": "other_fruits",
+  "peach": "other_fruits",
+  "plum": "other_fruits",
+  "grapes": "other_fruits",
+  "strawberry": "other_fruits",
+  "blueberry": "other_fruits",
+  "raspberry": "other_fruits",
+  "blackberry": "other_fruits",
+  "pineapple": "other_fruits",
+  "watermelon": "other_fruits",
+  "kiwi": "other_fruits",
+  "pomegranate": "other_fruits",
+  "guava": "other_fruits",
+  "lychee": "other_fruits",
+  "fig": "other_fruits",
+  "date": "other_fruits",
+  "raisin": "other_fruits",
+  
+  // Organ meat
+  "liver": "organ_meat",
+  "kidney": "organ_meat",
+  "heart": "organ_meat",
+  "brain": "organ_meat",
+  "tripe": "organ_meat",
+  "thymus": "organ_meat",
+  "sweetbread": "organ_meat",
+  
+  // Meat and fish
+  "beef": "meat_fish",
+  "pork": "meat_fish",
+  "lamb": "meat_fish",
+  "goat": "meat_fish",
+  "chicken": "meat_fish",
+  "duck": "meat_fish",
+  "turkey": "meat_fish",
+  "fish": "meat_fish",
+  "shrimp": "meat_fish",
+  "crab": "meat_fish",
+  "lobster": "meat_fish",
+  "clam": "meat_fish",
+  "oyster": "meat_fish",
+  "mussel": "meat_fish",
+  "squid": "meat_fish",
+  "octopus": "meat_fish",
+  "venison": "meat_fish",
+  "rabbit": "meat_fish",
+  "frog legs": "meat_fish",
+  "quail": "meat_fish",
+  
+  // Eggs
+  "egg": "eggs",
+  "chicken egg": "eggs",
+  "duck egg": "eggs",
+  "quail egg": "eggs",
+  "goose egg": "eggs",
+  
+  // Legumes, nuts and seeds
+  "beans": "legumes_nuts_seeds",
+  "lentil": "legumes_nuts_seeds",
+  "chickpea": "legumes_nuts_seeds",
+  "kidney beans": "legumes_nuts_seeds",
+  "mung beans": "legumes_nuts_seeds",
+  "black beans": "legumes_nuts_seeds",
+  "peanut": "legumes_nuts_seeds",
+  "almond": "legumes_nuts_seeds",
+  "cashew": "legumes_nuts_seeds",
+  "walnut": "legumes_nuts_seeds",
+  "pistachio": "legumes_nuts_seeds",
+  "hazelnut": "legumes_nuts_seeds",
+  "pecan": "legumes_nuts_seeds",
+  "sunflower seeds": "legumes_nuts_seeds",
+  "pumpkin seeds": "legumes_nuts_seeds",
+  "flax seeds": "legumes_nuts_seeds",
+  "chia seeds": "legumes_nuts_seeds",
+  "sesame seeds": "legumes_nuts_seeds",
+  "pine nuts": "legumes_nuts_seeds",
+  "macadamia": "legumes_nuts_seeds",
+  "brazil nuts": "legumes_nuts_seeds",
+  
+  // Milk and milk products
   "milk": "dairy",
-  "yogurt": "dairy",
   "cheese": "dairy",
+  "yogurt": "dairy",
   "butter": "dairy",
   "ghee": "dairy",
   "cream": "dairy",
@@ -218,221 +231,184 @@ export const foodToGroupMap: {[key: string]: string} = {
   "buttermilk": "dairy",
   "lassi": "dairy",
   
-  // Flesh foods
-  "beef": "flesh_foods",
-  "chicken": "flesh_foods",
-  "pork": "flesh_foods",
-  "lamb": "flesh_foods",
-  "mutton": "flesh_foods",
-  "fish": "flesh_foods",
-  "seafood": "flesh_foods",
-  "prawns": "flesh_foods",
-  "shrimp": "flesh_foods",
-  "crab": "flesh_foods",
-  "goat": "flesh_foods",
-  "turkey": "flesh_foods",
-  "duck": "flesh_foods",
-  "organ meats": "flesh_foods",
-  "liver": "flesh_foods",
-  "kidney": "flesh_foods",
-  "heart": "flesh_foods",
+  // Others (not counted in WHO DD groups but useful for reference)
+  "oil": "oils_fats",
+  "olive oil": "oils_fats",
+  "coconut oil": "oils_fats",
+  "vegetable oil": "oils_fats",
+  "mustard oil": "oils_fats",
+  "sesame oil": "oils_fats",
+  "lard": "oils_fats",
+  "tallow": "oils_fats",
   
-  // Eggs
-  "egg": "eggs",
-  "eggs": "eggs",
-  "quail eggs": "eggs",
-  "duck eggs": "eggs",
+  "sugar": "sugars",
+  "honey": "sugars",
+  "jaggery": "sugars",
+  "maple syrup": "sugars",
+  "molasses": "sugars",
   
-  // Vitamin A-rich fruits and vegetables
-  "carrot": "vitamin_a_fruits_vegetables",
-  "pumpkin": "vitamin_a_fruits_vegetables",
-  "sweet red pepper": "vitamin_a_fruits_vegetables",
-  "mango": "vitamin_a_fruits_vegetables",
-  "papaya": "vitamin_a_fruits_vegetables",
-  "apricot": "vitamin_a_fruits_vegetables",
-  "spinach": "vitamin_a_fruits_vegetables",
-  "kale": "vitamin_a_fruits_vegetables",
-  "collard greens": "vitamin_a_fruits_vegetables",
-  "turnip greens": "vitamin_a_fruits_vegetables",
-  "beet greens": "vitamin_a_fruits_vegetables",
-  "amaranth leaves": "vitamin_a_fruits_vegetables",
-  "mustard greens": "vitamin_a_fruits_vegetables",
-
-  // Other fruits
-  "apple": "other_fruits",
-  "banana": "other_fruits",
-  "orange": "other_fruits",
-  "grapes": "other_fruits",
-  "watermelon": "other_fruits",
-  "pineapple": "other_fruits",
-  "strawberry": "other_fruits",
-  "blueberry": "other_fruits",
-  "raspberry": "other_fruits",
-  "blackberry": "other_fruits",
-  "kiwi": "other_fruits",
-  "pear": "other_fruits",
-  "peach": "other_fruits",
-  "plum": "other_fruits",
-  "cherry": "other_fruits",
-  "guava": "other_fruits",
-  "lychee": "other_fruits",
-  "pomegranate": "other_fruits",
-  "fig": "other_fruits",
-  "date": "other_fruits",
-  "coconut": "other_fruits",
-
-  // Other vegetables
-  "onion": "other_vegetables",
-  "tomato": "other_vegetables",
-  "cucumber": "other_vegetables",
-  "eggplant": "other_vegetables",
-  "cauliflower": "other_vegetables",
-  "cabbage": "other_vegetables",
-  "broccoli": "other_vegetables",
-  "lettuce": "other_vegetables",
-  "capsicum": "other_vegetables",
-  "bell pepper": "other_vegetables",
-  "zucchini": "other_vegetables",
-  "okra": "other_vegetables",
-  "radish": "other_vegetables",
-  "beetroot": "other_vegetables",
-  "celery": "other_vegetables",
-  "leek": "other_vegetables",
-  "artichoke": "other_vegetables",
-  "asparagus": "other_vegetables",
-  "brussels sprouts": "other_vegetables",
-  "garlic": "other_vegetables",
-  "ginger": "other_vegetables",
-  "mushroom": "other_vegetables",
-  "turnip": "other_vegetables",
-  "mixed vegetables": "other_vegetables",
-  "vegetables": "other_vegetables",
-  "spices": "other_vegetables"
+  "salt": "spices_condiments",
+  "pepper": "spices_condiments",
+  "turmeric": "spices_condiments",
+  "cumin": "spices_condiments",
+  "coriander": "spices_condiments",
+  "ginger": "spices_condiments",
+  "garlic": "spices_condiments",
+  "chili": "spices_condiments",
+  "cinnamon": "spices_condiments",
+  "cardamom": "spices_condiments",
+  "clove": "spices_condiments",
+  "nutmeg": "spices_condiments",
+  "soy sauce": "spices_condiments",
+  "vinegar": "spices_condiments",
+  "ketchup": "spices_condiments",
+  "mustard": "spices_condiments",
+  "mayonnaise": "spices_condiments",
+  
+  "tea": "beverages",
+  "coffee": "beverages",
+  "alcohol": "beverages",
+  "soda": "beverages",
+  "juice": "beverages",
+  "water": "beverages"
 };
 
-// Helper function to map a food name to its standardized version
-export const mapFoodName = (input: string): string => {
-  const lowercaseInput = input.toLowerCase().trim();
-  return foodNameMap[lowercaseInput] || lowercaseInput;
+// Dictionary mapping dishes to their common ingredients
+const dishToIngredientsMap: Record<string, string[]> = {
+  "chapati": ["wheat"],
+  "roti": ["wheat"],
+  "naan": ["wheat", "milk"],
+  "paratha": ["wheat", "oil"],
+  "dal": ["lentil"],
+  "rajma": ["kidney beans"],
+  "chole": ["chickpea"],
+  "rice": ["rice"],
+  "biryani": ["rice", "vegetables", "spices"],
+  "pulao": ["rice", "vegetables", "spices"],
+  "idli": ["rice", "lentil"],
+  "dosa": ["rice", "lentil"],
+  "uttapam": ["rice", "lentil", "vegetables"],
+  "sambar": ["lentil", "vegetables", "spices"],
+  "rasam": ["tomato", "spices"],
+  "palak paneer": ["spinach", "cheese", "spices"],
+  "matar paneer": ["peas", "cheese", "spices"],
+  "aloo gobi": ["potato", "cauliflower", "spices"],
+  "aloo matar": ["potato", "peas", "spices"],
+  "bhindi masala": ["okra", "spices"],
+  "baingan bharta": ["eggplant", "spices"],
+  "chana masala": ["chickpea", "spices"],
+  "butter chicken": ["chicken", "butter", "cream", "spices"],
+  "tandoori chicken": ["chicken", "yogurt", "spices"],
+  "chicken curry": ["chicken", "spices"],
+  "fish curry": ["fish", "spices"],
+  "egg curry": ["egg", "spices"],
+  "kheer": ["rice", "milk", "sugar"],
+  "gulab jamun": ["milk", "sugar"],
+  "rasgulla": ["cheese", "sugar"],
+  "jalebi": ["wheat", "sugar"],
+  "ladoo": ["chickpea flour", "sugar"],
+  "halwa": ["semolina", "sugar", "ghee"]
 };
 
-// Helper function to get the food group for a given food
-export const getFoodGroup = (food: string): string => {
-  const standardizedFood = mapFoodName(food);
-  const group = foodToGroupMap[standardizedFood];
+// Function to get ingredients for a dish
+export const getIngredientsForDish = (dish: string): string[] => {
+  // Normalize input: lowercase and trim
+  const normalizedDish = dish.toLowerCase().trim();
   
-  if (group) {
-    return group;
+  // Check if dish exists in our mapping
+  if (dishToIngredientsMap[normalizedDish]) {
+    return dishToIngredientsMap[normalizedDish];
   }
   
-  // Handle composite foods by checking parts
-  const parts = standardizedFood.split(/\s+and\s+|\s*,\s*|\s+with\s+|\s+&\s+/);
-  if (parts.length > 1) {
-    for (const part of parts) {
-      const trimmedPart = part.trim();
-      const partGroup = foodToGroupMap[trimmedPart];
-      if (partGroup) {
-        return partGroup; // Return the first valid group found
-      }
+  // If the dish isn't in our mapping, see if the name itself is a food item
+  if (foodGroupMap[normalizedDish]) {
+    return [normalizedDish];
+  }
+  
+  // Check Hindi translations
+  const englishTerm = hindiToEnglishMap[normalizedDish];
+  if (englishTerm) {
+    if (dishToIngredientsMap[englishTerm]) {
+      return dishToIngredientsMap[englishTerm];
+    } else if (foodGroupMap[englishTerm]) {
+      return [englishTerm];
     }
   }
   
+  // Default case: return empty array if we can't identify the dish
+  return [];
+};
+
+// Function to get the food group for a specific ingredient
+export const getFoodGroup = (ingredient: string): string => {
+  const normalizedIngredient = ingredient.toLowerCase().trim();
+  
+  // Check if the ingredient is in our food group map
+  if (foodGroupMap[normalizedIngredient]) {
+    return foodGroupMap[normalizedIngredient];
+  }
+  
+  // Check Hindi translations
+  const englishTerm = hindiToEnglishMap[normalizedIngredient];
+  if (englishTerm && foodGroupMap[englishTerm]) {
+    return foodGroupMap[englishTerm];
+  }
+  
+  // Default if we can't identify the food group
   return "unknown";
 };
 
-// Helper function to check if a food belongs to a specific group
-export const isFoodInGroup = (food: string, group: string): boolean => {
-  return getFoodGroup(food) === group;
-};
-
-// Get all ingredients for a dish and return their food groups
-export const getIngredientsForDish = (dish: string): string[] => {
-  const standardizedDish = mapFoodName(dish);
-  
-  // Check if we have a mapping for this dish
-  if (dishToIngredientsMap[standardizedDish]) {
-    return dishToIngredientsMap[standardizedDish];
-  }
-  
-  // If no specific mapping, return the dish itself as the ingredient
-  return [standardizedDish];
-};
-
-// Get all food groups for a dish by analyzing its ingredients
-export const getFoodGroupsForDish = (dish: string): string[] => {
-  const ingredients = getIngredientsForDish(dish);
-  const groups = new Set<string>();
-  
-  ingredients.forEach(ingredient => {
-    const group = getFoodGroup(ingredient);
-    if (group !== "unknown") {
-      groups.add(group);
-    }
-  });
-  
-  return Array.from(groups);
-};
-
-// Map food groups to their corresponding ID in the foodGroups array
-const foodGroupToIdMap: {[key: string]: number} = {
-  "starchy_staples": 1, // CEREALS + WHITE ROOTS AND TUBERS
-  "vitamin_a_fruits_vegetables": 3, // VITAMIN A RICH VEGETABLES AND TUBERS
-  "beans_and_peas": 12, // LEGUMES, NUTS AND SEEDS
-  "nuts_and_seeds": 12, // LEGUMES, NUTS AND SEEDS
-  "dairy": 13, // MILK AND MILK PRODUCTS
-  "flesh_foods": 9, // FLESH MEATS
-  "eggs": 10, // EGGS
-  "other_vegetables": 5, // OTHER VEGETABLES
-  "other_fruits": 7, // OTHER FRUITS
-};
-
-// Function to process food text and suggest food groups that were likely consumed
+// Process the food text to identify food groups
 export const processFoodText = (foodText: string): number[] => {
+  // Check for empty input
   if (!foodText || foodText.trim() === '') {
     return [];
   }
   
-  // Split the input into individual food items
-  const foodItems = foodText.split(/[,;\n]+/).filter(item => item.trim().length > 0);
+  // Initialize set to track which food groups we've found
+  const groupsFound = new Set<string>();
   
-  // Map each food to its standardized name and get its food group
-  const detectedGroups = new Set<number>();
+  // Normalize and split the text by common separators
+  const foods = foodText.toLowerCase().split(/[,;\n]+/).map(f => f.trim()).filter(f => f !== '');
   
-  foodItems.forEach(item => {
-    const food = item.trim();
+  // Process each food item
+  foods.forEach(food => {
+    // First check if it's a dish with multiple ingredients
+    const ingredients = getIngredientsForDish(food);
     
-    // Get all food groups for this dish by analyzing its ingredients
-    const foodGroups = getFoodGroupsForDish(food);
-    
-    foodGroups.forEach(group => {
-      if (foodGroupToIdMap[group]) {
-        detectedGroups.add(foodGroupToIdMap[group]);
-        
-        // Special case handling
-        if (group === "starchy_staples") {
-          // Both CEREALS and WHITE ROOTS AND TUBERS might be detected
-          detectedGroups.add(1); // CEREALS
-          detectedGroups.add(2); // WHITE ROOTS AND TUBERS
+    if (ingredients.length > 0) {
+      // Process each ingredient in the dish
+      ingredients.forEach(ingredient => {
+        const foodGroup = getFoodGroup(ingredient);
+        if (foodGroup !== "unknown") {
+          groupsFound.add(foodGroup);
         }
+      });
+    } else {
+      // If not recognized as a dish, try as a single ingredient
+      const foodGroup = getFoodGroup(food);
+      if (foodGroup !== "unknown") {
+        groupsFound.add(foodGroup);
       }
-    });
-    
-    // Additional special case handling for specific foods
-    if (food.includes("spinach") || food.includes("kale") || 
-        food.includes("amaranth") || food.includes("collard") ||
-        food.includes("palak")) {
-      detectedGroups.add(4); // DARK GREEN LEAFY VEGETABLES
-    }
-    
-    if (food.includes("liver") || food.includes("kidney") || food.includes("heart")) {
-      detectedGroups.add(8); // ORGAN MEAT
-    }
-    
-    if (food.includes("fish") || food.includes("seafood") || food.includes("prawn") || 
-        food.includes("shrimp") || food.includes("machli") || food.includes("मछली")) {
-      detectedGroups.add(11); // FISH AND SEAFOOD
     }
   });
   
-  return Array.from(detectedGroups);
+  // Map the found groups to the 16 group IDs used in the app
+  const groupIds: number[] = [];
+  
+  if (groupsFound.has("starchy_staples")) groupIds.push(1);
+  if (groupsFound.has("dark_green_leafy_veg")) groupIds.push(4);
+  if (groupsFound.has("vitamin_a_fruits_vegetables")) groupIds.push(3);
+  if (groupsFound.has("other_vegetables")) groupIds.push(5);
+  if (groupsFound.has("other_fruits")) groupIds.push(7);
+  if (groupsFound.has("organ_meat")) groupIds.push(8);
+  if (groupsFound.has("meat_fish")) groupIds.push(9);
+  if (groupsFound.has("eggs")) groupIds.push(10);
+  if (groupsFound.has("legumes_nuts_seeds")) groupIds.push(12);
+  if (groupsFound.has("dairy")) groupIds.push(13);
+  if (groupsFound.has("oils_fats")) groupIds.push(14);
+  if (groupsFound.has("sugars")) groupIds.push(15);
+  if (groupsFound.has("spices_condiments") || groupsFound.has("beverages")) groupIds.push(16);
+  
+  return groupIds;
 };
