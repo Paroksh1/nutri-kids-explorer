@@ -1,4 +1,3 @@
-
 // A utility to map common food names to standardized names for better recognition
 // Includes Hindi to English translations and food group mappings
 
@@ -216,7 +215,6 @@ export const foodToGroupMap: {[key: string]: string} = {
   "ghee": "dairy",
   "cream": "dairy",
   "ice cream": "dairy",
-  "curd": "dairy",
   "buttermilk": "dairy",
   "lassi": "dairy",
   
@@ -252,7 +250,6 @@ export const foodToGroupMap: {[key: string]: string} = {
   "mango": "vitamin_a_fruits_vegetables",
   "papaya": "vitamin_a_fruits_vegetables",
   "apricot": "vitamin_a_fruits_vegetables",
-  "sweet potato": "vitamin_a_fruits_vegetables", 
   "spinach": "vitamin_a_fruits_vegetables",
   "kale": "vitamin_a_fruits_vegetables",
   "collard greens": "vitamin_a_fruits_vegetables",
