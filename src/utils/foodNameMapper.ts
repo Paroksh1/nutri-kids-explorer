@@ -122,9 +122,7 @@ const hindiToEnglishMap: Record<string, string> = {
   "भुना": "roasted",
   "तला": "fried",
   "उबला": "boiled",
-  "पकोड़ा": "fritter",
-  "भजिया": "fritter",
-  "वड़ा": "savory donut"
+  "भजिया": "fritter"
 };
 
 // Map of food names to their food groups (using the WHO/FAO dietary diversity groups)
@@ -168,9 +166,7 @@ const foodGroupMap: Record<string, string> = {
   "bathua": "dark_green_leafy_veg",
   "fenugreek leaves": "dark_green_leafy_veg",
   "chenopodium": "dark_green_leafy_veg",
-  "amaranth leaves": "dark_green_leafy_veg",
   "leafy greens": "dark_green_leafy_veg",
-  "mustard greens": "dark_green_leafy_veg",
   
   // Vitamin A rich fruits and vegetables
   "carrot": "vitamin_a_fruits_vegetables",
@@ -420,7 +416,7 @@ const dishToIngredientsMap: Record<string, string[]> = {
   "अंडा भुर्जी": ["egg", "vegetables", "spices"],
   "मछली करी": ["fish", "spices"],
   "मटन करी": ["meat", "spices"],
-  "चिकन करी": ["chicken", "spices"],
+  "चिकन करी": ["chicken", "spices"]
 };
 
 // Function to get ingredients for a dish

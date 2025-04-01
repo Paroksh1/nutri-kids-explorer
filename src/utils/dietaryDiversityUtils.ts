@@ -52,3 +52,18 @@ export const identifyHindiFood = (foodText: string): string[] => {
   
   return [...new Set(identifiedGroups)];
 };
+
+// Map Hindi names directly to food groups for common foods
+export const getHindiFoodGroup = (hindiFood: string): string => {
+  // Normalize input
+  const normalizedFood = hindiFood.toLowerCase().trim();
+  
+  // Common dairy products in Hindi
+  if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी"].includes(normalizedFood)) {
+    return "dairy";
+  }
+  
+  // Let the general mapper handle other cases
+  const foodGroups = getFoodGroupsForDish(normalizedFood);
+  return foodGroups.length > 0 ? foodGroups[0] : "unknown";
+};
