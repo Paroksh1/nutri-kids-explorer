@@ -44,9 +44,16 @@ export const identifyHindiFood = (foodText: string): string[] => {
   const identifiedGroups: string[] = [];
   
   foods.forEach(food => {
-    const foodGroups = getFoodGroupsForDish(food);
-    if (foodGroups.length > 0) {
-      identifiedGroups.push(...foodGroups);
+    // First try direct Hindi food group mapping
+    const hindiFoodGroup = getHindiFoodGroup(food);
+    if (hindiFoodGroup !== "unknown") {
+      identifiedGroups.push(hindiFoodGroup);
+    } else {
+      // Fall back to general food group mapping
+      const foodGroups = getFoodGroupsForDish(food);
+      if (foodGroups.length > 0) {
+        identifiedGroups.push(...foodGroups);
+      }
     }
   });
   

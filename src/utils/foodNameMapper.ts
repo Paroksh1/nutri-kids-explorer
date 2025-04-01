@@ -482,7 +482,13 @@ export const processFoodText = (foodText: string): number[] => {
   
   // Process each food item
   foods.forEach(food => {
-    // First check if it's a dish with multiple ingredients
+    // First check for Hindi dairy products directly
+    if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी"].includes(food)) {
+      groupsFound.add("dairy");
+      return;
+    }
+    
+    // Check if it's a dish with multiple ingredients
     const ingredients = getIngredientsForDish(food);
     
     if (ingredients.length > 0) {
@@ -498,9 +504,20 @@ export const processFoodText = (foodText: string): number[] => {
       const foodGroup = getFoodGroup(food);
       if (foodGroup !== "unknown") {
         groupsFound.add(foodGroup);
+      } else {
+        // Check if it's a Hindi food with a direct translation
+        const englishTerm = hindiToEnglishMap[food];
+        if (englishTerm) {
+          const translatedGroup = getFoodGroup(englishTerm);
+          if (translatedGroup !== "unknown") {
+            groupsFound.add(translatedGroup);
+          }
+        }
       }
     }
   });
+  
+  console.log("Found food groups:", Array.from(groupsFound));
   
   // Map the found groups to the 16 group IDs used in the app
   const groupIds: number[] = [];
@@ -518,6 +535,8 @@ export const processFoodText = (foodText: string): number[] => {
   if (groupsFound.has("oils_fats")) groupIds.push(14);
   if (groupsFound.has("sugars")) groupIds.push(15);
   if (groupsFound.has("spices_condiments") || groupsFound.has("beverages")) groupIds.push(16);
+  
+  console.log("Resulting group IDs:", groupIds);
   
   return groupIds;
 };
