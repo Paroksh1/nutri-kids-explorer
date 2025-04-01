@@ -1,5 +1,5 @@
 
-import { getIngredientsForDish, getFoodGroup } from './foodNameMapper';
+import { getIngredientsForDish, getFoodGroup, processFoodText } from './foodNameMapper';
 
 // Function to get all food groups for a given dish
 export const getFoodGroupsForDish = (dish: string): string[] => {
@@ -40,34 +40,36 @@ export const identifyHindiFood = (foodText: string): string[] => {
     return [];
   }
   
-  const foods = foodText.toLowerCase().split(/[,;\n]+/).map(f => f.trim()).filter(f => f !== '');
-  const identifiedGroups: string[] = [];
+  // Process input text - split by common separators and normalize
+  const foods = foodText.toLowerCase().split(/[,;\n\s]+/).map(f => f.trim()).filter(f => f !== '');
+  console.log("Processing foods:", foods);
   
-  foods.forEach(food => {
-    // First try direct Hindi food group mapping
-    const hindiFoodGroup = getHindiFoodGroup(food);
-    if (hindiFoodGroup !== "unknown") {
-      identifiedGroups.push(hindiFoodGroup);
-    } else {
-      // Fall back to general food group mapping
-      const foodGroups = getFoodGroupsForDish(food);
-      if (foodGroups.length > 0) {
-        identifiedGroups.push(...foodGroups);
-      }
-    }
-  });
+  // Process the text through the food mapper to get food group IDs
+  const groupIds = processFoodText(foodText);
+  console.log("Identified group IDs:", groupIds);
   
-  return [...new Set(identifiedGroups)];
+  // Map the group IDs back to string names
+  return groupIds.map(id => formatFoodGroupName(id).toLowerCase());
 };
 
-// Map Hindi names directly to food groups for common foods
+// Map common food items directly to food groups
 export const getHindiFoodGroup = (hindiFood: string): string => {
   // Normalize input
   const normalizedFood = hindiFood.toLowerCase().trim();
   
-  // Common dairy products in Hindi
-  if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी"].includes(normalizedFood)) {
+  // Common dairy products in Hindi and English
+  if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी", "milk", "dahi", "curd", "yogurt", "butter", "ghee", "cheese", "buttermilk", "paneer"].includes(normalizedFood)) {
     return "dairy";
+  }
+  
+  // Common legumes/dals
+  if (["दाल", "चना", "राजमा", "मूंग", "मसूर", "अरहर", "उड़द", "dal", "lentil", "rajma", "chana", "moong", "masoor", "urad", "toor", "arhar"].includes(normalizedFood)) {
+    return "legumes_nuts_seeds";
+  }
+  
+  // Common grains
+  if (["चावल", "गेहूं", "रोटी", "आटा", "पराठा", "नान", "चपाती", "rice", "wheat", "roti", "chapati", "naan", "paratha", "bread"].includes(normalizedFood)) {
+    return "starchy_staples";
   }
   
   // Let the general mapper handle other cases

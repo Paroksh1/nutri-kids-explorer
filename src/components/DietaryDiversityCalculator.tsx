@@ -11,7 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
-import { processFoodText, getIngredientsForDish, getFoodGroup } from '@/utils/foodNameMapper';
+import { processFoodText } from '@/utils/foodNameMapper';
+import { identifyHindiFood } from '@/utils/dietaryDiversityUtils';
 
 export const foodGroups = [
   {
@@ -179,6 +180,8 @@ const DietaryDiversityCalculator: React.FC = () => {
       .map(meal => meal.foods)
       .join(' ');
     
+    console.log("Analyzing foods:", allFoodText);
+    
     const detectedGroups = processFoodText(allFoodText);
     
     if (detectedGroups.length > 0) {
@@ -187,20 +190,19 @@ const DietaryDiversityCalculator: React.FC = () => {
         const index = updatedGroups.findIndex(group => group.id === groupId);
         if (index >= 0) {
           updatedGroups[index] = { ...updatedGroups[index], value: true };
+          console.log(`Set group ${updatedGroups[index].name} to true`);
         }
       });
       setFoodGroupsChecked(updatedGroups);
       
-      const foodItems = allFoodText.split(/[,;\n]+/).filter(item => item.trim().length > 0);
+      const foodItems = allFoodText.split(/[,;\n\s]+/).filter(item => item.trim().length > 0);
       if (foodItems.length > 0) {
-        const sampleDish = foodItems[0].trim();
-        const ingredients = getIngredientsForDish(sampleDish);
-        const groups = ingredients.map(ing => getFoodGroup(ing)).filter(g => g !== "unknown");
+        const hindiGroups = identifyHindiFood(allFoodText);
         
         setAnalysisDetails({
-          dish: sampleDish,
-          ingredients,
-          groups
+          dish: foodItems[0].trim(),
+          ingredients: foodItems.slice(0, 3),
+          groups: hindiGroups
         });
         
         toast.success(`Successfully analyzed ${foodItems.length} food items!`);

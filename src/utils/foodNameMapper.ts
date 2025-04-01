@@ -122,7 +122,22 @@ const hindiToEnglishMap: Record<string, string> = {
   "भुना": "roasted",
   "तला": "fried",
   "उबला": "boiled",
-  "भजिया": "fritter"
+  "भजिया": "fritter",
+  
+  // Also add English terms for better matching
+  "dal": "lentil",
+  "milk": "milk",
+  "curd": "yogurt",
+  "yoghurt": "yogurt",
+  "butter": "butter",
+  "ghee": "ghee",
+  "cheese": "cheese",
+  "buttermilk": "buttermilk",
+  "paneer": "cheese",
+  "rice": "rice",
+  "wheat": "wheat",
+  "roti": "roti",
+  "bread": "bread"
 };
 
 // Map of food names to their food groups (using the WHO/FAO dietary diversity groups)
@@ -266,6 +281,7 @@ const foodGroupMap: Record<string, string> = {
   // Legumes, nuts and seeds
   "beans": "legumes_nuts_seeds",
   "lentil": "legumes_nuts_seeds",
+  "dal": "legumes_nuts_seeds",
   "chickpea": "legumes_nuts_seeds",
   "kidney beans": "legumes_nuts_seeds",
   "mung beans": "legumes_nuts_seeds",
@@ -285,6 +301,13 @@ const foodGroupMap: Record<string, string> = {
   "pine nuts": "legumes_nuts_seeds",
   "macadamia": "legumes_nuts_seeds",
   "brazil nuts": "legumes_nuts_seeds",
+  "rajma": "legumes_nuts_seeds",
+  "chana": "legumes_nuts_seeds",
+  "moong": "legumes_nuts_seeds",
+  "masoor": "legumes_nuts_seeds",
+  "urad": "legumes_nuts_seeds",
+  "toor": "legumes_nuts_seeds",
+  "arhar": "legumes_nuts_seeds",
   
   // Milk and milk products
   "milk": "dairy",
@@ -478,13 +501,27 @@ export const processFoodText = (foodText: string): number[] => {
   const groupsFound = new Set<string>();
   
   // Normalize and split the text by common separators
-  const foods = foodText.toLowerCase().split(/[,;\n]+/).map(f => f.trim()).filter(f => f !== '');
+  const foods = foodText.toLowerCase().split(/[,;\n\s]+/).map(f => f.trim()).filter(f => f !== '');
+  console.log("Processing food items:", foods);
   
   // Process each food item
   foods.forEach(food => {
-    // First check for Hindi dairy products directly
-    if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी"].includes(food)) {
+    // Direct check for common foods in Hindi and English
+    // Dairy products
+    if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी", 
+         "milk", "dahi", "curd", "yogurt", "butter", "ghee", "cheese", 
+         "buttermilk", "paneer"].includes(food)) {
       groupsFound.add("dairy");
+      console.log(`Found dairy product: ${food}`);
+      return;
+    }
+    
+    // Lentils/pulses/dals
+    if (["दाल", "चना", "राजमा", "मूंग", "मसूर", "उड़द", "अरहर", 
+         "dal", "lentil", "rajma", "chana", "moong", "masoor", "urad", 
+         "toor", "pulses", "beans"].includes(food)) {
+      groupsFound.add("legumes_nuts_seeds");
+      console.log(`Found legume: ${food}`);
       return;
     }
     
@@ -497,6 +534,7 @@ export const processFoodText = (foodText: string): number[] => {
         const foodGroup = getFoodGroup(ingredient);
         if (foodGroup !== "unknown") {
           groupsFound.add(foodGroup);
+          console.log(`Found ingredient ${ingredient} in group ${foodGroup}`);
         }
       });
     } else {
@@ -504,6 +542,7 @@ export const processFoodText = (foodText: string): number[] => {
       const foodGroup = getFoodGroup(food);
       if (foodGroup !== "unknown") {
         groupsFound.add(foodGroup);
+        console.log(`Found food ${food} in group ${foodGroup}`);
       } else {
         // Check if it's a Hindi food with a direct translation
         const englishTerm = hindiToEnglishMap[food];
@@ -511,6 +550,7 @@ export const processFoodText = (foodText: string): number[] => {
           const translatedGroup = getFoodGroup(englishTerm);
           if (translatedGroup !== "unknown") {
             groupsFound.add(translatedGroup);
+            console.log(`Translated ${food} to ${englishTerm} in group ${translatedGroup}`);
           }
         }
       }
