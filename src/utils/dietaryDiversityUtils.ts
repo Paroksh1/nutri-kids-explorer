@@ -33,3 +33,22 @@ export const formatFoodGroupName = (groupId: number): string => {
     default: return "Unknown";
   }
 };
+
+// Helper function to improve Hindi food detection
+export const identifyHindiFood = (foodText: string): string[] => {
+  if (!foodText || foodText.trim() === '') {
+    return [];
+  }
+  
+  const foods = foodText.toLowerCase().split(/[,;\n]+/).map(f => f.trim()).filter(f => f !== '');
+  const identifiedGroups: string[] = [];
+  
+  foods.forEach(food => {
+    const foodGroups = getFoodGroupsForDish(food);
+    if (foodGroups.length > 0) {
+      identifiedGroups.push(...foodGroups);
+    }
+  });
+  
+  return [...new Set(identifiedGroups)];
+};
