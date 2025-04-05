@@ -5,6 +5,7 @@ import BMICalculator from '@/components/BMICalculator';
 import { getCurrentUser } from '@/components/auth/AuthForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
+import DashboardNav from '@/components/layout/DashboardNav';
 
 const DietaryDiversity: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -15,7 +16,8 @@ const DietaryDiversity: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/95">
+    <div className="min-h-screen bg-gradient-to-br from-background to-background/95 pt-16">
+      <DashboardNav />
       <div className="container mx-auto px-4 py-10">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Nutrition Assessment Dashboard</h1>
