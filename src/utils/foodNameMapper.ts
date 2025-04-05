@@ -375,7 +375,61 @@ const foodGroupMap: Record<string, string> = {
   "alcohol": "beverages",
   "soda": "beverages",
   "juice": "beverages",
-  "water": "beverages"
+  "water": "beverages",
+  
+  // Add global dish mappings
+  "pizza": "mixed_dish",
+  "burger": "mixed_dish",
+  "sandwich": "mixed_dish",
+  "pasta": "starchy_staples",
+  "spaghetti": "starchy_staples",
+  "noodles": "starchy_staples",
+  "sushi": "mixed_dish",
+  "tacos": "mixed_dish",
+  "burrito": "mixed_dish",
+  "falafel": "legumes_nuts_seeds",
+  "hummus": "legumes_nuts_seeds",
+  "croissant": "starchy_staples",
+  "bagel": "starchy_staples",
+  "paella": "mixed_dish",
+  "risotto": "starchy_staples",
+  "lasagna": "mixed_dish",
+  "moussaka": "mixed_dish",
+  "kebab": "meat_fish",
+  "curry": "mixed_dish",
+  "kimchi": "other_vegetables",
+  "couscous": "starchy_staples",
+  "pho": "mixed_dish",
+  "ramen": "mixed_dish",
+  "dim sum": "mixed_dish",
+  "dumplings": "mixed_dish",
+  "gnocchi": "starchy_staples",
+  "tempura": "mixed_dish",
+  "quiche": "mixed_dish",
+  "crepe": "starchy_staples",
+  "pancake": "starchy_staples",
+  "waffle": "starchy_staples",
+  "muesli": "starchy_staples",
+  "granola": "mixed_dish",
+  "cereal": "starchy_staples",
+  "muffin": "starchy_staples",
+  "donut": "starchy_staples",
+  "pastry": "starchy_staples",
+  "cake": "starchy_staples",
+  "pie": "mixed_dish",
+  "gelato": "dairy",
+  "sorbet": "other_fruits",
+  "gazpacho": "other_vegetables",
+  "salsa": "other_vegetables",
+  "guacamole": "other_fruits",
+  "tzatziki": "dairy",
+  "bruschetta": "mixed_dish",
+  "pita": "starchy_staples",
+  "tortilla": "starchy_staples",
+  "baguette": "starchy_staples",
+  "pretzel": "starchy_staples",
+  "brioche": "starchy_staples",
+  "porridge": "starchy_staples",
 };
 
 // Dictionary mapping dishes to their common ingredients
@@ -439,7 +493,64 @@ const dishToIngredientsMap: Record<string, string[]> = {
   "अंडा भुर्जी": ["egg", "vegetables", "spices"],
   "मछली करी": ["fish", "spices"],
   "मटन करी": ["meat", "spices"],
-  "चिकन करी": ["chicken", "spices"]
+  "चिकन करी": ["chicken", "spices"],
+  
+  // Adding global dish ingredients mappings
+  "pizza": ["wheat", "cheese", "tomato"],
+  "burger": ["wheat", "meat", "vegetables"],
+  "vegetable burger": ["wheat", "vegetables"],
+  "sandwich": ["wheat", "vegetables"],
+  "pasta": ["wheat"],
+  "spaghetti": ["wheat", "tomato"],
+  "noodles": ["wheat"],
+  "sushi": ["rice", "fish", "seaweed"],
+  "vegetable sushi": ["rice", "vegetables", "seaweed"],
+  "tacos": ["corn", "meat", "vegetables"],
+  "vegetable tacos": ["corn", "vegetables"],
+  "burrito": ["wheat", "rice", "beans", "vegetables"],
+  "falafel": ["chickpea"],
+  "hummus": ["chickpea", "oil"],
+  "croissant": ["wheat", "butter"],
+  "bagel": ["wheat"],
+  "paella": ["rice", "seafood", "vegetables"],
+  "vegetable paella": ["rice", "vegetables"],
+  "risotto": ["rice", "cheese"],
+  "lasagna": ["wheat", "cheese", "tomato"],
+  "vegetable lasagna": ["wheat", "cheese", "vegetables"],
+  "moussaka": ["eggplant", "meat", "potato"],
+  "vegetable moussaka": ["eggplant", "potato", "vegetables"],
+  "kebab": ["meat", "vegetables"],
+  "curry": ["spices", "vegetables"],
+  "kimchi": ["cabbage", "radish", "spices"],
+  "couscous": ["wheat"],
+  "pho": ["rice noodles", "meat", "vegetables"],
+  "vegetable pho": ["rice noodles", "vegetables"],
+  "ramen": ["wheat noodles", "meat", "vegetables"],
+  "vegetable ramen": ["wheat noodles", "vegetables"],
+  "dim sum": ["wheat", "meat", "vegetables"],
+  "dumplings": ["wheat", "meat", "vegetables"],
+  "vegetable dumplings": ["wheat", "vegetables"],
+  "gnocchi": ["potato", "wheat"],
+  "tempura": ["wheat", "vegetables"],
+  "quiche": ["wheat", "egg", "cheese", "vegetables"],
+  "crepe": ["wheat", "milk", "egg"],
+  "pancake": ["wheat", "milk", "egg"],
+  "waffle": ["wheat", "milk", "egg"],
+  "muesli": ["oats", "fruits", "nuts"],
+  "granola": ["oats", "honey", "nuts"],
+  "cereal": ["grain", "milk"],
+  "muffin": ["wheat", "egg", "milk"],
+  "donut": ["wheat", "sugar"],
+  "pastry": ["wheat", "butter"],
+  "cake": ["wheat", "sugar", "egg"],
+  "pie": ["wheat", "fruit"],
+  "gazpacho": ["tomato", "cucumber", "bell pepper"],
+  "salsa": ["tomato", "onion", "chili"],
+  "guacamole": ["avocado", "tomato", "onion"],
+  "tzatziki": ["yogurt", "cucumber", "garlic"],
+  "bruschetta": ["wheat", "tomato", "olive oil"],
+  "pita": ["wheat"],
+  "tortilla": ["corn", "wheat"],
 };
 
 // Function to get ingredients for a dish
@@ -522,6 +633,25 @@ export const processFoodText = (foodText: string): number[] => {
          "toor", "pulses", "beans"].includes(food)) {
       groupsFound.add("legumes_nuts_seeds");
       console.log(`Found legume: ${food}`);
+      return;
+    }
+    
+    // Handle mixed dishes specially (like pizza, burgers, etc.)
+    if (foodGroupMap[food] === "mixed_dish") {
+      console.log(`Found mixed dish: ${food}`);
+      
+      // Get the ingredients for this mixed dish
+      const ingredients = getIngredientsForDish(food);
+      if (ingredients.length > 0) {
+        // For mixed dishes, we need to add all the food groups from ingredients
+        ingredients.forEach(ingredient => {
+          const foodGroup = getFoodGroup(ingredient);
+          if (foodGroup !== "unknown") {
+            groupsFound.add(foodGroup);
+            console.log(`Mixed dish ${food} contains ${ingredient} in group ${foodGroup}`);
+          }
+        });
+      }
       return;
     }
     

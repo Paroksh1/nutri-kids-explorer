@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
-import { processFoodText } from '@/utils/foodNameMapper';
+import { processFoodText, getIngredientsForDish } from '@/utils/foodNameMapper';
 import { identifyHindiFood, getHindiFoodGroup, identifyGlobalFood } from '@/utils/dietaryDiversityUtils';
 
 export const foodGroups = [
@@ -202,6 +202,47 @@ const DietaryDiversityCalculator: React.FC = () => {
         console.log(`Food items in ${mealType}:`, foodItems);
         
         foodItems.forEach(food => {
+          const ingredients = getIngredientsForDish(food);
+          if (ingredients.length > 0) {
+            console.log(`Found dish: ${food} with ingredients:`, ingredients);
+            
+            let ingredientGroups = new Set<string>();
+            ingredients.forEach(ingredient => {
+              const globalGroups = identifyGlobalFood(ingredient);
+              if (globalGroups.length > 0) {
+                globalGroups.forEach(group => ingredientGroups.add(group));
+              }
+            });
+            
+            if (ingredientGroups.size > 0) {
+              recognizedFoods.push(`${food} → ${Array.from(ingredientGroups).join(', ')}`);
+              
+              ingredientGroups.forEach(groupName => {
+                if (groupName === "starchy_staples") detectedGroups.add(1);
+                else if (groupName === "vitamin_a_fruits_vegetables") {
+                  detectedGroups.add(3);
+                  detectedGroups.add(6);
+                }
+                else if (groupName === "dark_green_leafy_veg") detectedGroups.add(4);
+                else if (groupName === "other_vegetables") detectedGroups.add(5);
+                else if (groupName === "other_fruits") detectedGroups.add(7);
+                else if (groupName === "organ_meat") detectedGroups.add(8);
+                else if (groupName === "meat_fish") {
+                  detectedGroups.add(9);
+                  detectedGroups.add(11);
+                }
+                else if (groupName === "eggs") detectedGroups.add(10);
+                else if (groupName === "legumes_nuts_seeds") detectedGroups.add(12);
+                else if (groupName === "dairy") detectedGroups.add(13);
+                else if (groupName === "oils_fats") detectedGroups.add(14);
+                else if (groupName === "sugars") detectedGroups.add(15);
+                else if (groupName === "spices_condiments") detectedGroups.add(16);
+              });
+              
+              return;
+            }
+          }
+          
           const globalGroups = identifyGlobalFood(food);
           console.log(`Global food analysis for "${food}":`, globalGroups);
           
@@ -226,6 +267,29 @@ const DietaryDiversityCalculator: React.FC = () => {
               else if (groupName === "oils_fats") detectedGroups.add(14);
               else if (groupName === "sugars") detectedGroups.add(15);
               else if (groupName === "spices_condiments") detectedGroups.add(16);
+              else if (groupName === "mixed_dish") {
+                detectedGroups.add(1);
+                detectedGroups.add(5);
+                
+                if (food === "pizza") {
+                  detectedGroups.add(1);
+                  detectedGroups.add(5);
+                  detectedGroups.add(13);
+                }
+                else if (food === "burger") {
+                  detectedGroups.add(1);
+                  detectedGroups.add(5);
+                  detectedGroups.add(9);
+                }
+                else if (food.includes("sandwich")) {
+                  detectedGroups.add(1);
+                  detectedGroups.add(5);
+                }
+                else if (food === "sushi") {
+                  detectedGroups.add(1);
+                  detectedGroups.add(11);
+                }
+              }
             });
             
             recognizedFoods.push(`${food} → ${globalGroups.join(', ')}`);
@@ -415,7 +479,7 @@ const DietaryDiversityCalculator: React.FC = () => {
               </h4>
               <ul className="space-y-1 text-sm text-blue-700">
                 <li>• You can enter food names in Hindi, English, or any other language</li>
-                <li>• For dishes like "pasta carbonara", listing components helps (pasta, eggs, cheese)</li>
+                <li>• For dishes like "pizza carbonara", listing components helps (pasta, eggs, cheese)</li>
                 <li>• Enter international foods like "sushi", "croissant", or "tacos"</li>
                 <li>• Include all ingredients for composite dishes</li>
                 <li>• Separate different foods with commas</li>
@@ -431,10 +495,11 @@ const DietaryDiversityCalculator: React.FC = () => {
                 Our system recognizes foods from around the world! Examples include:
               </p>
               <ul className="space-y-1 text-sm text-green-700">
-                <li>• "sushi" → rice, fish → starchy staples, meat/fish</li>
-                <li>• "pizza" → wheat flour, cheese, tomato → starchy staples, dairy, vegetables</li>
-                <li>• "quinoa salad" → quinoa, vegetables → starchy staples, vegetables</li>
-                <li>• "hummus" → chickpeas, tahini → legumes/nuts/seeds</li>
+                <li>• "pizza" → wheat flour, cheese, tomato → cereals, dairy, vegetables</li>
+                <li>• "sushi" → rice, fish → cereals, fish</li>
+                <li>• "burger" → bread, meat, vegetables → cereals, meat, vegetables</li>
+                <li>• "pasta" → wheat flour → cereals</li>
+                <li>• "tacos" → corn tortilla, meat/beans, vegetables → cereals, meat/legumes, vegetables</li>
               </ul>
             </div>
             
@@ -469,7 +534,7 @@ const DietaryDiversityCalculator: React.FC = () => {
                       onChange={(e) => updateMeal(mealType as keyof typeof meals, e.target.value)}
                     />
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Example: croissant, cappuccino, orange juice, fruits
+                      Example: pizza, pasta, croissant, curry, sushi, burger, tacos, etc.
                     </div>
                   </div>
                 </TabsContent>
