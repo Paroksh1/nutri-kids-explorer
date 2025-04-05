@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
-import { processFoodText } from '@/utils/foodNameMapper';
-import { identifyHindiFood } from '@/utils/dietaryDiversityUtils';
+import { processFoodText, getHindiFoodGroup } from '@/utils/foodNameMapper';
+import { identifyHindiFood, getHindiFoodGroup as utilsGetHindiFoodGroup } from '@/utils/dietaryDiversityUtils';
 
 export const foodGroups = [
   {
@@ -180,13 +180,58 @@ const DietaryDiversityCalculator: React.FC = () => {
       .map(meal => meal.foods)
       .join(' ');
     
-    console.log("Analyzing foods:", allFoodText);
+    console.log("Analyzing all foods:", allFoodText);
     
-    const detectedGroups = processFoodText(allFoodText);
+    if (!allFoodText.trim()) {
+      toast.error("Please enter at least one food item before continuing");
+      return;
+    }
     
-    if (detectedGroups.length > 0) {
+    let detectedGroups = new Set<number>();
+    
+    Object.entries(meals).forEach(([mealType, meal]) => {
+      if (meal.foods.trim()) {
+        console.log(`Processing ${mealType}:`, meal.foods);
+        
+        const foodItems = meal.foods.toLowerCase()
+          .split(/[,;\n\s]+/)
+          .map(item => item.trim())
+          .filter(item => item !== '');
+          
+        console.log(`Food items in ${mealType}:`, foodItems);
+        
+        foodItems.forEach(food => {
+          const foodGroup = utilsGetHindiFoodGroup(food);
+          console.log(`Food "${food}" mapped to group: ${foodGroup}`);
+          
+          if (foodGroup === "dairy") detectedGroups.add(13);
+          else if (foodGroup === "legumes_nuts_seeds") detectedGroups.add(12);
+          else if (foodGroup === "starchy_staples") detectedGroups.add(1);
+          else if (foodGroup === "vitamin_a_fruits_vegetables") detectedGroups.add(3);
+          else if (foodGroup === "other_vegetables") detectedGroups.add(5);
+          else if (foodGroup === "dark_green_leafy_veg") detectedGroups.add(4);
+          else if (foodGroup === "other_fruits") detectedGroups.add(7);
+          else if (foodGroup === "meat_fish") detectedGroups.add(9);
+          else if (foodGroup === "eggs") detectedGroups.add(10);
+        });
+        
+        const mealGroups = processFoodText(meal.foods);
+        console.log(`Additional groups from processor for ${mealType}:`, mealGroups);
+        
+        mealGroups.forEach(id => detectedGroups.add(id));
+      }
+    });
+    
+    const allFoodGroups = processFoodText(allFoodText);
+    console.log("Groups from processing all foods together:", allFoodGroups);
+    
+    allFoodGroups.forEach(id => detectedGroups.add(id));
+    
+    console.log("Final detected groups:", Array.from(detectedGroups));
+    
+    if (detectedGroups.size > 0) {
       const updatedGroups = [...foodGroupsChecked];
-      detectedGroups.forEach(groupId => {
+      Array.from(detectedGroups).forEach(groupId => {
         const index = updatedGroups.findIndex(group => group.id === groupId);
         if (index >= 0) {
           updatedGroups[index] = { ...updatedGroups[index], value: true };
@@ -195,18 +240,24 @@ const DietaryDiversityCalculator: React.FC = () => {
       });
       setFoodGroupsChecked(updatedGroups);
       
-      const foodItems = allFoodText.split(/[,;\n\s]+/).filter(item => item.trim().length > 0);
+      const foodItems = allFoodText
+        .split(/[,;\n\s]+/)
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+        
       if (foodItems.length > 0) {
         const hindiGroups = identifyHindiFood(allFoodText);
         
         setAnalysisDetails({
-          dish: foodItems[0].trim(),
+          dish: foodItems[0],
           ingredients: foodItems.slice(0, 3),
           groups: hindiGroups
         });
         
         toast.success(`Successfully analyzed ${foodItems.length} food items!`);
       }
+    } else {
+      toast.warning("Couldn't determine any food groups. Please check your entries or manually select them.");
     }
     
     if (userProfile) {
