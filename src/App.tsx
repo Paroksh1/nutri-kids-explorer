@@ -11,7 +11,6 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
 import Recommendations from "./pages/Recommendations";
-import MealPlans from "./pages/MealPlans";
 import Education from "./pages/Education";
 import DietaryDiversity from "./pages/DietaryDiversity";
 import { isAuthenticated } from "./components/auth/AuthForm";
@@ -47,7 +46,6 @@ const App = () => {
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
-            <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
             <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
             <Route path="/dietary-diversity" element={<ProtectedRoute><DietaryDiversity /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
