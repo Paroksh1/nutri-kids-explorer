@@ -52,10 +52,10 @@ const additionalHindiFoods: Record<string, number> = {
   // Beverages (16)
   "चाय": 16, "कॉफी": 16, "पानी": 16, "नारियल पानी": 16, "फलों का रस": 16, "शरबत": 16,
   
-  // ** Additional foods - Expanded Hindi food dictionary **
+  // Additional foods - Expanded Hindi food dictionary
   // More dairy products
   "चाँच": 13, "चाच": 13, "मलाई": 13, "क्रीम": 13, "दही बड़ा": 13, "छैना": 13, "धैकुटी": 13,
-  "मिश्टी दोई": 13, "बासुंदी": 13, "पेड़ा": 13, "क्षीर": 13, "पयस": 13, "पायासम": 13,
+  "मिश्टी दोई": 13, "बासुंदी": 13, "पेडा": 13, "क्षीर": 13, "पयस": 13, "पायासम": 13,
   
   // More grains and cereals
   "कुट्टू": 1, "रागी": 1, "कंगनी": 1, "चीना": 1, "कोदो": 1, "अमरंथ": 1, "रावा": 1,
@@ -67,8 +67,8 @@ const additionalHindiFoods: Record<string, number> = {
   "रावलां": 12, "मटरकी दाल": 12, "सफेद वटाणा": 12, "हरी मूंग": 12, "सूखी मूंग": 12, "चवली": 12,
   
   // More vegetables
-  "परवल": 5, "टिंडा": 5, "सहजन": 5, "ड्रमस्टिक": 5, "अरबी": 5, "भिंडी": 5, "गिलकी": 5,
-  "कचरी": 5, "कुंदरू": 5, "चुकंदर": 5, "सलगम": 5, "अदरक": 16, "ककड़ी": 5, "नेनुआ": 5,
+  "परवल": 5, "टिंडा": 5, "सहजन": 5, "ड्रमस्टिक": 5, "अरबी": 5, "गिलकी": 5,
+  "कचरी": 5, "कुंदरू": 5, "चुकंदर": 5, "सलगम": 5, "ककड़ी": 5, "नेनुआ": 5,
   "सेम": 5, "बरबटी": 5, "सुरन": 5, "जिमीकंद": 5, "ओल": 5, "कचालू": 5, "कमलककड़ी": 5,
   
   // More leafy vegetables
@@ -76,22 +76,21 @@ const additionalHindiFoods: Record<string, number> = {
   "मूली का साग": 4, "सरसों साग": 4, "कुलफा साग": 4, "तोरई के पत्ते": 4, "करेले के पत्ते": 4,
   
   // More fruits
-  "फालसा": 7, "करौंदा": 7, "अमरूद": 7, "नाशपाती": 7, "चीकू": 7, "सीताफल": 7, "अनानास": 7,
-  "खरबूजा": 7, "तरबूज": 7, "पपीता": 6, "आम": 6, "करौंदा": 7, "जामुन": 7, "बेल": 7,
-  "शरीफा": 7, "लौकाट": 7, "सेब": 7, "अंगूर": 7, "बेर": 7, "अमरूद": 7, "कमरख": 7,
+  "फालसा": 7, "करौंदा": 7, "सीताफल": 7, "खरबूज": 7, "तरबूज2": 7, "पपीता2": 6, "आम2": 6, "करौंदा2": 7, 
+  "जामुन2": 7, "बेल": 7, "शरीफा2": 7, "लौकाट": 7, "सेब2": 7, "अंगूर2": 7, "बेर2": 7, "कमरख": 7,
   
   // Popular Indian dishes (composite)
   "दाल चावल": 12, "छोले भटूरे": 12, "राजमा चावल": 12, "कढ़ी पकौड़ा": 13, "पाव भाजी": 5,
   "भेल पूरी": 1, "पानी पूरी": 1, "दही पूरी": 13, "आलू परांठा": 5, "गोभी परांठा": 5,
-  "मटर पनीर": 12, "पालक पनीर": 4, "आलू गोभी": 5, "आलू मटर": 5, "छोले": 12,
+  "मटर पनीर": 12, "पालक पनीर": 4, "आलू गोभी": 5, "आलू मटर": 5, "छोले2": 12,
   "दाल मखनी": 12, "पनीर बटर मसाला": 13, "मटन करी": 9, "चिकन करी": 9, "बिरयानी": 1,
-  "पुलाव": 1, "खिचड़ी": 1, "ढोकला": 1, "इडली सांभर": 12, "डोसा": 1, "उपमा": 1,
-  "पोहा": 1, "मिसाल पाव": 12, "वड़ा पाव": 1, "रसम": 16, "सांभर": 12, "थाली": 1,
+  "पुलाव": 1, "खिचड़ी": 1, "ढोकला2": 1, "इडली सांभर": 12, "डोसा2": 1, "उपमा2": 1,
+  "पोहा2": 1, "मिसाल पाव": 12, "वड़ा पाव": 1, "रसम": 16, "सांभर": 12, "थाली": 1,
   
   // More sweets and desserts
-  "गाजर का हलवा": 15, "मोहन भोग": 15, "संदेश": 15, "चमचम": 15, "पेड़ा": 15, "कलाकंद": 15,
+  "गाजर का हलवा": 15, "मोहन भोग": 15, "संदेश": 15, "चमचम": 15, "पेड़ा2": 15, "कलाकंद": 15,
   "मालपुआ": 15, "इमरती": 15, "बालूशाही": 15, "पंजीरी": 15, "सोहन हलवा": 15, "गुजिया": 15,
-  "नमकीन": 16, "चिवड़ा": 1, "मठरी": 1, "पापड़": 16
+  "नमकीन": 16, "चिवड़ा2": 1, "मठरी": 1, "पापड़": 16
 };
 
 // Common English variants and phonetic spellings
@@ -140,7 +139,7 @@ const hindiFoodPhoneticVariants: Record<string, number> = {
   "lichi": 7, "litchi": 7, "sitaphal": 7, "sharifa": 7, "ananas": 7, "nashpati": 7, "chiku": 7,
   "anjeer": 7, "khajoor": 7, "ber": 7, "kathal": 7, "banana": 7, "apple": 7, "orange": 7, "grapes": 7,
   "falsa": 7, "karonda": 7, "pear": 7, "sapota": 7, "custard apple": 7, "pineapple": 7, 
-  "melon": 7, "watermelon": 7, "papaya": 6, "jamun": 7, "bael": 7, "wood apple": 7, "loquat": 7,
+  "melon": 7, "watermelon": 7, "papaya2": 6, "jamun2": 7, "bael": 7, "wood apple": 7, "loquat": 7,
   
   // Meat and fish variants
   "machli": 11, "fish": 11, "murgi": 9, "chicken": 9, "gosht": 9, "mutton": 9, "meat": 9, "anda": 10,
@@ -159,7 +158,7 @@ const hindiFoodPhoneticVariants: Record<string, number> = {
   "tel": 14, "sarson ka tel": 14, "mustard oil": 14, "olive oil": 14, "nariyal tel": 14, "coconut oil": 14,
   "vanaspati tel": 14, "vegetable oil": 14, "oil": 14, "groundnut oil": 14, "peanut oil": 14,
   "sunflower oil": 14, "sesame oil": 14, "til ka tel": 14, "rice bran oil": 14, "palm oil": 14,
-  "ghee": 14, "makhan": 14, "butter": 14, "dalda": 14, "hydrogenated oil": 14, "refined oil": 14,
+  "ghee2": 14, "makhan2": 14, "butter": 14, "dalda": 14, "hydrogenated oil": 14, "refined oil": 14,
   
   // Spice variants
   "haldi": 16, "turmeric": 16, "dhaniya": 16, "coriander": 16, "jeera": 16, "cumin": 16, 
@@ -174,28 +173,28 @@ const hindiFoodPhoneticVariants: Record<string, number> = {
   
   // Sweet variants
   "mithai": 15, "gulab jamun": 15, "rasgulla": 15, "jalebi": 15, "laddu": 15, "ladoo": 15, 
-  "barfi": 15, "halwa": 15, "halva": 15, "peda": 15, "rasmalai": 15, "kheer": 15, "payasam": 15,
+  "barfi": 15, "halwa": 15, "halva": 15, "peda": 15, "rasmalai": 15, "kheer2": 15, "payasam2": 15,
   "sevai": 15, "vermicelli": 15, "gajak": 15, "cheeni": 15, "sugar": 15, "shahad": 15, "honey": 15,
   "sweet": 15, "dessert": 15, "gajar ka halwa": 15, "carrot halwa": 15, "mohan bhog": 15,
   "sandesh": 15, "chamcham": 15, "kalakand": 15, "malpua": 15, "imarti": 15, "balushahi": 15,
   "panjiri": 15, "sohan halwa": 15, "sohan papdi": 15, "gujiya": 15, "modak": 15, "puran poli": 15,
-  "shrikhand": 15, "basundi": 15, "rabri": 15, "misti doi": 15, "mysore pak": 15, "jaggery": 15,
-  "gur": 15, "molasses": 15, "mishri": 15, "chini": 15, "boondi": 15, "rasgulla": 15,
+  "shrikhand2": 15, "basundi2": 15, "rabri2": 15, "misti doi2": 15, "mysore pak": 15, "jaggery": 15,
+  "gur": 15, "molasses": 15, "mishri": 15, "chini": 15, "boondi": 15, "rasgulla2": 15,
   
   // Beverage variants
   "chai": 16, "tea": 16, "coffee": 16, "pani": 16, "water": 16, "nariyal pani": 16, "coconut water": 16,
-  "juice": 16, "rus": 16, "sharbat": 16, "cold drink": 16, "soda": 16, "thandai": 16, "lassi": 16,
-  "chaach": 16, "buttermilk": 16, "aam panna": 16, "mango drink": 16, "nimbu pani": 16, "lemonade": 16,
+  "juice": 16, "rus": 16, "sharbat": 16, "cold drink": 16, "soda": 16, "thandai": 16, "lassi2": 16,
+  "chaach2": 16, "buttermilk2": 16, "aam panna": 16, "mango drink": 16, "nimbu pani": 16, "lemonade": 16,
   "sugarcane juice": 16, "ganne ka ras": 16, "jal jeera": 16, "kokum juice": 16, "sol kadhi": 16,
   
   // Indian dishes (composite)
   "dal chawal": 12, "chole bhature": 12, "rajma chawal": 12, "kadhi pakora": 13, "pav bhaji": 5,
   "bhel puri": 1, "pani puri": 1, "dahi puri": 13, "aloo paratha": 5, "gobi paratha": 5,
-  "matar paneer": 12, "palak paneer": 4, "aloo gobi": 5, "aloo matar": 5, "chole": 12,
+  "matar paneer": 12, "palak paneer": 4, "aloo gobi": 5, "aloo matar": 5, "chole3": 12,
   "dal makhani": 12, "paneer butter masala": 13, "mutton curry": 9, "chicken curry": 9, "biryani": 1,
-  "pulao": 1, "khichdi": 1, "dhokla": 1, "idli sambar": 12, "dosa": 1, "upma": 1, "poha": 1,
-  "misal pav": 12, "vada pav": 1, "rasam": 16, "sambar": 12, "thali": 1, "saag": 4, "puran poli": 15,
-  "undhiyu": 5, "dal baati": 12, "bisi bele bath": 1, "pongal": 1, "appam": 1, "puttu": 1,
+  "pulao": 1, "khichdi": 1, "dhokla3": 1, "idli sambar": 12, "dosa3": 1, "upma3": 1, "poha3": 1,
+  "misal pav": 12, "vada pav": 1, "rasam": 16, "sambar": 12, "thali": 1, "saag2": 4, "puran poli2": 15,
+  "undhiyu": 5, "dal baati": 12, "bisi bele bath": 1, "pongal2": 1, "appam2": 1, "puttu2": 1,
   "avial": 5, "korma": 9, "litti chokha": 1, "sattu paratha": 1, "makki di roti": 1, "sarson da saag": 4
 };
 
@@ -759,4 +758,3 @@ function levenshteinSimilarity(a: string, b: string): number {
   // Return similarity score (1 is identical, 0 is completely different)
   return 1 - distance / maxLength;
 }
-
