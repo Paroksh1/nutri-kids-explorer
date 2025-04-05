@@ -43,7 +43,7 @@ export const foodNameToGroupMap: Record<string, string> = {
   
   // White roots, tubers and plantains
   potato: foodGroups.grains,
-  sweetpotato: foodGroups.grains,
+  sweetpotato: foodGroups.vitaminAFruits,
   cassava: foodGroups.grains,
   yam: foodGroups.grains,
   plantain: foodGroups.grains,
@@ -132,7 +132,6 @@ export const foodNameToGroupMap: Record<string, string> = {
   
   // Vitamin A-rich fruits and vegetables
   carrot: foodGroups.vitaminAFruits,
-  sweetpotato: foodGroups.vitaminAFruits,
   pumpkin: foodGroups.vitaminAFruits,
   mango: foodGroups.vitaminAFruits,
   cantaloupe: foodGroups.vitaminAFruits,
@@ -185,69 +184,66 @@ export const foodNameToGroupMap: Record<string, string> = {
   pomegranate: foodGroups.otherFruits,
   
   // International dishes and their main food groups
-  pizza: foodGroups.grains, // Crust is grain
-  burger: foodGroups.grains, // Bun is grain
-  sandwich: foodGroups.grains, // Bread is grain
-  pasta: foodGroups.grains,
-  sushi: foodGroups.grains, // Rice is grain
-  taco: foodGroups.grains, // Shell is grain
-  burrito: foodGroups.grains, // Tortilla is grain
-  noodles: foodGroups.grains,
-  dumpling: foodGroups.grains, // Wrapper is grain
+  pizza: foodGroups.grains,
+  burger: foodGroups.grains,
+  sandwich: foodGroups.grains,
+  sushi: foodGroups.grains,
+  taco: foodGroups.grains,
+  burrito: foodGroups.grains,
+  dumpling: foodGroups.grains,
   croissant: foodGroups.grains,
   bagel: foodGroups.grains,
   muffin: foodGroups.grains,
   pancake: foodGroups.grains,
   waffle: foodGroups.grains,
-  cereal: foodGroups.grains,
   
   // Indian foods
-  samosa: foodGroups.grains, // Outer covering is grain
-  pakora: foodGroups.grains, // Batter is grain
-  biryani: foodGroups.grains, // Rice is grain
-  pulao: foodGroups.grains, // Rice is grain
-  dalroti: foodGroups.pulses, // Main component is lentils
-  cholemasala: foodGroups.pulses, // Chickpeas
-  rajma: foodGroups.pulses, // Kidney beans
+  samosa: foodGroups.grains,
+  pakora: foodGroups.grains,
+  biryani: foodGroups.grains,
+  pulao: foodGroups.grains,
+  dalroti: foodGroups.pulses,
+  cholemasala: foodGroups.pulses,
+  rajmacurry: foodGroups.pulses,
   
   // Italian foods
-  lasagna: foodGroups.grains, // Pasta sheets are grain
-  risotto: foodGroups.grains, // Rice is grain
-  gnocchi: foodGroups.grains, // Potato-based pasta
+  lasagna: foodGroups.grains,
+  risotto: foodGroups.grains,
+  gnocchi: foodGroups.grains,
   
   // Mexican foods
-  enchilada: foodGroups.grains, // Tortilla is grain
-  quesadilla: foodGroups.grains, // Tortilla is grain
-  tamale: foodGroups.grains, // Corn masa is grain
+  enchilada: foodGroups.grains,
+  quesadilla: foodGroups.grains,
+  tamale: foodGroups.grains,
   
   // Chinese foods
-  dimsum: foodGroups.grains, // Usually has wrapper made of grain
-  springroll: foodGroups.grains, // Wrapper is grain
-  friedrice: foodGroups.grains, // Rice is grain
+  dimsum: foodGroups.grains,
+  springroll: foodGroups.grains,
+  friedrice: foodGroups.grains,
   
   // Japanese foods
-  ramen: foodGroups.grains, // Noodles are grain
-  udon: foodGroups.grains, // Noodles are grain
+  ramen: foodGroups.grains,
+  udon: foodGroups.grains,
   
   // Thai foods
-  padthai: foodGroups.grains, // Noodles are grain
-  curryrice: foodGroups.grains, // Rice is grain
+  padthai: foodGroups.grains,
+  curryrice: foodGroups.grains,
   
   // Fast foods
-  fries: foodGroups.grains, // Potato is considered starchy vegetable
-  nuggets: foodGroups.meat, // Typically chicken
+  fries: foodGroups.grains,
+  nuggets: foodGroups.meat,
   
   // Desserts
-  cake: foodGroups.grains, // Flour is grain
-  cookie: foodGroups.grains, // Flour is grain
-  pie: foodGroups.grains, // Crust is grain
+  cake: foodGroups.grains,
+  cookie: foodGroups.grains,
+  pie: foodGroups.grains,
   
   // Beverages (typically not counted in food groups but included for completeness)
   coffee: "beverage",
   tea: "beverage",
   soda: "beverage",
   juice: "beverage",
-  smoothie: "beverage" // Depends on ingredients
+  smoothie: "beverage"
 };
 
 // Function to guess food group based on partial matches
@@ -363,19 +359,19 @@ export function guessFoodGroup(foodItem: string): string {
   
   // For complex dishes with multiple ingredients
   if (foodItem.includes("pizza")) {
-    return foodGroups.grains; // Main component is the crust (grain)
+    return foodGroups.grains;
   }
   
   if (foodItem.includes("salad")) {
-    return foodGroups.otherVegetables; // Most salads are primarily vegetables
+    return foodGroups.otherVegetables;
   }
   
   if (foodItem.includes("sandwich") || foodItem.includes("burger")) {
-    return foodGroups.grains; // Main component is bread (grain)
+    return foodGroups.grains;
   }
   
   if (foodItem.includes("soup")) {
-    return "mixed"; // Soups can vary greatly in composition
+    return "mixed";
   }
   
   // Default return if no match found
@@ -432,3 +428,159 @@ export const foodGroupExamples = {
   [foodGroups.otherVegetables]: "Tomatoes, onions, eggplant, cucumber",
   [foodGroups.otherFruits]: "Apples, bananas, berries, oranges"
 };
+
+// Function to analyze food text and return relevant food group IDs
+export function processFoodText(text: string): number[] {
+  const foodGroups = new Set<number>();
+  const lowerText = text.toLowerCase();
+  
+  // Grains, white roots, tubers
+  if (containsFoodFromGroup(lowerText, ['rice', 'bread', 'pasta', 'noodle', 'wheat', 'flour', 
+                                     'cereal', 'oat', 'corn', 'potato', 'yam', 'cassava'])) {
+    foodGroups.add(1);
+    foodGroups.add(2);
+  }
+  
+  // Vitamin A rich vegetables
+  if (containsFoodFromGroup(lowerText, ['carrot', 'pumpkin', 'squash', 'sweet potato', 'red pepper'])) {
+    foodGroups.add(3);
+  }
+  
+  // Dark green leafy vegetables
+  if (containsFoodFromGroup(lowerText, ['spinach', 'kale', 'greens', 'lettuce', 'palak', 'methi'])) {
+    foodGroups.add(4);
+  }
+  
+  // Other vegetables
+  if (containsFoodFromGroup(lowerText, ['tomato', 'onion', 'eggplant', 'cucumber', 'vegetables', 
+                                     'broccoli', 'cauliflower', 'cabbage', 'pepper'])) {
+    foodGroups.add(5);
+  }
+  
+  // Vitamin A rich fruits
+  if (containsFoodFromGroup(lowerText, ['mango', 'papaya', 'apricot', 'cantaloupe'])) {
+    foodGroups.add(6);
+  }
+  
+  // Other fruits
+  if (containsFoodFromGroup(lowerText, ['apple', 'banana', 'orange', 'fruit', 'berry', 'grapes', 
+                                     'watermelon', 'pineapple', 'strawberry'])) {
+    foodGroups.add(7);
+  }
+  
+  // Organ meat
+  if (containsFoodFromGroup(lowerText, ['liver', 'kidney', 'heart', 'organ'])) {
+    foodGroups.add(8);
+  }
+  
+  // Flesh meats
+  if (containsFoodFromGroup(lowerText, ['beef', 'pork', 'lamb', 'goat', 'chicken', 'duck', 'meat'])) {
+    foodGroups.add(9);
+  }
+  
+  // Eggs
+  if (containsFoodFromGroup(lowerText, ['egg'])) {
+    foodGroups.add(10);
+  }
+  
+  // Fish
+  if (containsFoodFromGroup(lowerText, ['fish', 'seafood', 'prawn', 'shrimp', 'crab', 'salmon', 'tuna'])) {
+    foodGroups.add(11);
+  }
+  
+  // Legumes, nuts and seeds
+  if (containsFoodFromGroup(lowerText, ['bean', 'lentil', 'pea', 'nut', 'seed', 'almond', 'walnut', 
+                                     'cashew', 'peanut', 'dal', 'chana', 'rajma', 'tofu'])) {
+    foodGroups.add(12);
+  }
+  
+  // Milk and milk products
+  if (containsFoodFromGroup(lowerText, ['milk', 'cheese', 'yogurt', 'curd', 'paneer', 'butter', 'ghee'])) {
+    foodGroups.add(13);
+  }
+  
+  // Oils and fats
+  if (containsFoodFromGroup(lowerText, ['oil', 'fat', 'butter', 'ghee'])) {
+    foodGroups.add(14);
+  }
+  
+  // Sweets
+  if (containsFoodFromGroup(lowerText, ['sugar', 'honey', 'sweet', 'candy', 'chocolate', 'dessert',
+                                     'cookie', 'cake', 'ice cream'])) {
+    foodGroups.add(15);
+  }
+  
+  // Spices, condiments
+  if (containsFoodFromGroup(lowerText, ['spice', 'salt', 'pepper', 'sauce', 'coffee', 'tea', 'masala'])) {
+    foodGroups.add(16);
+  }
+  
+  // Special handling for complex dishes
+  if (lowerText.includes('pizza')) {
+    foodGroups.add(1);
+    foodGroups.add(5);
+    foodGroups.add(13);
+  } else if (lowerText.includes('burger')) {
+    foodGroups.add(1);
+    foodGroups.add(5);
+    foodGroups.add(9);
+  } else if (lowerText.includes('sandwich')) {
+    foodGroups.add(1);
+    foodGroups.add(5);
+  } else if (lowerText.includes('sushi')) {
+    foodGroups.add(1);
+    foodGroups.add(11);
+  }
+  
+  return Array.from(foodGroups);
+}
+
+function containsFoodFromGroup(text: string, foods: string[]): boolean {
+  return foods.some(food => text.includes(food));
+}
+
+// Function to get ingredients for a complex dish
+export function getIngredientsForDish(dish: string): string[] {
+  dish = dish.toLowerCase().trim();
+  
+  const dishIngredients: Record<string, string[]> = {
+    "pizza": ["wheat flour", "tomato", "cheese", "herbs", "olive oil"],
+    "burger": ["bread bun", "meat patty", "lettuce", "tomato", "onion", "cheese"],
+    "sandwich": ["bread", "lettuce", "tomato", "cheese", "meat/egg"],
+    "sushi": ["rice", "seaweed", "fish", "vinegar"],
+    "pasta": ["wheat flour", "eggs", "water", "sauce"],
+    "taco": ["corn tortilla", "meat", "lettuce", "tomato", "cheese", "beans"],
+    "burrito": ["flour tortilla", "rice", "beans", "meat", "cheese", "vegetables"],
+    "biryani": ["rice", "meat/vegetables", "spices", "ghee"],
+    "curry": ["vegetables/meat", "spices", "coconut milk/yogurt"],
+    "salad": ["lettuce", "vegetables", "dressing"],
+    "soup": ["broth", "vegetables", "meat/beans"],
+    "noodles": ["wheat flour", "eggs", "water", "vegetables"],
+    "lasagna": ["pasta sheets", "tomato sauce", "cheese", "meat"],
+    "risotto": ["rice", "broth", "cheese", "vegetables/meat"],
+    "stir-fry": ["vegetables", "meat/tofu", "sauce", "oil"],
+    "omelette": ["eggs", "vegetables", "cheese", "herbs"],
+    "pie": ["flour crust", "filling (fruit/meat/vegetables)"],
+    "pancake": ["flour", "eggs", "milk", "sugar"],
+    "waffle": ["flour", "eggs", "milk", "sugar", "butter"],
+    "muffin": ["flour", "eggs", "milk", "sugar", "fruit"],
+    "smoothie": ["fruit", "yogurt/milk", "ice", "honey/sugar"]
+  };
+  
+  // Try to find an exact match
+  for (const [key, ingredients] of Object.entries(dishIngredients)) {
+    if (dish === key) {
+      return ingredients;
+    }
+  }
+  
+  // Try partial matches
+  for (const [key, ingredients] of Object.entries(dishIngredients)) {
+    if (dish.includes(key)) {
+      return ingredients;
+    }
+  }
+  
+  // If no match found, return empty array
+  return [];
+}
