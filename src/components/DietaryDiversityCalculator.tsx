@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,14 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, Info, AlertCircle, HelpCircle, Search } from 'lucide-react';
+import { Check, Info, AlertCircle, HelpCircle, Search, Globe } from 'lucide-react';
 import DietaryDiversityResults from './DietaryDiversityResults';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
 import { processFoodText } from '@/utils/foodNameMapper';
-import { identifyHindiFood, getHindiFoodGroup } from '@/utils/dietaryDiversityUtils';
+import { identifyHindiFood, getHindiFoodGroup, identifyGlobalFood } from '@/utils/dietaryDiversityUtils';
 
 export const foodGroups = [
   {
@@ -191,78 +190,75 @@ const DietaryDiversityCalculator: React.FC = () => {
     let detectedGroups = new Set<number>();
     let recognizedFoods: string[] = [];
     
-    // Process each meal individually for better food recognition
     Object.entries(meals).forEach(([mealType, meal]) => {
       if (meal.foods.trim()) {
         console.log(`Processing ${mealType}:`, meal.foods);
         
-        // Improved food item splitting - better handles multi-word foods and various separators
         const foodItems = meal.foods.toLowerCase()
-          .split(/[,;\n]+/)  // Split by common separators first
-          .flatMap(item => item.trim().split(/\s+/))  // Then further split by spaces if needed
+          .split(/[,;\n]+/)
           .map(item => item.trim())
           .filter(item => item !== '');
           
         console.log(`Food items in ${mealType}:`, foodItems);
         
-        // Process each food item
         foodItems.forEach(food => {
-          const foodGroup = getHindiFoodGroup(food);
-          console.log(`Food "${food}" mapped to group: ${foodGroup}`);
+          const globalGroups = identifyGlobalFood(food);
+          console.log(`Global food analysis for "${food}":`, globalGroups);
           
-          // Track recognitions for user feedback
-          if (foodGroup !== "unknown") {
-            recognizedFoods.push(`${food} → ${foodGroup}`);
+          if (globalGroups.length > 0) {
+            globalGroups.forEach(groupName => {
+              if (groupName === "starchy_staples") detectedGroups.add(1);
+              else if (groupName === "vitamin_a_fruits_vegetables") {
+                detectedGroups.add(3);
+                detectedGroups.add(6);
+              }
+              else if (groupName === "dark_green_leafy_veg") detectedGroups.add(4);
+              else if (groupName === "other_vegetables") detectedGroups.add(5);
+              else if (groupName === "other_fruits") detectedGroups.add(7);
+              else if (groupName === "organ_meat") detectedGroups.add(8);
+              else if (groupName === "meat_fish") {
+                detectedGroups.add(9);
+                detectedGroups.add(11);
+              }
+              else if (groupName === "eggs") detectedGroups.add(10);
+              else if (groupName === "legumes_nuts_seeds") detectedGroups.add(12);
+              else if (groupName === "dairy") detectedGroups.add(13);
+              else if (groupName === "oils_fats") detectedGroups.add(14);
+              else if (groupName === "sugars") detectedGroups.add(15);
+              else if (groupName === "spices_condiments") detectedGroups.add(16);
+            });
+            
+            recognizedFoods.push(`${food} → ${globalGroups.join(', ')}`);
+          } else {
+            const foodGroup = getHindiFoodGroup(food);
+            console.log(`Fallback: food "${food}" mapped to group: ${foodGroup}`);
+            
+            if (foodGroup !== "unknown") {
+              recognizedFoods.push(`${food} → ${foodGroup}`);
+            }
+            
+            if (foodGroup === "dairy") detectedGroups.add(13);
+            else if (foodGroup === "legumes_nuts_seeds") detectedGroups.add(12);
+            else if (foodGroup === "starchy_staples") detectedGroups.add(1);
+            else if (foodGroup === "vitamin_a_fruits_vegetables") {
+              detectedGroups.add(3);
+              detectedGroups.add(6);
+            }
+            else if (foodGroup === "other_vegetables") detectedGroups.add(5);
+            else if (foodGroup === "dark_green_leafy_veg") detectedGroups.add(4);
+            else if (foodGroup === "other_fruits") detectedGroups.add(7);
+            else if (foodGroup === "meat_fish") {
+              detectedGroups.add(9);
+              detectedGroups.add(11);
+            }
+            else if (foodGroup === "eggs") detectedGroups.add(10);
+            else if (foodGroup === "organ_meat") detectedGroups.add(8);
+            else if (foodGroup === "oils_fats") detectedGroups.add(14);
+            else if (foodGroup === "sugars") detectedGroups.add(15);
+            else if (foodGroup === "spices_condiments") detectedGroups.add(16);
           }
-          
-          // Map to group IDs
-          if (foodGroup === "dairy") detectedGroups.add(13);
-          else if (foodGroup === "legumes_nuts_seeds") detectedGroups.add(12);
-          else if (foodGroup === "starchy_staples") detectedGroups.add(1);
-          else if (foodGroup === "vitamin_a_fruits_vegetables") {
-            detectedGroups.add(3);  // Vitamin A rich vegetables
-            detectedGroups.add(6);  // Vitamin A rich fruits
-          }
-          else if (foodGroup === "other_vegetables") detectedGroups.add(5);
-          else if (foodGroup === "dark_green_leafy_veg") detectedGroups.add(4);
-          else if (foodGroup === "other_fruits") detectedGroups.add(7);
-          else if (foodGroup === "meat_fish") {
-            detectedGroups.add(9);  // Flesh meats
-            detectedGroups.add(11); // Fish and seafood
-          }
-          else if (foodGroup === "eggs") detectedGroups.add(10);
-          else if (foodGroup === "organ_meat") detectedGroups.add(8);
-          else if (foodGroup === "oils_fats") detectedGroups.add(14);
-          else if (foodGroup === "sugars") detectedGroups.add(15);
-          else if (foodGroup === "spices_condiments") detectedGroups.add(16);
         });
         
-        // Also use advanced Hindi food recognition for the entire meal
-        const hindiGroups = identifyHindiFood(meal.foods);
-        console.log(`Hindi food groups from ${mealType}:`, hindiGroups);
-        
-        // Map recognized group names back to IDs
-        hindiGroups.forEach(groupName => {
-          if (groupName.includes("starchy")) detectedGroups.add(1);
-          else if (groupName.includes("dark green")) detectedGroups.add(4);
-          else if (groupName.includes("vitamin a")) {
-            detectedGroups.add(3);
-            detectedGroups.add(6);
-          }
-          else if (groupName.includes("other vegetable")) detectedGroups.add(5);
-          else if (groupName.includes("other fruit")) detectedGroups.add(7);
-          else if (groupName.includes("organ meat")) detectedGroups.add(8);
-          else if (groupName.includes("flesh meat")) detectedGroups.add(9);
-          else if (groupName.includes("fish")) detectedGroups.add(11);
-          else if (groupName.includes("egg")) detectedGroups.add(10);
-          else if (groupName.includes("legume") || groupName.includes("nut") || groupName.includes("seed")) detectedGroups.add(12);
-          else if (groupName.includes("milk") || groupName.includes("dairy")) detectedGroups.add(13);
-          else if (groupName.includes("oil") || groupName.includes("fat")) detectedGroups.add(14);
-          else if (groupName.includes("sweet")) detectedGroups.add(15);
-          else if (groupName.includes("spice") || groupName.includes("condiment") || groupName.includes("beverage")) detectedGroups.add(16);
-        });
-        
-        // Also use the original processor as a backup
         const mealGroups = processFoodText(meal.foods);
         console.log(`Additional groups from processor for ${mealType}:`, mealGroups);
         
@@ -270,7 +266,6 @@ const DietaryDiversityCalculator: React.FC = () => {
       }
     });
     
-    // Process all foods together as a backup approach
     const allFoodGroups = processFoodText(allFoodText);
     console.log("Groups from processing all foods together:", allFoodGroups);
     
@@ -289,22 +284,18 @@ const DietaryDiversityCalculator: React.FC = () => {
       });
       setFoodGroupsChecked(updatedGroups);
       
-      // Get a sample of food items for feedback
       const allFoodItems = allFoodText
         .split(/[,;\n\s]+/)
         .map(item => item.trim())
         .filter(item => item.length > 0);
         
       if (allFoodItems.length > 0) {
-        // Use our advanced Hindi food identifier
-        const hindiGroups = identifyHindiFood(allFoodText);
-        
         setAnalysisDetails({
           dish: allFoodItems[0],
           ingredients: allFoodItems.slice(0, 3),
           groups: recognizedFoods.length > 0 ? 
-                 recognizedFoods.slice(0, 5) : // Show specific recognitions if available
-                 hindiGroups.slice(0, 5)       // Otherwise show general groups
+                 recognizedFoods.slice(0, 5) : 
+                 allFoodGroups.map(id => `Group ${id}`).slice(0, 5)
         });
         
         toast.success(`Successfully analyzed ${allFoodItems.length} food items!`);
@@ -423,9 +414,9 @@ const DietaryDiversityCalculator: React.FC = () => {
                 Food Entry Tips
               </h4>
               <ul className="space-y-1 text-sm text-blue-700">
-                <li>• You can enter food names in Hindi or English (e.g. "आलू" or "potato")</li>
-                <li>• For dishes like "dal rice", list both components</li>
-                <li>• Use common names like "chapati" (for wheat) or "roti"</li>
+                <li>• You can enter food names in Hindi, English, or any other language</li>
+                <li>• For dishes like "pasta carbonara", listing components helps (pasta, eggs, cheese)</li>
+                <li>• Enter international foods like "sushi", "croissant", or "tacos"</li>
                 <li>• Include all ingredients for composite dishes</li>
                 <li>• Separate different foods with commas</li>
               </ul>
@@ -433,17 +424,17 @@ const DietaryDiversityCalculator: React.FC = () => {
             
             <div className="bg-green-50 p-4 rounded-lg border border-green-200">
               <h4 className="font-medium flex items-center text-green-800 mb-2">
-                <Search className="h-4 w-4 mr-2" />
-                Ingredient Analysis
+                <Globe className="h-4 w-4 mr-2" />
+                Global Food Recognition
               </h4>
               <p className="text-sm text-green-700 mb-2">
-                Our system automatically analyzes dishes to identify their ingredients and food groups!
-                For example:
+                Our system recognizes foods from around the world! Examples include:
               </p>
               <ul className="space-y-1 text-sm text-green-700">
-                <li>• "chapati" → wheat → starchy staples</li>
-                <li>• "palak paneer" → spinach, cheese → vitamin A rich vegetables, dairy</li>
-                <li>• "aloo gobhi" → potato, cauliflower → starchy staples, other vegetables</li>
+                <li>• "sushi" → rice, fish → starchy staples, meat/fish</li>
+                <li>• "pizza" → wheat flour, cheese, tomato → starchy staples, dairy, vegetables</li>
+                <li>• "quinoa salad" → quinoa, vegetables → starchy staples, vegetables</li>
+                <li>• "hummus" → chickpeas, tahini → legumes/nuts/seeds</li>
               </ul>
             </div>
             
@@ -472,13 +463,13 @@ const DietaryDiversityCalculator: React.FC = () => {
                     </div>
                     <Textarea
                       id={`${mealType}-foods`}
-                      placeholder={`Enter all foods and drinks consumed during ${mealType.replace(/([A-Z])/g, ' $1').trim().toLowerCase()}...`}
+                      placeholder={`Enter foods from anywhere in the world consumed during ${mealType.replace(/([A-Z])/g, ' $1').trim().toLowerCase()}...`}
                       className="min-h-[120px]"
                       value={meal.foods}
                       onChange={(e) => updateMeal(mealType as keyof typeof meals, e.target.value)}
                     />
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Example: chapati, dal, rice, vegetables, yogurt
+                      Example: croissant, cappuccino, orange juice, fruits
                     </div>
                   </div>
                 </TabsContent>

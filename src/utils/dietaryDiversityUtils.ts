@@ -1,4 +1,3 @@
-
 import { getIngredientsForDish, getFoodGroup, processFoodText } from './foodNameMapper';
 
 // Enhanced Hindi food dictionary for direct matching
@@ -238,6 +237,144 @@ const indianDishIngredients: Record<string, string[]> = {
   "pongal": ["rice", "lentil", "ghee", "spices"]
 };
 
+// International cuisine categorization by region for enhanced global food recognition
+const internationalCuisines: Record<string, string[]> = {
+  "mediterranean": ["hummus", "falafel", "tahini", "pita", "olive oil", "tzatziki", "baba ganoush", "dolma", "tabbouleh", "couscous"],
+  "east_asian": ["sushi", "kimchi", "tofu", "miso", "soy sauce", "ramen", "dumplings", "bao", "pho", "pad thai", "teriyaki"],
+  "latin_american": ["tortilla", "salsa", "guacamole", "enchilada", "taco", "burrito", "ceviche", "empanada", "churro", "mole", "arepa"],
+  "african": ["jollof", "couscous", "injera", "tagine", "fufu", "bobotie", "egusi", "piri piri", "bunny chow", "chakalaka"],
+  "european": ["pasta", "pizza", "risotto", "croissant", "baguette", "pierogi", "schnitzel", "stroganoff", "paella", "goulash"],
+  "middle_eastern": ["kebab", "shawarma", "falafel", "hummus", "tabbouleh", "baklava", "halva", "pilaf", "kofte", "shakshuka"],
+  "south_asian": ["curry", "biryani", "naan", "dosa", "samosa", "chutney", "tandoori", "idli", "pakora", "raita"],
+  "southeast_asian": ["pad thai", "pho", "satay", "spring roll", "laksa", "rendang", "nasi goreng", "banh mi", "tom yum", "adobo"],
+  "caribbean": ["jerk", "plantain", "rice and peas", "roti", "callaloo", "ackee", "saltfish", "rum cake", "pepperpot", "conch"],
+  "oceanian": ["pavlova", "meat pie", "anzac biscuit", "lamington", "vegemite", "hangi", "fairy bread", "tim tam", "marmite", "hokey pokey"]
+};
+
+// Global food database with nutritional categorizations
+const globalFoods: Record<string, { group: string, ingredients?: string[] }> = {
+  // Breads & Grains from around the world
+  "baguette": { group: "starchy_staples", ingredients: ["wheat flour", "yeast", "salt"] },
+  "naan": { group: "starchy_staples", ingredients: ["wheat flour", "yogurt", "yeast"] },
+  "tortilla": { group: "starchy_staples", ingredients: ["corn flour", "lime", "salt"] },
+  "injera": { group: "starchy_staples", ingredients: ["teff flour", "water"] },
+  "pita": { group: "starchy_staples", ingredients: ["wheat flour", "yeast"] },
+  "bagel": { group: "starchy_staples", ingredients: ["wheat flour", "yeast", "malt"] },
+  "brioche": { group: "starchy_staples", ingredients: ["wheat flour", "butter", "eggs", "milk"] },
+  "focaccia": { group: "starchy_staples", ingredients: ["wheat flour", "olive oil", "yeast"] },
+  "sourdough": { group: "starchy_staples", ingredients: ["wheat flour", "sourdough starter"] },
+  "ciabatta": { group: "starchy_staples", ingredients: ["wheat flour", "olive oil", "yeast"] },
+  "challah": { group: "starchy_staples", ingredients: ["wheat flour", "eggs", "yeast"] },
+  "roti": { group: "starchy_staples", ingredients: ["wheat flour"] },
+  "croissant": { group: "starchy_staples", ingredients: ["wheat flour", "butter", "yeast"] },
+  "pretzel": { group: "starchy_staples", ingredients: ["wheat flour", "yeast", "baking soda"] },
+  
+  // Vegetables from around the world
+  "artichoke": { group: "other_vegetables" },
+  "asparagus": { group: "other_vegetables" },
+  "bok choy": { group: "dark_green_leafy_veg" },
+  "brussels sprouts": { group: "other_vegetables" },
+  "fennel": { group: "other_vegetables" },
+  "leek": { group: "other_vegetables" },
+  "radicchio": { group: "other_vegetables" },
+  "endive": { group: "other_vegetables" },
+  "kohlrabi": { group: "other_vegetables" },
+  "jicama": { group: "other_vegetables" },
+  "rutabaga": { group: "other_vegetables" },
+  "daikon": { group: "other_vegetables" },
+  "romanesco": { group: "other_vegetables" },
+  "sunchoke": { group: "other_vegetables" },
+  "celeriac": { group: "other_vegetables" },
+  "tomatillo": { group: "other_vegetables" },
+  "sorrel": { group: "dark_green_leafy_veg" },
+  "watercress": { group: "dark_green_leafy_veg" },
+  
+  // Popular international dishes
+  "pizza": { group: "mixed", ingredients: ["wheat flour", "tomato", "cheese", "olive oil"] },
+  "sushi": { group: "mixed", ingredients: ["rice", "fish", "seaweed", "vinegar"] },
+  "tacos": { group: "mixed", ingredients: ["corn tortilla", "meat", "vegetables", "cheese"] },
+  "paella": { group: "mixed", ingredients: ["rice", "saffron", "seafood", "chicken", "vegetables"] },
+  "pho": { group: "mixed", ingredients: ["rice noodles", "beef", "herbs", "broth"] },
+  "moussaka": { group: "mixed", ingredients: ["eggplant", "meat", "béchamel sauce", "tomato"] },
+  "falafel": { group: "legumes_nuts_seeds", ingredients: ["chickpeas", "herbs", "spices"] },
+  "hummus": { group: "legumes_nuts_seeds", ingredients: ["chickpeas", "tahini", "olive oil", "lemon"] },
+  "pad thai": { group: "mixed", ingredients: ["rice noodles", "tofu", "peanuts", "egg", "vegetables"] },
+  "risotto": { group: "starchy_staples", ingredients: ["rice", "broth", "cheese", "butter"] },
+  "ratatouille": { group: "other_vegetables", ingredients: ["eggplant", "zucchini", "tomato", "bell pepper", "onion"] },
+  "kimchi": { group: "other_vegetables", ingredients: ["cabbage", "radish", "chili", "garlic", "ginger"] },
+  "goulash": { group: "mixed", ingredients: ["beef", "paprika", "onion", "tomato"] },
+  "coq au vin": { group: "mixed", ingredients: ["chicken", "wine", "mushrooms", "bacon"] },
+  "ceviche": { group: "meat_fish", ingredients: ["fish", "lime", "onion", "cilantro"] },
+  "beef wellington": { group: "mixed", ingredients: ["beef", "mushrooms", "puff pastry"] },
+  "poutine": { group: "mixed", ingredients: ["potatoes", "cheese curds", "gravy"] },
+  "jollof rice": { group: "mixed", ingredients: ["rice", "tomato", "onion", "peppers", "spices"] },
+  "bibimbap": { group: "mixed", ingredients: ["rice", "vegetables", "egg", "meat", "gochujang"] },
+  "miso soup": { group: "mixed", ingredients: ["miso", "tofu", "seaweed", "green onion"] },
+  "gazpacho": { group: "other_vegetables", ingredients: ["tomato", "cucumber", "bell pepper", "olive oil"] },
+  
+  // Fruits from around the world
+  "dragonfruit": { group: "other_fruits" },
+  "lychee": { group: "other_fruits" },
+  "persimmon": { group: "other_fruits" },
+  "quince": { group: "other_fruits" },
+  "rambutan": { group: "other_fruits" },
+  "passionfruit": { group: "other_fruits" },
+  "jackfruit": { group: "other_fruits" },
+  "starfruit": { group: "other_fruits" },
+  "kumquat": { group: "other_fruits" },
+  "feijoa": { group: "other_fruits" },
+  "durian": { group: "other_fruits" },
+  "mangosteen": { group: "other_fruits" },
+  "acai": { group: "other_fruits" },
+  "longan": { group: "other_fruits" },
+  "tamarind": { group: "other_fruits" },
+  
+  // Proteins and meats from around the world
+  "tofu": { group: "legumes_nuts_seeds" },
+  "tempeh": { group: "legumes_nuts_seeds" },
+  "edamame": { group: "legumes_nuts_seeds" },
+  "seitan": { group: "other" },
+  "prosciutto": { group: "meat_fish" },
+  "chorizo": { group: "meat_fish" },
+  "salami": { group: "meat_fish" },
+  "pancetta": { group: "meat_fish" },
+  "bresaola": { group: "meat_fish" },
+  "andouille": { group: "meat_fish" },
+  "haggis": { group: "meat_fish" },
+  "foie gras": { group: "organ_meat" },
+  "escargot": { group: "meat_fish" },
+  "caviar": { group: "meat_fish" },
+  "surimi": { group: "meat_fish" },
+  
+  // Dairy products from around the world
+  "feta": { group: "dairy" },
+  "brie": { group: "dairy" },
+  "gouda": { group: "dairy" },
+  "camembert": { group: "dairy" },
+  "gruyere": { group: "dairy" },
+  "manchego": { group: "dairy" },
+  "halloumi": { group: "dairy" },
+  "mascarpone": { group: "dairy" },
+  "ricotta": { group: "dairy" },
+  "quark": { group: "dairy" },
+  "kefir": { group: "dairy" },
+  "skyr": { group: "dairy" },
+  "labneh": { group: "dairy" },
+  "crème fraîche": { group: "dairy" },
+  
+  // Sweets and desserts from around the world
+  "tiramisu": { group: "sugars", ingredients: ["coffee", "mascarpone", "cocoa", "ladyfingers"] },
+  "gelato": { group: "sugars", ingredients: ["milk", "sugar", "flavoring"] },
+  "baklava": { group: "sugars", ingredients: ["phyllo dough", "nuts", "honey", "butter"] },
+  "churros": { group: "sugars", ingredients: ["flour", "sugar", "oil"] },
+  "crème brûlée": { group: "sugars", ingredients: ["cream", "egg yolks", "sugar", "vanilla"] },
+  "pavlova": { group: "sugars", ingredients: ["egg whites", "sugar", "fruits", "cream"] },
+  "cannoli": { group: "sugars", ingredients: ["pastry dough", "ricotta", "sugar"] },
+  "mochi": { group: "sugars", ingredients: ["rice flour", "sugar"] },
+  "tres leches": { group: "sugars", ingredients: ["cake", "milk", "cream", "sugar"] },
+  "macaron": { group: "sugars", ingredients: ["almond flour", "egg whites", "sugar"] }
+};
+
 // Food groups based on standard nutritional categories
 const foodGroupClusters = {
   grains: ["rice", "wheat", "barley", "oats", "corn", "millet", "buckwheat", "ragi", "jowar", "bajra", 
@@ -265,7 +402,44 @@ const foodGroupClusters = {
   oils: ["oil", "ghee", "butter", "margarine", "fat", "lard", "tallow", "shortening"],
   
   sweets: ["sugar", "jaggery", "honey", "syrup", "chocolate", "candy", "dessert", "pastry", "cake", 
-          "cookie", "ice cream", "pudding", "sweet", "halwa", "ladoo", "jalebi", "mithai"]
+          "cookie", "ice cream", "pudding", "sweet", "halwa", "ladoo", "jalebi", "mithai"],
+          
+  // Adding more international food categories
+  international_grains: [
+    "quinoa", "bulgur", "farro", "couscous", "polenta", "millet", "amaranth", "spelt", 
+    "kamut", "teff", "freekeh", "sorghum", "barley", "wild rice", "black rice", "arborio", 
+    "basmati", "jasmine", "sticky rice", "glutinous rice"
+  ],
+  
+  international_proteins: [
+    "tempeh", "seitan", "edamame", "natto", "quorn", "beyond meat", "impossible meat", 
+    "jackfruit", "textured vegetable protein", "lupini beans", "fava beans", "black beans",
+    "adzuki beans", "navy beans", "cannellini beans", "lima beans", "pinto beans"
+  ],
+  
+  international_vegetables: [
+    "bok choy", "chinese cabbage", "napa cabbage", "gai lan", "chayote", "daikon", "lotus root",
+    "bamboo shoots", "water chestnuts", "chinese eggplant", "bitter melon", "kabocha", "taro",
+    "burdock", "kohlrabi", "romanesco", "celeriac", "salsify", "fiddlehead ferns", "samphire"
+  ],
+  
+  international_fruits: [
+    "dragon fruit", "lychee", "longan", "rambutan", "mangosteen", "jackfruit", "durian",
+    "persimmon", "kumquat", "starfruit", "passion fruit", "guava", "feijoa", "cherimoya", 
+    "quince", "tamarillo", "sapote", "salak", "langsat", "santol", "soursop"
+  ],
+  
+  international_dairy: [
+    "halloumi", "paneer", "quark", "labneh", "skyr", "kefir", "clotted cream", "crème fraîche",
+    "mascarpone", "burrata", "feta", "halloumi", "manchego", "pecorino", "roquefort", 
+    "gorgonzola", "camembert", "brie", "gouda", "emmental", "gruyère", "tulum"
+  ],
+  
+  international_spices: [
+    "za'atar", "sumac", "harissa", "berbere", "ras el hanout", "garam masala", "five spice",
+    "seven spice", "dukkah", "shichimi togarashi", "furikake", "achiote", "annatto", "epazote",
+    "aleppo pepper", "urfa biber", "grains of paradise", "mahlab", "asafoetida", "amchoor"
+  ]
 };
 
 // Function to get all food groups for a given dish
@@ -321,6 +495,86 @@ export const formatFoodGroupName = (groupId: number): string => {
     case 16: return "Spices, Condiments, Beverages";
     default: return "Unknown";
   }
+};
+
+// Enhanced function for identifying global foods and ingredients
+export const identifyGlobalFood = (foodText: string): string[] => {
+  if (!foodText || foodText.trim() === '') {
+    return [];
+  }
+  
+  console.log("Analyzing global food item:", foodText);
+  
+  // Normalize the food text
+  const normalizedText = foodText.toLowerCase().trim();
+  
+  // First check our global foods database for direct matches
+  if (globalFoods[normalizedText]) {
+    const foodInfo = globalFoods[normalizedText];
+    console.log(`Found direct match in global foods database: ${normalizedText} → ${foodInfo.group}`);
+    return [foodInfo.group];
+  }
+  
+  // Check for partial matches in global foods
+  const globalFoodMatches = Object.keys(globalFoods).filter(food => 
+    normalizedText.includes(food) || food.includes(normalizedText)
+  );
+  
+  if (globalFoodMatches.length > 0) {
+    console.log(`Found partial matches in global foods: ${globalFoodMatches.join(', ')}`);
+    return globalFoodMatches.map(match => globalFoods[match].group);
+  }
+  
+  // Check international cuisine categories
+  for (const [region, foods] of Object.entries(internationalCuisines)) {
+    for (const food of foods) {
+      if (normalizedText.includes(food) || food.includes(normalizedText)) {
+        console.log(`Matched international cuisine: ${food} from ${region}`);
+        // Map region to appropriate food groups
+        return mapRegionToFoodGroups(region);
+      }
+    }
+  }
+  
+  // Try natural language category matching
+  for (const [category, keywords] of Object.entries(foodGroupClusters)) {
+    if (Array.isArray(keywords)) {
+      for (const keyword of keywords) {
+        if (
+          normalizedText.includes(keyword) || 
+          keyword.includes(normalizedText) ||
+          levenshteinSimilarity(normalizedText, keyword) > 0.7
+        ) {
+          console.log(`Natural language match: ${normalizedText} similar to ${keyword} in ${category}`);
+          return [mapClusterToGroupName(category)];
+        }
+      }
+    }
+  }
+  
+  // Use existing Hindi food identification as a fallback
+  const hindiGroups = identifyHindiFood(normalizedText);
+  if (hindiGroups.length > 0) {
+    console.log(`Fallback to Hindi food identification: ${normalizedText} → ${hindiGroups.join(', ')}`);
+    return hindiGroups;
+  }
+  
+  // Use general food text processor as final fallback
+  const processedGroups = processFoodText(normalizedText);
+  if (processedGroups.length > 0) {
+    console.log(`Fallback to general processor: ${normalizedText} → ${processedGroups.join(', ')}`);
+    return processedGroups.map(id => mapGroupIdToName(id));
+  }
+  
+  // Try to make an educated guess based on common food patterns
+  const guessedGroups = guessGroupsFromText(normalizedText);
+  if (guessedGroups.length > 0) {
+    console.log(`Made educated guess: ${normalizedText} → ${guessedGroups.join(', ')}`);
+    return guessedGroups;
+  }
+  
+  console.log(`Unable to identify food group for: ${normalizedText}`);
+  return [];
 };
 
 // Enhanced function for fuzzy matching food text to groups using ML-inspired techniques
@@ -439,6 +693,107 @@ export const getHindiFoodGroup = (hindiFood: string): string => {
   return "unknown";
 };
 
+// New function to guess food groups based on common patterns in food names
+function guessGroupsFromText(foodText: string): string[] {
+  const groups: string[] = [];
+  const text = foodText.toLowerCase();
+  
+  // Check for common ingredient patterns
+  if (/rice|grain|wheat|corn|oat|barley|cereal|flour|bread|pasta|noodle/.test(text)) {
+    groups.push("starchy_staples");
+  }
+  
+  if (/vegetable|veg|salad|greens|garden|plant-based/.test(text)) {
+    groups.push("other_vegetables");
+  }
+  
+  if (/spinach|kale|collard|lettuce|arugula|chard|leafy/.test(text)) {
+    groups.push("dark_green_leafy_veg");
+  }
+  
+  if (/carrot|sweet potato|pumpkin|squash|orange|yellow vegetable/.test(text)) {
+    groups.push("vitamin_a_fruits_vegetables");
+  }
+  
+  if (/fruit|berry|apple|orange|banana|grape|melon/.test(text)) {
+    groups.push("other_fruits");
+  }
+  
+  if (/milk|cheese|yogurt|dairy|cream|butter|ghee|curd/.test(text)) {
+    groups.push("dairy");
+  }
+  
+  if (/meat|chicken|beef|pork|lamb|mutton|goat|poultry/.test(text)) {
+    groups.push("meat_fish");
+  }
+  
+  if (/fish|seafood|shrimp|prawn|crab|lobster|mussel|oyster|clam/.test(text)) {
+    groups.push("meat_fish");
+  }
+  
+  if (/liver|kidney|heart|brain|organ|offal|sweetbread/.test(text)) {
+    groups.push("organ_meat");
+  }
+  
+  if (/egg|omelette|frittata|quiche/.test(text)) {
+    groups.push("eggs");
+  }
+  
+  if (/bean|lentil|pea|chickpea|legume|pulse|soy|tofu|tempeh/.test(text)) {
+    groups.push("legumes_nuts_seeds");
+  }
+  
+  if (/nut|seed|almond|walnut|cashew|pistachio|peanut|sesame/.test(text)) {
+    groups.push("legumes_nuts_seeds");
+  }
+  
+  if (/oil|fat|butter|ghee|lard|tallow|margarine|shortening/.test(text)) {
+    groups.push("oils_fats");
+  }
+  
+  if (/sugar|sweet|dessert|candy|chocolate|pastry|cake|cookie|biscuit/.test(text)) {
+    groups.push("sugars");
+  }
+  
+  if (/spice|herb|seasoning|condiment|sauce|dressing|marinade/.test(text)) {
+    groups.push("spices_condiments");
+  }
+  
+  if (/tea|coffee|beverage|drink|water|juice|soda|alcohol|wine|beer/.test(text)) {
+    groups.push("spices_condiments");
+  }
+  
+  return groups;
+}
+
+// Map region of cuisine to appropriate food groups
+function mapRegionToFoodGroups(region: string): string[] {
+  switch(region) {
+    case "mediterranean":
+      return ["other_vegetables", "oils_fats", "legumes_nuts_seeds"];
+    case "east_asian":
+      return ["starchy_staples", "other_vegetables", "meat_fish"];
+    case "latin_american":
+      return ["starchy_staples", "other_vegetables", "meat_fish"];
+    case "african":
+      return ["starchy_staples", "other_vegetables", "legumes_nuts_seeds"];
+    case "european":
+      return ["starchy_staples", "dairy", "meat_fish"];
+    case "middle_eastern":
+      return ["starchy_staples", "legumes_nuts_seeds", "meat_fish"];
+    case "south_asian":
+      return ["starchy_staples", "legumes_nuts_seeds", "other_vegetables"];
+    case "southeast_asian":
+      return ["starchy_staples", "other_vegetables", "meat_fish"];
+    case "caribbean":
+      return ["starchy_staples", "other_fruits", "meat_fish"];
+    case "oceanian":
+      return ["starchy_staples", "dairy", "meat_fish"];
+    default:
+      return [];
+  }
+}
+
 // Helper function to map group IDs to standard names used in the app
 function mapGroupIdToName(groupId: number): string {
   switch(groupId) {
@@ -473,7 +828,22 @@ function mapClusterToGroupName(cluster: string): string {
     case "spices": return "spices_condiments";
     case "oils": return "oils_fats";
     case "sweets": return "sugars";
-    default: return "unknown";
+    case "international_grains": return "starchy_staples";
+    case "international_proteins": return "legumes_nuts_seeds";
+    case "international_vegetables": return "other_vegetables";
+    case "international_fruits": return "other_fruits";
+    case "international_dairy": return "dairy";
+    case "international_spices": return "spices_condiments";
+    default: return cluster.includes("starch") ? "starchy_staples" :
+             cluster.includes("veget") ? "other_vegetables" :
+             cluster.includes("fruit") ? "other_fruits" :
+             cluster.includes("meat") || cluster.includes("fish") ? "meat_fish" :
+             cluster.includes("dairy") || cluster.includes("milk") ? "dairy" :
+             cluster.includes("legume") || cluster.includes("nut") || cluster.includes("seed") ? "legumes_nuts_seeds" :
+             cluster.includes("oil") || cluster.includes("fat") ? "oils_fats" :
+             cluster.includes("sweet") || cluster.includes("sugar") ? "sugars" :
+             cluster.includes("spice") || cluster.includes("herb") ? "spices_condiments" :
+             "unknown";
   }
 }
 
