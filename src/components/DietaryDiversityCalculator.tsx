@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
-import { processFoodText, getHindiFoodGroup } from '@/utils/foodNameMapper';
-import { identifyHindiFood, getHindiFoodGroup as utilsGetHindiFoodGroup } from '@/utils/dietaryDiversityUtils';
+import { processFoodText, getFoodGroup } from '@/utils/foodNameMapper';
+import { identifyHindiFood, getHindiFoodGroup } from '@/utils/dietaryDiversityUtils';
 
 export const foodGroups = [
   {
@@ -201,7 +201,7 @@ const DietaryDiversityCalculator: React.FC = () => {
         console.log(`Food items in ${mealType}:`, foodItems);
         
         foodItems.forEach(food => {
-          const foodGroup = utilsGetHindiFoodGroup(food);
+          const foodGroup = getHindiFoodGroup(food);
           console.log(`Food "${food}" mapped to group: ${foodGroup}`);
           
           if (foodGroup === "dairy") detectedGroups.add(13);

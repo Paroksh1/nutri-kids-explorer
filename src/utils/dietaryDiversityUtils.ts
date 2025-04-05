@@ -34,7 +34,7 @@ export const formatFoodGroupName = (groupId: number): string => {
   }
 };
 
-// Enhanced function to identify food items and their groups
+// Enhanced function to identify food items and their groups - improved to recognize more foods
 export const identifyHindiFood = (foodText: string): string[] => {
   if (!foodText || foodText.trim() === '') {
     return [];
@@ -53,34 +53,36 @@ export const identifyHindiFood = (foodText: string): string[] => {
   const directGroupIds = new Set<number>();
   
   foods.forEach(food => {
-    // Check for dairy products
+    // Check for dairy products - expanded list
     if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी", 
          "milk", "dahi", "curd", "yogurt", "butter", "ghee", "cheese", 
-         "buttermilk", "paneer"].includes(food)) {
+         "buttermilk", "paneer", "chaas", "matha", "dudh"].includes(food)) {
       directGroupIds.add(13); // Milk and Milk Products
       console.log(`Direct match: ${food} → Milk and Milk Products`);
     }
     
-    // Check for legumes/pulses
+    // Check for legumes/pulses - expanded list
     else if (["दाल", "चना", "राजमा", "मूंग", "मसूर", "उड़द", "अरहर", 
          "dal", "lentil", "rajma", "chana", "moong", "masoor", "urad", 
-         "toor", "pulses", "beans"].includes(food)) {
+         "toor", "pulses", "beans", "daal", "pulse", "bean"].includes(food)) {
       directGroupIds.add(12); // Legumes, Nuts and Seeds
       console.log(`Direct match: ${food} → Legumes, Nuts and Seeds`);
     }
     
-    // Check for cereals/grains
+    // Check for cereals/grains - expanded list
     else if (["चावल", "गेहूं", "रोटी", "आटा", "पराठा", "नान", "चपाती",
-             "rice", "wheat", "roti", "chapati", "naan", "paratha", "bread"].includes(food)) {
+             "rice", "wheat", "roti", "chapati", "naan", "paratha", "bread",
+             "chawal", "gehun", "atta", "parantha", "phulka"].includes(food)) {
       directGroupIds.add(1); // Starchy Staples
       console.log(`Direct match: ${food} → Starchy Staples`);
     }
     
-    // Check for vegetables
+    // Check for vegetables - expanded list
     else if (["पालक", "मेथी", "गोभी", "फूलगोभी", "आलू", "प्याज", "टमाटर", "भिंडी", "बैंगन",
-              "spinach", "potato", "onion", "tomato", "okra", "eggplant", "cauliflower"].includes(food)) {
+              "spinach", "potato", "onion", "tomato", "okra", "eggplant", "cauliflower",
+              "palak", "methi", "gobhi", "phool gobhi", "aloo", "pyaaz", "tamatar", "bhindi", "baingan"].includes(food)) {
       // Dark green leafy vegetables
-      if (["पालक", "मेथी", "spinach", "fenugreek leaves"].includes(food)) {
+      if (["पालक", "मेथी", "spinach", "fenugreek leaves", "palak", "methi"].includes(food)) {
         directGroupIds.add(4);
         console.log(`Direct match: ${food} → Dark Green Leafy Vegetables`);
       } else {
@@ -89,11 +91,12 @@ export const identifyHindiFood = (foodText: string): string[] => {
       }
     }
     
-    // Check for fruits
+    // Check for fruits - expanded list
     else if (["केला", "सेब", "संतरा", "अंगूर", "आम", "पपीता",
-              "banana", "apple", "orange", "grapes", "mango", "papaya"].includes(food)) {
+              "banana", "apple", "orange", "grapes", "mango", "papaya",
+              "kela", "seb", "santra", "angoor", "aam", "papita"].includes(food)) {
       // Vitamin A rich fruits
-      if (["पपीता", "आम", "papaya", "mango"].includes(food)) {
+      if (["पपीता", "आम", "papaya", "mango", "papita", "aam"].includes(food)) {
         directGroupIds.add(6);
         console.log(`Direct match: ${food} → Vitamin A Rich Fruits`);
       } else {
@@ -103,14 +106,15 @@ export const identifyHindiFood = (foodText: string): string[] => {
     }
     
     // Check for eggs
-    else if (["अंडा", "egg"].includes(food)) {
+    else if (["अंडा", "egg", "anda", "eggs"].includes(food)) {
       directGroupIds.add(10); // Eggs
       console.log(`Direct match: ${food} → Eggs`);
     }
     
-    // Check for meat and fish
+    // Check for meat and fish - expanded list
     else if (["मछली", "मुर्गी", "गोश्त", "मटन", "चिकन",
-              "fish", "chicken", "meat", "mutton"].includes(food)) {
+              "fish", "chicken", "meat", "mutton", "gosht", 
+              "machli", "murgi", "bakra", "lamb"].includes(food)) {
       directGroupIds.add(9); // Flesh Meats
       console.log(`Direct match: ${food} → Flesh Meats`);
     }
@@ -141,38 +145,78 @@ export const identifyHindiFood = (foodText: string): string[] => {
   return groupIds.map(id => formatFoodGroupName(id).toLowerCase());
 };
 
-// Improved function to map Hindi food names to food groups
+// Improved function to map Hindi food names to food groups - expanded to include more food items
 export const getHindiFoodGroup = (hindiFood: string): string => {
   // Normalize input
   const normalizedFood = hindiFood.toLowerCase().trim();
   
-  // Common dairy products in Hindi and English
-  if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी", "milk", "dahi", "curd", "yogurt", "butter", "ghee", "cheese", "buttermilk", "paneer"].includes(normalizedFood)) {
+  // Common dairy products in Hindi and English - expanded list
+  if (["दही", "छाछ", "दूध", "पनीर", "मट्ठा", "मक्खन", "घी", 
+       "milk", "dahi", "curd", "yogurt", "butter", "ghee", "cheese", 
+       "buttermilk", "paneer", "chaas", "matha", "dudh"].includes(normalizedFood)) {
     console.log(`getHindiFoodGroup: ${normalizedFood} → dairy`);
     return "dairy";
   }
   
-  // Common legumes/dals
-  if (["दाल", "चना", "राजमा", "मूंग", "मसूर", "अरहर", "उड़द", "dal", "lentil", "rajma", "chana", "moong", "masoor", "urad", "toor", "arhar", "pulses", "beans"].includes(normalizedFood)) {
+  // Common legumes/dals - expanded list
+  if (["दाल", "चना", "राजमा", "मूंग", "मसूर", "अरहर", "उड़द", 
+       "dal", "lentil", "rajma", "chana", "moong", "masoor", "urad", 
+       "toor", "arhar", "pulses", "beans", "daal", "pulse", "bean"].includes(normalizedFood)) {
     console.log(`getHindiFoodGroup: ${normalizedFood} → legumes_nuts_seeds`);
     return "legumes_nuts_seeds";
   }
   
-  // Common grains
-  if (["चावल", "गेहूं", "रोटी", "आटा", "पराठा", "नान", "चपाती", "rice", "wheat", "roti", "chapati", "naan", "paratha", "bread"].includes(normalizedFood)) {
+  // Common grains - expanded list
+  if (["चावल", "गेहूं", "रोटी", "आटा", "पराठा", "नान", "चपाती", 
+       "rice", "wheat", "roti", "chapati", "naan", "paratha", "bread",
+       "chawal", "gehun", "atta", "parantha", "phulka"].includes(normalizedFood)) {
     console.log(`getHindiFoodGroup: ${normalizedFood} → starchy_staples`);
     return "starchy_staples";
   }
   
-  // Common vegetables
-  if (["आलू", "प्याज", "टमाटर", "गोभी", "फूलगोभी", "मटर", "गाजर", "भिंडी", "बैंगन", "potato", "onion", "tomato", "cabbage", "cauliflower", "peas", "carrot", "okra", "eggplant"].includes(normalizedFood)) {
+  // Common vegetables - expanded list
+  if (["आलू", "प्याज", "टमाटर", "गोभी", "फूलगोभी", "मटर", "गाजर", "भिंडी", "बैंगन",
+       "potato", "onion", "tomato", "cabbage", "cauliflower", "peas", "carrot", "okra", "eggplant",
+       "aloo", "pyaaz", "tamatar", "gobhi", "phool gobhi", "matar", "gajar", "bhindi", "baingan"].includes(normalizedFood)) {
     // Check for vitamin A rich vegetables
-    if (["गाजर", "carrot"].includes(normalizedFood)) {
+    if (["गाजर", "carrot", "gajar"].includes(normalizedFood)) {
       console.log(`getHindiFoodGroup: ${normalizedFood} → vitamin_a_fruits_vegetables`);
       return "vitamin_a_fruits_vegetables";
     }
     console.log(`getHindiFoodGroup: ${normalizedFood} → other_vegetables`);
     return "other_vegetables";
+  }
+  
+  // Green leafy vegetables
+  if (["पालक", "मेथी", "spinach", "fenugreek leaves", "palak", "methi", "saag"].includes(normalizedFood)) {
+    console.log(`getHindiFoodGroup: ${normalizedFood} → dark_green_leafy_veg`);
+    return "dark_green_leafy_veg";
+  }
+  
+  // Fruits
+  if (["केला", "सेब", "संतरा", "अंगूर", "banana", "apple", "orange", "grapes",
+       "kela", "seb", "santra", "angoor"].includes(normalizedFood)) {
+    console.log(`getHindiFoodGroup: ${normalizedFood} → other_fruits`);
+    return "other_fruits";
+  }
+  
+  // Vitamin A rich fruits
+  if (["आम", "पपीता", "mango", "papaya", "aam", "papita"].includes(normalizedFood)) {
+    console.log(`getHindiFoodGroup: ${normalizedFood} → vitamin_a_fruits_vegetables`);
+    return "vitamin_a_fruits_vegetables";
+  }
+  
+  // Eggs
+  if (["अंडा", "egg", "anda", "eggs"].includes(normalizedFood)) {
+    console.log(`getHindiFoodGroup: ${normalizedFood} → eggs`);
+    return "eggs";
+  }
+  
+  // Meat and fish
+  if (["मछली", "मुर्गी", "गोश्त", "मटन", "चिकन", "fish", "chicken", "meat", "mutton", 
+       "machli", "murgi", "gosht", "bakra"].includes(normalizedFood)) {
+    console.log(`getHindiFoodGroup: ${normalizedFood} → meat_fish`);
+    return "meat_fish";
   }
   
   // Let the general mapper handle other cases
@@ -185,4 +229,3 @@ export const getHindiFoodGroup = (hindiFood: string): string => {
   console.log(`getHindiFoodGroup: ${normalizedFood} → unknown`);
   return "unknown";
 };
-
