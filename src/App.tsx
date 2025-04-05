@@ -8,9 +8,6 @@ import GlobalNav from "./components/layout/GlobalNav";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Onboarding from "./pages/Onboarding";
-import Recommendations from "./pages/Recommendations";
 import Education from "./pages/Education";
 import DietaryDiversity from "./pages/DietaryDiversity";
 import { isAuthenticated } from "./components/auth/AuthForm";
@@ -19,7 +16,7 @@ import React from "react";
 // Auth guard for public routes
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   if (isAuthenticated()) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dietary-diversity" replace />;
   }
   return <>{children}</>;
 };
@@ -43,10 +40,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-            <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
-            <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
+            <Route path="/education" element={<Education />} />
             <Route path="/dietary-diversity" element={<ProtectedRoute><DietaryDiversity /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

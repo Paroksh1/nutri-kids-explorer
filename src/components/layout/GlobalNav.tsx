@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ArrowLeft, LogIn, BookOpen, Calculator } from 'lucide-react';
+import { Home, LogIn, BookOpen, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -26,65 +26,66 @@ const GlobalNav: React.FC<GlobalNavProps> = ({ className }) => {
     return null;
   }
   
-  // Different nav for dashboard pages (they have their own nav)
-  const isDashboardPage = location.pathname.includes('/dashboard');
-  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={cn("fixed bottom-4 left-4 z-50 flex flex-col md:flex-row gap-2", className)}
+      className={cn("fixed bottom-4 left-0 right-0 z-50 flex justify-center", className)}
     >
-      <Link to="/">
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          className="bg-white/90 hover:bg-white shadow-md"
-        >
-          <Home className="h-4 w-4 mr-2" />
-          Home
-        </Button>
-      </Link>
-      
-      {!isAuthenticated_ && (
-        <Link to="/login" className="md:ml-2">
+      <div className="flex gap-2 px-6 py-3 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-primary/10">
+        <Link to="/">
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm" 
-            className="bg-white/90 hover:bg-white shadow-md"
+            className="rounded-full hover:bg-primary/10"
           >
-            <LogIn className="h-4 w-4 mr-2" />
-            Sign In
+            <Home className="h-4 w-4 mr-2" />
+            Home
           </Button>
         </Link>
-      )}
-      
-      {location.pathname !== '/dietary-diversity' && (
-        <Link to="/dietary-diversity" className="md:ml-2">
+        
+        {!isAuthenticated_ && (
+          <Link to="/login">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="rounded-full hover:bg-primary/10"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          </Link>
+        )}
+        
+        <Link to="/dietary-diversity">
           <Button 
-            variant="outline" 
+            variant={location.pathname === '/dietary-diversity' ? 'default' : 'ghost'}
             size="sm" 
-            className="bg-white/90 hover:bg-white shadow-md"
+            className={cn(
+              "rounded-full",
+              location.pathname !== '/dietary-diversity' && "hover:bg-primary/10"
+            )}
           >
             <Calculator className="h-4 w-4 mr-2" />
             Diversity Calculator
           </Button>
         </Link>
-      )}
-      
-      {location.pathname !== '/education' && (
-        <Link to="/education" className="md:ml-2">
+        
+        <Link to="/education">
           <Button 
-            variant="outline" 
+            variant={location.pathname === '/education' ? 'default' : 'ghost'}
             size="sm" 
-            className="bg-white/90 hover:bg-white shadow-md"
+            className={cn(
+              "rounded-full",
+              location.pathname !== '/education' && "hover:bg-primary/10"
+            )}
           >
             <BookOpen className="h-4 w-4 mr-2" />
             Education
           </Button>
         </Link>
-      )}
+      </div>
     </motion.div>
   );
 };

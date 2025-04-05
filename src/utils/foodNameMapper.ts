@@ -1,664 +1,434 @@
-export const getIngredientsForDish = (dishName: string): string[] => {
-  const lowerDishName = dishName.toLowerCase().trim();
-  
-  const globalDishes: Record<string, string[]> = {
-    // Asian Dishes
-    "fried rice": ["rice", "vegetables", "egg", "soy sauce"],
-    "sushi": ["rice", "fish", "seaweed", "vegetables"],
-    "pad thai": ["rice noodles", "tofu", "peanuts", "bean sprouts", "lime"],
-    "spring roll": ["rice paper", "vegetables", "shrimp", "herbs"],
-    "dumplings": ["flour", "pork", "vegetables", "soy sauce"],
-    "ramen": ["wheat noodles", "broth", "pork", "egg", "vegetables"],
-    "biryani": ["rice", "meat", "yogurt", "saffron", "spices"],
-    "curry": ["meat", "vegetables", "spices", "coconut milk"],
-    "butter chicken": ["chicken", "tomato", "cream", "spices"],
-    "samosa": ["flour", "potatoes", "peas", "spices"],
-    "dal": ["lentils", "tomatoes", "spices", "ghee"],
-    "naan": ["flour", "yogurt", "butter"],
-    "kimchi": ["cabbage", "radish", "garlic", "chili"],
-    "bibimbap": ["rice", "vegetables", "egg", "meat", "gochujang"],
-    
-    // European Dishes
-    "pizza": ["flour", "tomato", "cheese", "toppings"],
-    "pasta": ["wheat flour", "eggs", "sauce"],
-    "lasagna": ["pasta", "cheese", "tomato sauce", "ground beef"],
-    "risotto": ["rice", "broth", "cheese", "butter", "wine"],
-    "paella": ["rice", "saffron", "seafood", "chicken", "vegetables"],
-    "goulash": ["beef", "paprika", "vegetables", "potatoes"],
-    "croissant": ["flour", "butter", "yeast"],
-    "ratatouille": ["eggplant", "zucchini", "tomatoes", "bell peppers", "herbs"],
-    "quiche": ["pastry", "eggs", "cream", "cheese", "fillings"],
-    "moussaka": ["eggplant", "potatoes", "meat sauce", "béchamel"],
-    
-    // Middle Eastern & African Dishes
-    "hummus": ["chickpeas", "tahini", "olive oil", "garlic", "lemon"],
-    "falafel": ["chickpeas", "herbs", "spices"],
-    "tabouleh": ["parsley", "bulgur", "tomato", "onion", "mint", "lemon"],
-    "shawarma": ["meat", "flatbread", "vegetables", "sauce"],
-    "couscous": ["semolina", "vegetables", "meat", "broth"],
-    "tagine": ["meat", "fruits", "vegetables", "spices"],
-    "injera": ["teff flour", "sourdough"],
-    "jollof rice": ["rice", "tomatoes", "peppers", "spices"],
-    
-    // Latin American Dishes
-    "tacos": ["tortilla", "meat", "vegetables", "cheese", "salsa"],
-    "burrito": ["tortilla", "beans", "rice", "meat", "cheese", "vegetables"],
-    "enchiladas": ["tortilla", "meat", "cheese", "sauce"],
-    "guacamole": ["avocado", "tomato", "onion", "lime", "cilantro"],
-    "ceviche": ["raw fish", "lime", "onion", "chili", "cilantro"],
-    "empanadas": ["pastry", "meat", "vegetables", "cheese"],
-    "pupusas": ["corn masa", "cheese", "beans", "meat"],
-    "mole": ["chocolate", "chili", "spices", "nuts", "tomatoes"],
-    
-    // North American & Fusion
-    "burger": ["bread", "beef patty", "cheese", "lettuce", "tomato"],
-    "sandwich": ["bread", "meat", "cheese", "vegetables", "condiments"],
-    "mac and cheese": ["pasta", "cheese", "milk", "butter"],
-    "chicken wings": ["chicken", "sauce", "spices"],
-    "poutine": ["fries", "cheese curds", "gravy"],
-    "clam chowder": ["clams", "potatoes", "cream", "onions"],
-    
-    // Breakfast Items
-    "pancakes": ["flour", "eggs", "milk", "sugar"],
-    "waffles": ["flour", "eggs", "milk", "sugar", "butter"],
-    "cereal": ["grains", "milk", "sugar"],
-    "oatmeal": ["oats", "milk", "fruits", "nuts"],
-    "french toast": ["bread", "eggs", "milk", "cinnamon", "sugar"],
-    "omelette": ["eggs", "fillings", "cheese"],
-    
-    // Desserts
-    "ice cream": ["milk", "cream", "sugar", "flavorings"],
-    "cake": ["flour", "sugar", "eggs", "butter"],
-    "cookies": ["flour", "sugar", "butter", "eggs"],
-    "pie": ["pastry", "fillings", "sugar"],
-    "cheesecake": ["cheese", "sugar", "eggs", "graham crackers"],
-    "tiramisu": ["ladyfingers", "coffee", "mascarpone", "cocoa"],
-    "baklava": ["phyllo dough", "nuts", "honey", "butter"],
-    
-    // Fast Food
-    "french fries": ["potatoes", "oil", "salt"],
-    "onion rings": ["onions", "batter", "oil"],
-    "chicken nuggets": ["chicken", "breadcrumbs", "spices"],
-    "hot dog": ["sausage", "bun", "condiments"],
-    
-    // Soups & Stews
-    "chicken soup": ["chicken", "vegetables", "broth", "noodles"],
-    "tomato soup": ["tomatoes", "cream", "broth", "herbs"],
-    "minestrone": ["vegetables", "beans", "pasta", "broth"],
-    "borscht": ["beets", "cabbage", "potatoes", "meat", "sour cream"],
-    "stew": ["meat", "vegetables", "broth", "potatoes"],
-    "chili": ["beans", "meat", "tomatoes", "chili peppers"],
-    
-    // Salads
-    "caesar salad": ["romaine lettuce", "croutons", "parmesan", "dressing"],
-    "greek salad": ["tomatoes", "cucumber", "olives", "feta", "olive oil"],
-    "potato salad": ["potatoes", "mayonnaise", "vegetables", "eggs"],
-    "coleslaw": ["cabbage", "carrots", "mayonnaise", "vinegar"],
-    
-    // Snacks & Appetizers
-    "nachos": ["tortilla chips", "cheese", "toppings"],
-    "popcorn": ["corn kernels", "butter", "salt"],
-    "pretzels": ["flour", "salt", "yeast"],
-    "mozzarella sticks": ["mozzarella", "breadcrumbs", "marinara sauce"],
-    
-    // Indian dishes
-    "dosa": ["rice", "lentils", "potato filling", "chutney", "sambar"],
-    "idli": ["rice", "lentils", "sambhar", "chutney"],
-    "vada": ["lentils", "spices", "herbs"],
-    "poha": ["flattened rice", "onions", "turmeric", "peanuts"],
-    "paratha": ["wheat flour", "stuffing", "ghee"],
-    "rajma": ["kidney beans", "tomatoes", "spices"],
-    "chole": ["chickpeas", "tomatoes", "spices"],
-    "upma": ["semolina", "vegetables", "spices"],
-    "pav bhaji": ["mixed vegetables", "tomatoes", "butter", "bread"],
-    "dhokla": ["gram flour", "yogurt", "spices"],
-    "khichdi": ["rice", "lentils", "ghee", "spices"],
-    "sambhar": ["lentils", "vegetables", "tamarind", "spices"],
-    "rasam": ["tamarind", "tomatoes", "spices"],
-    "ladoo": ["gram flour", "sugar", "ghee"],
-    "gulab jamun": ["milk solids", "sugar syrup", "cardamom"],
-    "jalebi": ["flour", "sugar syrup", "saffron"],
-    "barfi": ["milk", "sugar", "nuts"],
-    "rasgulla": ["cheese", "sugar syrup"],
-    "chaat": ["fried dough", "potatoes", "chickpeas", "yogurt", "chutneys"],
-    "pani puri": ["fried hollow puri", "flavored water", "potato filling"],
-    "pakora": ["vegetables", "gram flour batter", "spices"],
-    "bhel puri": ["puffed rice", "vegetables", "chutneys", "sev"],
-    "aloo tikki": ["potatoes", "spices", "chutneys"]
-  };
-  
-  return globalDishes[lowerDishName] || [];
+const foodGroups = {
+  grains: "Grains, white roots and tubers, and plantains",
+  pulses: "Pulses (beans, peas and lentils)",
+  nuts: "Nuts and seeds",
+  dairy: "Dairy",
+  meat: "Meat, poultry and fish",
+  eggs: "Eggs",
+  darkGreenVegetables: "Dark green leafy vegetables",
+  vitaminAFruits: "Vitamin A-rich fruits and vegetables",
+  otherVegetables: "Other vegetables",
+  otherFruits: "Other fruits"
 };
 
-export const foodNameVariations: Record<string, string> = {
-  "maize": "corn",
-  "sweetcorn": "corn",
-  "white potatoes": "potatoes",
-  "sweet potato": "sweet potatoes",
-  "sweet potatoes": "sweet potatoes",
-  "pumpkin": "pumpkin",
-  "carrot": "carrots",
-  "squash": "squash",
-  "red sweet pepper": "red bell pepper",
-  "red bell pepper": "bell pepper",
-  "kale": "kale",
-  "spinach": "spinach",
-  "tomato": "tomatoes",
-  "onion": "onions",
-  "eggplant": "eggplant",
-  "ripe mango": "mango",
-  "cantaloupe": "cantaloupe",
-  "apricot": "apricots",
-  "ripe papaya": "papaya",
-  "dried peach": "peaches",
-  "beef": "beef",
-  "pork": "pork",
-  "lamb": "lamb",
-  "goat": "goat",
-  "rabbit": "rabbit",
-  "game": "game meat",
-  "chicken": "chicken",
-  "duck": "duck",
-  "fresh fish": "fish",
-  "dried fish": "fish",
-  "shellfish": "shellfish",
-  "dried beans": "beans",
-  "dried peas": "peas",
-  "lentils": "lentils",
-  "nuts": "nuts",
-  "seeds": "seeds",
-  "milk": "milk",
-  "cheese": "cheese",
-  "yogurt": "yogurt",
-  "oil": "oil",
-  "fats": "fats",
-  "butter": "butter",
-  "sugar": "sugar",
-  "honey": "honey",
-  "chocolates": "chocolate",
-  "candies": "candy",
-  "cookies": "cookie",
-  "cakes": "cake",
-  "black pepper": "pepper",
-  "salt": "salt",
-  "soy sauce": "soy sauce",
-  "hot sauce": "hot sauce",
-  "coffee": "coffee",
-  "tea": "tea",
-  "alcoholic beverages": "alcohol",
-  "bread": "bread",
-  "noodles": "noodles",
-  "porridge": "porridge",
-  "grain products": "grains",
-  "white yam": "yam",
-  "white cassava": "cassava",
-  "foods made from roots": "roots",
-  "amaranth": "amaranth",
-  "cassava leaves": "cassava leaves",
-  "ripe mango": "mango",
-  "cantaloupe": "cantaloupe",
-  "apricot": "apricots",
-  "ripe papaya": "papaya",
-  "dried peach": "peaches",
-  "liver": "liver",
-  "kidney": "kidney",
-  "heart": "heart",
-  "organ meats": "organ meat",
-  "blood-based foods": "blood",
-  "eggs from chicken": "eggs",
-  "eggs from duck": "eggs",
-  "eggs from guinea fowl": "eggs",
-  "hummus": "hummus",
-  "peanut butter": "peanut butter",
-  "milk products": "dairy",
-  "sweetened soda": "soda",
-  "sweetened juice drinks": "juice",
-  "sugary foods": "sweets",
-  "wheat flour": "flour",
-  "rice": "rice",
-  "chapati": "roti",
-  "roti": "roti",
-  "dal makhani": "dal",
-  "paneer butter masala": "paneer",
-  "palak paneer": "paneer",
-  "aloo gobi": "aloo",
-  "baingan bharta": "baingan",
-  "matar paneer": "paneer",
-  "chana masala": "chana",
-  "veg biryani": "biryani",
-  "veg pulao": "pulao",
-  "gajar ka halwa": "halwa",
-  "sooji halwa": "halwa",
-  "besan ladoo": "ladoo",
-  "motichoor ladoo": "ladoo",
-  "rasmalai": "rasmalai",
-  "kheer": "kheer",
-  "lassi": "lassi",
-  "chaas": "chaas",
-  "shikanji": "shikanji",
-  "nimbu pani": "nimbu pani",
-  "jal jeera": "jal jeera",
-  "aam panna": "aam panna",
-  "thandai": "thandai",
-  "masala chai": "chai",
-  "adrak chai": "chai",
-  "elaichi chai": "chai",
-  "pudina chai": "chai",
-  "tulsi chai": "chai",
-  "dalia": "dalia",
-  "khichri": "khichri",
-  "upma": "upma",
-  "poha": "poha",
-  "idli sambar": "idli",
-  "dosa sambar": "dosa",
-  "vada sambar": "vada",
-  "uttapam": "uttapam",
-  "aloo paratha": "paratha",
-  "gobi paratha": "paratha",
-  "paneer paratha": "paratha",
-  "mooli paratha": "paratha",
-  "methi paratha": "paratha",
-  "pyaaz paratha": "paratha",
-  "dal paratha": "paratha",
-  "sattu paratha": "paratha",
-  "aloo tikki chaat": "aloo tikki",
-  "papri chaat": "chaat",
-  "dahi bhalla": "dahi bhalla",
-  "sev puri": "puri",
-  "bhel puri": "puri",
-  "pani puri": "puri",
-  "raj kachori": "kachori",
-  "samosa chaat": "samosa",
-  "aloo chaat": "aloo",
-  "chana chaat": "chana",
-  "dahi puri": "puri",
-  "masala puri": "puri",
-  "sev tameta": "sev",
-  "dhokla": "dhokla",
-  "khandvi": "khandvi",
-  "fafda": "fafda",
-  "thepla": "thepla",
-  "khakhra": "khakhra",
-  "gathiya": "gathiya",
-  "sev": "sev",
-  "chivda": "chivda",
-  "chakri": "chakri",
-  "shankarpali": "shankarpali",
-  "mathri": "mathri",
-  "namakpare": "namakpare",
-  "murukku": "murukku",
-  "seedai": "seedai",
-  "thattai": "thattai",
-  "ribbon pakoda": "pakoda",
-  "manoharam": "manoharam",
-  "thenkuzhal": "thenkuzhal",
-  "adhirasam": "adhirasam",
-  "mysore pak": "mysore pak",
-  "jangiri": "jangiri",
-  "badusha": "badusha",
-  "soan papdi": "soan papdi",
-  "balushahi": "balushahi",
-  "imarti": "imarti",
-  "ghevar": "ghevar",
-  "pheni": "pheni",
-  "khaja": "khaja",
-  "chirote": "chirote",
-  "kajjikayalu": "kajjikayalu",
-  "poornam boorelu": "boorelu",
-  "ariselu": "ariselu",
-  "gavvalu": "gavvalu",
-  "sunnundalu": "sunnundalu",
-  "bobbatlu": "bobbatlu",
-  "kudumulu": "kudumulu",
-  "undrallu": "undrallu",
-  "paramannam": "paramannam",
-  "daddojanam": "daddojanam",
-  "pulihora": "pulihora",
-  "bisi bele bath": "bisi bele bath",
-  "vangi bath": "vangi bath",
-  "sambar rice": "sambar",
-  "rasam rice": "rasam",
-  "curd rice": "curd",
-  "lemon rice": "lemon",
-  "tomato rice": "tomato",
-  "coconut rice": "coconut",
-  "tamarind rice": "tamarind",
-  "mango rice": "mango",
-  "mint rice": "mint",
-  "coriander rice": "coriander",
-  "jeera rice": "jeera",
-  "ghee rice": "ghee",
-  "kashmiri pulao": "pulao",
-  "peas pulao": "pulao",
-  "vegetable pulao": "pulao",
-  "mushroom pulao": "pulao",
-  "paneer pulao": "pulao",
-  "tava pulao": "pulao",
-  "chicken biryani": "biryani",
-  "mutton biryani": "biryani",
-  "egg biryani": "biryani",
-  "fish biryani": "biryani",
-  "prawn biryani": "biryani",
-  "hyderabadi biryani": "biryani",
-  "lucknowi biryani": "biryani",
-  "kolkata biryani": "biryani",
-  "thalassery biryani": "biryani",
-  "dindigul biryani": "biryani",
-  "ambur biryani": "biryani",
-  "kalyani biryani": "biryani",
-  "beary biryani": "biryani",
-  "memoni biryani": "biryani",
-  "bombay biryani": "biryani",
-  "sindhi biryani": "biryani",
-  "afghani biryani": "biryani",
-  "irani biryani": "biryani",
-  "yakhni pulao": "pulao",
-  "mutter pulao": "pulao",
-  "kashmiri pulao": "pulao",
-  "vegetable korma": "korma",
-  "paneer butter masala": "paneer",
-  "palak paneer": "paneer",
-  "malai kofta": "kofta",
-  "navratan korma": "korma",
-  "shahi paneer": "paneer",
-  "dum aloo": "aloo",
-  "aloo gobi": "aloo",
-  "baingan bharta": "baingan",
-  "bhindi masala": "bhindi",
-  "chana masala": "chana",
-  "matar paneer": "paneer",
-  "dal makhani": "dal",
-  "dal tadka": "dal",
-  "dal fry": "dal",
-  "rajma masala": "rajma",
-  "chole bhature": "chole",
-  "kadhi pakora": "kadhi",
-  "sarson ka saag": "sarson",
-  "makki di roti": "roti",
-  "missi roti": "roti",
-  "bajra roti": "roti",
-  "jowar roti": "roti",
-  "ragi roti": "roti",
-  "thepla": "thepla",
-  "khakhra": "khakhra",
-  "bhakri": "bhakri",
-  "akki roti": "roti",
-  "jolada roti": "roti",
-  "thalipeeth": "thalipeeth",
-  "puran poli": "poli",
-  "bakharkhani": "bakharkhani",
-  "sheermal": "sheermal",
-  "taftan": "taftan",
-  "kulcha": "kulcha",
-  "naan": "naan",
-  "rumali roti": "roti",
-  "parotta": "parotta",
-  "lachha paratha": "paratha",
-  "butter naan": "naan",
-  "garlic naan": "naan",
-  "peshawari naan": "naan",
-  "keema naan": "naan",
-  "aloo naan": "naan",
-  "paneer naan": "naan",
-  "gobi naan": "naan",
-  "methi naan": "naan",
-  "pyaaz naan": "naan",
-  "dal naan": "naan",
-  "sattu naan": "naan",
-  "aloo tikki": "tikki",
-  "papri chaat": "chaat",
-  "dahi bhalla": "bhalla",
-  "sev puri": "puri",
-  "bhel puri": "puri",
-  "pani puri": "puri",
-  "raj kachori": "kachori",
-  "samosa chaat": "samosa",
-  "aloo chaat": "chaat",
-  "chana chaat": "chaat",
-  "dahi puri": "puri",
-  "masala puri": "puri",
-  "sev tameta": "sev",
-  "dhokla": "dhokla",
-  "khandvi": "khandvi",
-  "fafda": "fafda",
-  "thepla": "thepla",
-  "khakhra": "khakhra",
-  "gathiya": "gathiya",
-  "sev": "sev",
-  "chivda": "chivda",
-  "chakri": "chakri",
-  "shankarpali": "shankarpali",
-  "mathri": "mathri",
-  "namakpare": "namakpare",
-  "murukku": "murukku",
-  "seedai": "seedai",
-  "thattai": "thattai",
-  "ribbon pakoda": "pakoda",
-  "manoharam": "manoharam",
-  "thenkuzhal": "thenkuzhal",
-  "adhirasam": "adhirasam",
-  "mysore pak": "mysore pak",
-  "jangiri": "jangiri",
-  "badusha": "badusha",
-  "soan papdi": "soan papdi",
-  "balushahi": "balushahi",
-  "imarti": "imarti",
-  "ghevar": "ghevar",
-  "pheni": "pheni",
-  "khaja": "khaja",
-  "chirote": "chirote",
-  "kajjikayalu": "kajjikayalu",
-  "poornam boorelu": "boorelu",
-  "ariselu": "ariselu",
-  "gavvalu": "gavvalu",
-  "sunnundalu": "sunnundalu",
-  "bobbatlu": "bobbatlu",
-  "kudumulu": "kudumulu",
-  "undrallu": "undrallu",
-  "paramannam": "paramannam",
-  "daddojanam": "daddojanam",
-  "pulihora": "pulihora",
-  "bisi bele bath": "bisi bele bath",
-  "vangi bath": "vangi bath",
-  "sambar rice": "sambar",
-  "rasam rice": "rasam",
-  "curd rice": "curd",
-  "lemon rice": "lemon",
-  "tomato rice": "tomato",
-  "coconut rice": "coconut",
-  "tamarind rice": "tamarind",
-  "mango rice": "mango",
-  "mint rice": "mint",
-  "coriander rice": "coriander",
-  "jeera rice": "jeera",
-  "ghee rice": "ghee",
-  "kashmiri pulao": "pulao",
-  "peas pulao": "pulao",
-  "vegetable pulao": "pulao",
-  "mushroom pulao": "pulao",
-  "paneer pulao": "pulao",
-  "tava pulao": "pulao",
-  "chicken biryani": "biryani",
-  "mutton biryani": "biryani",
-  "egg biryani": "biryani",
-  "fish biryani": "biryani",
-  "prawn biryani": "biryani",
-  "hyderabadi biryani": "biryani",
-  "lucknowi biryani": "biryani",
-  "kolkata biryani": "biryani",
-  "thalassery biryani": "biryani",
-  "dindigul biryani": "biryani",
-  "ambur biryani": "biryani",
-  "kalyani biryani": "biryani",
-  "beary biryani": "biryani",
-  "memoni biryani": "biryani",
-  "bombay biryani": "biryani",
-  "sindhi biryani": "biryani",
-  "afghani biryani": "biryani",
-  "irani biryani": "biryani",
-  "yakhni pulao": "pulao",
-  "mutter pulao": "pulao",
-  "kashmiri pulao": "pulao",
-  "vegetable korma": "korma",
-  "paneer butter masala": "paneer",
-  "palak paneer": "paneer",
-  "malai kofta": "kofta",
-  "navratan korma": "korma",
-  "shahi paneer": "paneer",
-  "dum aloo": "aloo",
-  "aloo gobi": "aloo",
-  "baingan bharta": "baingan",
-  "bhindi masala": "bhindi",
-  "chana masala": "chana",
-  "matar paneer": "paneer",
-  "dal makhani": "dal",
-  "dal tadka": "dal",
-  "dal fry": "dal",
-  "rajma masala": "rajma",
-  "chole bhature": "chole",
-  "kadhi pakora": "kadhi",
-  "sarson ka saag": "sarson",
-  "makki di roti": "roti",
-  "missi roti": "roti",
-  "bajra roti": "roti",
-  "jowar roti": "roti",
-  "ragi roti": "roti",
-  "thepla": "thepla",
-  "khakhra": "khakhra",
-  "bhakri": "bhakri",
-  "akki roti": "roti",
-  "jolada roti": "roti",
-  "thalipeeth": "thalipeeth",
-  "puran poli": "poli",
-  "bakharkhani": "bakharkhani",
-  "sheermal": "sheermal",
-  "taftan": "taftan",
-  "kulcha": "kulcha",
-  "naan": "naan",
-  "rumali roti": "roti",
-  "parotta": "parotta",
-  "lachha paratha": "paratha",
-  "butter naan": "naan",
-  "garlic naan": "naan",
-  "peshawari naan": "naan",
-  "keema naan": "naan",
-  "aloo naan": "naan",
-  "paneer naan": "naan",
-  "gobi naan": "naan",
-  "methi naan": "naan",
-  "pyaaz naan": "naan",
-  "dal naan": "naan",
-  "sattu naan": "naan",
-  "aloo tikki": "tikki",
-  "papri chaat": "chaat",
-  "dahi bhalla": "bhalla",
-  "sev puri": "puri",
-  "bhel puri": "puri",
-  "pani puri": "puri",
-  "raj kachori": "kachori",
-  "samosa chaat": "samosa",
-  "aloo chaat": "chaat",
-  "chana chaat": "chaat",
-  "dahi puri": "puri",
-  "masala puri": "puri",
-  "sev tameta": "sev",
-  "dhokla": "dhokla",
-  "khandvi": "khandvi",
-  "fafda": "fafda",
-  "thepla": "thepla",
-  "khakhra": "khakhra",
-  "gathiya": "gathiya",
-  "sev": "sev",
-  "chivda": "chivda",
-  "chakri": "chakri",
-  "shankarpali": "shankarpali",
-  "mathri": "mathri",
-  "namakpare": "namakpare",
-  "murukku": "murukku",
-  "seedai": "seedai",
-  "thattai": "thattai",
-  "ribbon pakoda": "pakoda",
-  "manoharam": "manoharam",
-  "thenkuzhal": "thenkuzhal",
-  "adhirasam": "adhirasam",
-  "mysore pak": "mysore pak",
-  "jangiri": "jangiri",
-  "badusha": "badusha",
-  "soan papdi": "soan papdi",
-  "balushahi": "balushahi",
-  "imarti": "imarti",
-  "ghevar": "ghevar",
-  "pheni": "pheni",
-  "khaja": "khaja",
-  "chirote": "chirote",
-  "kajjikayalu": "kajjikayalu",
-  "poornam boorelu": "boorelu",
-  "ariselu": "ariselu",
-  "gavvalu": "gavvalu",
-  "sunnundalu": "sunnundalu",
-  "bobbatlu": "bobbatlu",
-  "kudumulu": "kudumulu",
-  "undrallu": "undrallu",
-  "paramannam": "paramannam",
-  "daddojanam": "daddojanam",
-  "pulihora": "pulihora",
-  "bisi bele bath": "bisi bele bath",
-  "vangi bath": "vangi bath",
-  "sambar rice": "sambar",
-  "rasam rice": "rasam",
-  "curd rice": "curd",
-  "lemon rice": "lemon",
-  "tomato rice": "tomato",
-  "coconut rice": "coconut",
-  "tamarind rice": "tamarind",
-  "mango rice": "mango",
-  "mint rice": "mint",
-  "coriander rice": "coriander",
-  "jeera rice": "jeera",
-  "ghee rice": "ghee",
-  "kashmiri pulao": "pulao",
-  "peas pulao": "pulao",
-  "vegetable pulao": "pulao",
-  "mushroom pulao": "pulao",
-  "paneer pulao": "pulao",
-  "tava pulao": "pulao",
-  "chicken biryani": "biryani",
-  "mutton biryani": "biryani",
-  "egg biryani": "biryani",
-  "fish biryani": "biryani",
-  "prawn biryani": "biryani",
-  "hyderabadi biryani": "biryani",
-  "lucknowi biryani": "biryani",
-  "kolkata biryani": "biryani",
-  "thalassery biryani": "biryani",
-  "dindigul biryani": "biryani",
-  "ambur biryani": "biryani",
-  "kalyani biryani": "biryani",
-  "beary biryani": "biryani",
-  "memoni biryani": "biryani",
-  "bombay biryani": "biryani",
-  "sindhi biryani": "biryani",
-  "afghani biryani": "biryani",
-  "irani biryani": "biryani",
-  "yakhni pulao": "pulao",
-  "mutter pulao": "pulao",
-  "kashmiri pulao": "pulao",
-  "vegetable korma": "korma",
-  "paneer butter masala": "paneer",
-  "palak paneer": "paneer",
-  "malai kofta": "kofta",
-  "navratan korma": "korma",
-  "shahi paneer": "paneer",
-  "dum aloo": "aloo",
-  "aloo gobi": "aloo",
-  "baingan bharta": "baingan",
-  "bhindi masala": "bhindi",
-  "chana masala": "chana",
-  "matar paneer": "paneer",
-  "dal makhani": "dal",
-  "dal tadka": "dal",
-  "dal fry": "dal",
-  "rajma masala": "rajma",
-  "chole bhature": "chole",
-  "kadhi pakora": "kadhi",
-  "
+// Map common food names to their food groups
+export const foodNameToGroupMap: Record<string, string> = {
+  // Grains
+  rice: foodGroups.grains,
+  bread: foodGroups.grains,
+  pasta: foodGroups.grains,
+  noodles: foodGroups.grains,
+  wheat: foodGroups.grains,
+  flour: foodGroups.grains,
+  cereal: foodGroups.grains,
+  oats: foodGroups.grains,
+  barley: foodGroups.grains,
+  corn: foodGroups.grains,
+  maize: foodGroups.grains,
+  tortilla: foodGroups.grains,
+  chapati: foodGroups.grains,
+  roti: foodGroups.grains,
+  naan: foodGroups.grains,
+  paratha: foodGroups.grains,
+  poha: foodGroups.grains,
+  idli: foodGroups.grains,
+  dosa: foodGroups.grains,
+  upma: foodGroups.grains,
+  quinoa: foodGroups.grains,
+  millet: foodGroups.grains,
+  sorghum: foodGroups.grains,
+  cornflakes: foodGroups.grains,
+  semolina: foodGroups.grains,
+  couscous: foodGroups.grains,
+  
+  // White roots, tubers and plantains
+  potato: foodGroups.grains,
+  sweetpotato: foodGroups.grains,
+  cassava: foodGroups.grains,
+  yam: foodGroups.grains,
+  plantain: foodGroups.grains,
+  taro: foodGroups.grains,
+  
+  // Pulses
+  beans: foodGroups.pulses,
+  lentils: foodGroups.pulses,
+  peas: foodGroups.pulses,
+  chickpeas: foodGroups.pulses,
+  dahl: foodGroups.pulses,
+  tofu: foodGroups.pulses,
+  soybeans: foodGroups.pulses,
+  tempeh: foodGroups.pulses,
+  edamame: foodGroups.pulses,
+  hummus: foodGroups.pulses,
+  rajma: foodGroups.pulses,
+  chana: foodGroups.pulses,
+  moong: foodGroups.pulses,
+  urad: foodGroups.pulses,
+  
+  // Nuts and seeds
+  almonds: foodGroups.nuts,
+  cashews: foodGroups.nuts,
+  walnuts: foodGroups.nuts,
+  pistachios: foodGroups.nuts,
+  hazelnuts: foodGroups.nuts,
+  pecans: foodGroups.nuts,
+  peanuts: foodGroups.nuts, 
+  sesameSeeds: foodGroups.nuts,
+  flaxseeds: foodGroups.nuts,
+  sunflowerSeeds: foodGroups.nuts,
+  pumpkinSeeds: foodGroups.nuts,
+  chiaSeeds: foodGroups.nuts,
+  
+  // Dairy
+  milk: foodGroups.dairy,
+  cheese: foodGroups.dairy,
+  yogurt: foodGroups.dairy,
+  curd: foodGroups.dairy,
+  paneer: foodGroups.dairy,
+  butter: foodGroups.dairy,
+  ghee: foodGroups.dairy,
+  cream: foodGroups.dairy,
+  icecream: foodGroups.dairy,
+  lassi: foodGroups.dairy,
+  
+  // Meat, poultry and fish
+  chicken: foodGroups.meat,
+  beef: foodGroups.meat,
+  pork: foodGroups.meat,
+  mutton: foodGroups.meat,
+  lamb: foodGroups.meat,
+  goat: foodGroups.meat,
+  turkey: foodGroups.meat,
+  duck: foodGroups.meat,
+  fish: foodGroups.meat,
+  salmon: foodGroups.meat,
+  tuna: foodGroups.meat,
+  sardines: foodGroups.meat,
+  mackerel: foodGroups.meat,
+  prawns: foodGroups.meat,
+  shrimp: foodGroups.meat,
+  crab: foodGroups.meat,
+  lobster: foodGroups.meat,
+  
+  // Eggs
+  eggs: foodGroups.eggs,
+  eggwhite: foodGroups.eggs,
+  eggyolk: foodGroups.eggs,
+  
+  // Dark green leafy vegetables
+  spinach: foodGroups.darkGreenVegetables,
+  kale: foodGroups.darkGreenVegetables,
+  arugula: foodGroups.darkGreenVegetables,
+  collardgreens: foodGroups.darkGreenVegetables,
+  bokchoy: foodGroups.darkGreenVegetables,
+  mustardgreens: foodGroups.darkGreenVegetables,
+  broccolirabe: foodGroups.darkGreenVegetables,
+  swisschard: foodGroups.darkGreenVegetables,
+  dandeliongreens: foodGroups.darkGreenVegetables,
+  turnipgreens: foodGroups.darkGreenVegetables,
+  palak: foodGroups.darkGreenVegetables,
+  methi: foodGroups.darkGreenVegetables,
+  sarson: foodGroups.darkGreenVegetables,
+  
+  // Vitamin A-rich fruits and vegetables
+  carrot: foodGroups.vitaminAFruits,
+  sweetpotato: foodGroups.vitaminAFruits,
+  pumpkin: foodGroups.vitaminAFruits,
+  mango: foodGroups.vitaminAFruits,
+  cantaloupe: foodGroups.vitaminAFruits,
+  apricot: foodGroups.vitaminAFruits,
+  papaya: foodGroups.vitaminAFruits,
+  redpeppers: foodGroups.vitaminAFruits,
+  
+  // Other vegetables
+  cucumber: foodGroups.otherVegetables,
+  tomato: foodGroups.otherVegetables,
+  onion: foodGroups.otherVegetables,
+  eggplant: foodGroups.otherVegetables,
+  cabbage: foodGroups.otherVegetables,
+  cauliflower: foodGroups.otherVegetables,
+  broccoli: foodGroups.otherVegetables,
+  bellpepper: foodGroups.otherVegetables,
+  zucchini: foodGroups.otherVegetables,
+  okra: foodGroups.otherVegetables,
+  bittergoard: foodGroups.otherVegetables,
+  bottlegoard: foodGroups.otherVegetables,
+  radish: foodGroups.otherVegetables,
+  turnip: foodGroups.otherVegetables,
+  artichoke: foodGroups.otherVegetables,
+  asparagus: foodGroups.otherVegetables,
+  celery: foodGroups.otherVegetables,
+  mushroom: foodGroups.otherVegetables,
+  greenbean: foodGroups.otherVegetables,
+  greenpeas: foodGroups.otherVegetables,
+  
+  // Other fruits
+  apple: foodGroups.otherFruits,
+  banana: foodGroups.otherFruits,
+  orange: foodGroups.otherFruits,
+  grape: foodGroups.otherFruits,
+  watermelon: foodGroups.otherFruits,
+  pineapple: foodGroups.otherFruits,
+  strawberry: foodGroups.otherFruits,
+  blueberry: foodGroups.otherFruits,
+  kiwi: foodGroups.otherFruits,
+  peach: foodGroups.otherFruits,
+  pear: foodGroups.otherFruits,
+  plum: foodGroups.otherFruits,
+  cherry: foodGroups.otherFruits,
+  avocado: foodGroups.otherFruits,
+  coconut: foodGroups.otherFruits,
+  fig: foodGroups.otherFruits,
+  guava: foodGroups.otherFruits,
+  lychee: foodGroups.otherFruits,
+  dragonfruit: foodGroups.otherFruits,
+  pomegranate: foodGroups.otherFruits,
+  
+  // International dishes and their main food groups
+  pizza: foodGroups.grains, // Crust is grain
+  burger: foodGroups.grains, // Bun is grain
+  sandwich: foodGroups.grains, // Bread is grain
+  pasta: foodGroups.grains,
+  sushi: foodGroups.grains, // Rice is grain
+  taco: foodGroups.grains, // Shell is grain
+  burrito: foodGroups.grains, // Tortilla is grain
+  noodles: foodGroups.grains,
+  dumpling: foodGroups.grains, // Wrapper is grain
+  croissant: foodGroups.grains,
+  bagel: foodGroups.grains,
+  muffin: foodGroups.grains,
+  pancake: foodGroups.grains,
+  waffle: foodGroups.grains,
+  cereal: foodGroups.grains,
+  
+  // Indian foods
+  samosa: foodGroups.grains, // Outer covering is grain
+  pakora: foodGroups.grains, // Batter is grain
+  biryani: foodGroups.grains, // Rice is grain
+  pulao: foodGroups.grains, // Rice is grain
+  dalroti: foodGroups.pulses, // Main component is lentils
+  cholemasala: foodGroups.pulses, // Chickpeas
+  rajma: foodGroups.pulses, // Kidney beans
+  
+  // Italian foods
+  lasagna: foodGroups.grains, // Pasta sheets are grain
+  risotto: foodGroups.grains, // Rice is grain
+  gnocchi: foodGroups.grains, // Potato-based pasta
+  
+  // Mexican foods
+  enchilada: foodGroups.grains, // Tortilla is grain
+  quesadilla: foodGroups.grains, // Tortilla is grain
+  tamale: foodGroups.grains, // Corn masa is grain
+  
+  // Chinese foods
+  dimsum: foodGroups.grains, // Usually has wrapper made of grain
+  springroll: foodGroups.grains, // Wrapper is grain
+  friedrice: foodGroups.grains, // Rice is grain
+  
+  // Japanese foods
+  ramen: foodGroups.grains, // Noodles are grain
+  udon: foodGroups.grains, // Noodles are grain
+  
+  // Thai foods
+  padthai: foodGroups.grains, // Noodles are grain
+  curryrice: foodGroups.grains, // Rice is grain
+  
+  // Fast foods
+  fries: foodGroups.grains, // Potato is considered starchy vegetable
+  nuggets: foodGroups.meat, // Typically chicken
+  
+  // Desserts
+  cake: foodGroups.grains, // Flour is grain
+  cookie: foodGroups.grains, // Flour is grain
+  pie: foodGroups.grains, // Crust is grain
+  
+  // Beverages (typically not counted in food groups but included for completeness)
+  coffee: "beverage",
+  tea: "beverage",
+  soda: "beverage",
+  juice: "beverage",
+  smoothie: "beverage" // Depends on ingredients
+};
+
+// Function to guess food group based on partial matches
+export function guessFoodGroup(foodItem: string): string {
+  foodItem = foodItem.toLowerCase().replace(/\s+/g, '');
+  
+  // Check for exact match first
+  if (foodNameToGroupMap[foodItem]) {
+    return foodNameToGroupMap[foodItem];
+  }
+  
+  // Check for partial matches
+  for (const [key, value] of Object.entries(foodNameToGroupMap)) {
+    if (foodItem.includes(key)) {
+      return value;
+    }
+  }
+  
+  // If no match found, try to guess based on common ingredients
+  if (foodItem.includes("rice") || 
+      foodItem.includes("bread") || 
+      foodItem.includes("pasta") || 
+      foodItem.includes("noodle") || 
+      foodItem.includes("dough") ||
+      foodItem.includes("flour") ||
+      foodItem.includes("wheat") ||
+      foodItem.includes("grain") ||
+      foodItem.includes("potato")) {
+    return foodGroups.grains;
+  }
+  
+  if (foodItem.includes("bean") || 
+      foodItem.includes("lentil") || 
+      foodItem.includes("pea") ||
+      foodItem.includes("dal") ||
+      foodItem.includes("tofu")) {
+    return foodGroups.pulses;
+  }
+  
+  if (foodItem.includes("nut") || 
+      foodItem.includes("seed") ||
+      foodItem.includes("almond") || 
+      foodItem.includes("cashew") ||
+      foodItem.includes("walnut") ||
+      foodItem.includes("pistachio")) {
+    return foodGroups.nuts;
+  }
+  
+  if (foodItem.includes("milk") || 
+      foodItem.includes("cheese") || 
+      foodItem.includes("yogurt") ||
+      foodItem.includes("curd") ||
+      foodItem.includes("cream") ||
+      foodItem.includes("butter")) {
+    return foodGroups.dairy;
+  }
+  
+  if (foodItem.includes("meat") || 
+      foodItem.includes("chicken") || 
+      foodItem.includes("beef") ||
+      foodItem.includes("pork") ||
+      foodItem.includes("fish") ||
+      foodItem.includes("lamb") ||
+      foodItem.includes("mutton") ||
+      foodItem.includes("seafood") ||
+      foodItem.includes("shrimp")) {
+    return foodGroups.meat;
+  }
+  
+  if (foodItem.includes("egg")) {
+    return foodGroups.eggs;
+  }
+  
+  if (foodItem.includes("spinach") || 
+      foodItem.includes("kale") || 
+      foodItem.includes("greens") ||
+      foodItem.includes("lettuce") ||
+      foodItem.includes("palak")) {
+    return foodGroups.darkGreenVegetables;
+  }
+  
+  if (foodItem.includes("carrot") || 
+      foodItem.includes("pumpkin") || 
+      foodItem.includes("mango") ||
+      foodItem.includes("papaya") ||
+      foodItem.includes("apricot")) {
+    return foodGroups.vitaminAFruits;
+  }
+  
+  if (foodItem.includes("tomato") || 
+      foodItem.includes("cucumber") || 
+      foodItem.includes("onion") ||
+      foodItem.includes("eggplant") ||
+      foodItem.includes("mushroom") ||
+      foodItem.includes("broccoli") ||
+      foodItem.includes("pepper") ||
+      foodItem.includes("cauliflower") ||
+      foodItem.includes("cabbage")) {
+    return foodGroups.otherVegetables;
+  }
+  
+  if (foodItem.includes("apple") || 
+      foodItem.includes("banana") || 
+      foodItem.includes("orange") ||
+      foodItem.includes("grape") ||
+      foodItem.includes("berry") ||
+      foodItem.includes("melon") ||
+      foodItem.includes("peach") ||
+      foodItem.includes("pear") ||
+      foodItem.includes("fruit")) {
+    return foodGroups.otherFruits;
+  }
+  
+  // For complex dishes with multiple ingredients
+  if (foodItem.includes("pizza")) {
+    return foodGroups.grains; // Main component is the crust (grain)
+  }
+  
+  if (foodItem.includes("salad")) {
+    return foodGroups.otherVegetables; // Most salads are primarily vegetables
+  }
+  
+  if (foodItem.includes("sandwich") || foodItem.includes("burger")) {
+    return foodGroups.grains; // Main component is bread (grain)
+  }
+  
+  if (foodItem.includes("soup")) {
+    return "mixed"; // Soups can vary greatly in composition
+  }
+  
+  // Default return if no match found
+  return "unknown";
+}
+
+export const getFoodGroupColor = (group: string): string => {
+  switch (group) {
+    case foodGroups.grains:
+      return "bg-amber-500";
+    case foodGroups.pulses:
+      return "bg-rose-500";
+    case foodGroups.nuts:
+      return "bg-amber-700";
+    case foodGroups.dairy:
+      return "bg-blue-200";
+    case foodGroups.meat:
+      return "bg-red-600";
+    case foodGroups.eggs:
+      return "bg-yellow-200";
+    case foodGroups.darkGreenVegetables:
+      return "bg-emerald-600";
+    case foodGroups.vitaminAFruits:
+      return "bg-orange-500";
+    case foodGroups.otherVegetables:
+      return "bg-green-500";
+    case foodGroups.otherFruits:
+      return "bg-purple-500";
+    default:
+      return "bg-gray-400";
+  }
+};
+
+export const getTextColor = (group: string): string => {
+  switch (group) {
+    case foodGroups.dairy:
+    case foodGroups.eggs:
+      return "text-gray-800";
+    default:
+      return "text-white";
+  }
+};
+
+// Examples of foods in each group for user guidance
+export const foodGroupExamples = {
+  [foodGroups.grains]: "Rice, bread, pasta, potatoes, corn",
+  [foodGroups.pulses]: "Beans, lentils, chickpeas, peas, tofu",
+  [foodGroups.nuts]: "Almonds, walnuts, peanuts, sunflower seeds",
+  [foodGroups.dairy]: "Milk, cheese, yogurt, curd, butter",
+  [foodGroups.meat]: "Chicken, beef, fish, pork, seafood",
+  [foodGroups.eggs]: "Eggs (any preparation)",
+  [foodGroups.darkGreenVegetables]: "Spinach, kale, lettuce, broccoli",
+  [foodGroups.vitaminAFruits]: "Carrots, mangoes, papaya, pumpkin",
+  [foodGroups.otherVegetables]: "Tomatoes, onions, eggplant, cucumber",
+  [foodGroups.otherFruits]: "Apples, bananas, berries, oranges"
+};

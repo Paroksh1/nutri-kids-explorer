@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Apple, Calculator, BookOpen, User } from 'lucide-react';
-import { isAuthenticated } from '@/components/auth/AuthForm';
+import { Menu, X, Apple, Calculator, BookOpen, User, LogOut } from 'lucide-react';
+import { isAuthenticated, logout } from '@/components/auth/AuthForm';
+import { useNavigate } from 'react-router-dom';
 
 interface NavItem {
   title: string;
@@ -13,30 +14,11 @@ interface NavItem {
   authRequired?: boolean;
 }
 
-const navItems: NavItem[] = [
-  { title: 'Home', href: '/' },
-  { 
-    title: 'Diversity Calculator', 
-    href: '/dietary-diversity',
-    icon: <Calculator className="h-4 w-4 mr-2" />
-  },
-  { 
-    title: 'Education', 
-    href: '/education',
-    icon: <BookOpen className="h-4 w-4 mr-2" /> 
-  },
-  { 
-    title: 'Dashboard', 
-    href: '/dashboard',
-    icon: <User className="h-4 w-4 mr-2" />,
-    authRequired: true
-  },
-];
-
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const isAuthenticated_ = isAuthenticated();
 
   useEffect(() => {
@@ -51,10 +33,25 @@ const Navbar = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-  const filteredNavItems = navItems.filter(item => 
-    !item.authRequired || (item.authRequired && isAuthenticated_)
-  );
+  const navItems: NavItem[] = [
+    { title: 'Home', href: '/' },
+    { 
+      title: 'Diversity Calculator', 
+      href: '/dietary-diversity',
+      icon: <Calculator className="h-4 w-4 mr-2" />
+    },
+    { 
+      title: 'Nutrition Education', 
+      href: '/education',
+      icon: <BookOpen className="h-4 w-4 mr-2" /> 
+    },
+  ];
 
   return (
     <header
@@ -78,7 +75,7 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          {filteredNavItems.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}
@@ -92,13 +89,21 @@ const Navbar = () => {
             </Link>
           ))}
           {!isAuthenticated_ ? (
-            <Button asChild className="bg-primary hover:bg-primary/90 transition-colors">
+            <Button asChild className="bg-primary hover:bg-primary/90 transition-colors ml-4">
               <Link to="/login">Sign In</Link>
             </Button>
           ) : (
-            <Button asChild className="bg-primary hover:bg-primary/90 transition-colors">
-              <Link to="/dashboard">My Account</Link>
-            </Button>
+            <div className="flex items-center gap-4 ml-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2 border-primary/20"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           )}
         </nav>
 
@@ -114,9 +119,9 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg animate-fade-in">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white/90 shadow-lg animate-fade-in">
           <nav className="flex flex-col p-6 space-y-4">
-            {filteredNavItems.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
@@ -134,8 +139,13 @@ const Navbar = () => {
                 <Link to="/login">Sign In</Link>
               </Button>
             ) : (
-              <Button asChild className="bg-primary hover:bg-primary/90 transition-colors w-full mt-4">
-                <Link to="/dashboard">My Account</Link>
+              <Button 
+                variant="outline" 
+                className="flex items-center justify-center gap-2 w-full mt-4"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
               </Button>
             )}
           </nav>
