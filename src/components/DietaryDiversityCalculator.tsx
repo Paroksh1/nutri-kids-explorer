@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { getCurrentUser } from './auth/AuthForm';
-import { processFoodText, getFoodGroup } from '@/utils/foodNameMapper';
+import { processFoodText } from '@/utils/foodNameMapper';
 import { identifyHindiFood, getHindiFoodGroup } from '@/utils/dietaryDiversityUtils';
 
 export const foodGroups = [
@@ -188,33 +189,80 @@ const DietaryDiversityCalculator: React.FC = () => {
     }
     
     let detectedGroups = new Set<number>();
+    let recognizedFoods: string[] = [];
     
+    // Process each meal individually for better food recognition
     Object.entries(meals).forEach(([mealType, meal]) => {
       if (meal.foods.trim()) {
         console.log(`Processing ${mealType}:`, meal.foods);
         
+        // Improved food item splitting - better handles multi-word foods and various separators
         const foodItems = meal.foods.toLowerCase()
-          .split(/[,;\n\s]+/)
+          .split(/[,;\n]+/)  // Split by common separators first
+          .flatMap(item => item.trim().split(/\s+/))  // Then further split by spaces if needed
           .map(item => item.trim())
           .filter(item => item !== '');
           
         console.log(`Food items in ${mealType}:`, foodItems);
         
+        // Process each food item
         foodItems.forEach(food => {
           const foodGroup = getHindiFoodGroup(food);
           console.log(`Food "${food}" mapped to group: ${foodGroup}`);
           
+          // Track recognitions for user feedback
+          if (foodGroup !== "unknown") {
+            recognizedFoods.push(`${food} → ${foodGroup}`);
+          }
+          
+          // Map to group IDs
           if (foodGroup === "dairy") detectedGroups.add(13);
           else if (foodGroup === "legumes_nuts_seeds") detectedGroups.add(12);
           else if (foodGroup === "starchy_staples") detectedGroups.add(1);
-          else if (foodGroup === "vitamin_a_fruits_vegetables") detectedGroups.add(3);
+          else if (foodGroup === "vitamin_a_fruits_vegetables") {
+            detectedGroups.add(3);  // Vitamin A rich vegetables
+            detectedGroups.add(6);  // Vitamin A rich fruits
+          }
           else if (foodGroup === "other_vegetables") detectedGroups.add(5);
           else if (foodGroup === "dark_green_leafy_veg") detectedGroups.add(4);
           else if (foodGroup === "other_fruits") detectedGroups.add(7);
-          else if (foodGroup === "meat_fish") detectedGroups.add(9);
+          else if (foodGroup === "meat_fish") {
+            detectedGroups.add(9);  // Flesh meats
+            detectedGroups.add(11); // Fish and seafood
+          }
           else if (foodGroup === "eggs") detectedGroups.add(10);
+          else if (foodGroup === "organ_meat") detectedGroups.add(8);
+          else if (foodGroup === "oils_fats") detectedGroups.add(14);
+          else if (foodGroup === "sugars") detectedGroups.add(15);
+          else if (foodGroup === "spices_condiments") detectedGroups.add(16);
         });
         
+        // Also use advanced Hindi food recognition for the entire meal
+        const hindiGroups = identifyHindiFood(meal.foods);
+        console.log(`Hindi food groups from ${mealType}:`, hindiGroups);
+        
+        // Map recognized group names back to IDs
+        hindiGroups.forEach(groupName => {
+          if (groupName.includes("starchy")) detectedGroups.add(1);
+          else if (groupName.includes("dark green")) detectedGroups.add(4);
+          else if (groupName.includes("vitamin a")) {
+            detectedGroups.add(3);
+            detectedGroups.add(6);
+          }
+          else if (groupName.includes("other vegetable")) detectedGroups.add(5);
+          else if (groupName.includes("other fruit")) detectedGroups.add(7);
+          else if (groupName.includes("organ meat")) detectedGroups.add(8);
+          else if (groupName.includes("flesh meat")) detectedGroups.add(9);
+          else if (groupName.includes("fish")) detectedGroups.add(11);
+          else if (groupName.includes("egg")) detectedGroups.add(10);
+          else if (groupName.includes("legume") || groupName.includes("nut") || groupName.includes("seed")) detectedGroups.add(12);
+          else if (groupName.includes("milk") || groupName.includes("dairy")) detectedGroups.add(13);
+          else if (groupName.includes("oil") || groupName.includes("fat")) detectedGroups.add(14);
+          else if (groupName.includes("sweet")) detectedGroups.add(15);
+          else if (groupName.includes("spice") || groupName.includes("condiment") || groupName.includes("beverage")) detectedGroups.add(16);
+        });
+        
+        // Also use the original processor as a backup
         const mealGroups = processFoodText(meal.foods);
         console.log(`Additional groups from processor for ${mealType}:`, mealGroups);
         
@@ -222,6 +270,7 @@ const DietaryDiversityCalculator: React.FC = () => {
       }
     });
     
+    // Process all foods together as a backup approach
     const allFoodGroups = processFoodText(allFoodText);
     console.log("Groups from processing all foods together:", allFoodGroups);
     
@@ -240,21 +289,25 @@ const DietaryDiversityCalculator: React.FC = () => {
       });
       setFoodGroupsChecked(updatedGroups);
       
-      const foodItems = allFoodText
+      // Get a sample of food items for feedback
+      const allFoodItems = allFoodText
         .split(/[,;\n\s]+/)
         .map(item => item.trim())
         .filter(item => item.length > 0);
         
-      if (foodItems.length > 0) {
+      if (allFoodItems.length > 0) {
+        // Use our advanced Hindi food identifier
         const hindiGroups = identifyHindiFood(allFoodText);
         
         setAnalysisDetails({
-          dish: foodItems[0],
-          ingredients: foodItems.slice(0, 3),
-          groups: hindiGroups
+          dish: allFoodItems[0],
+          ingredients: allFoodItems.slice(0, 3),
+          groups: recognizedFoods.length > 0 ? 
+                 recognizedFoods.slice(0, 5) : // Show specific recognitions if available
+                 hindiGroups.slice(0, 5)       // Otherwise show general groups
         });
         
-        toast.success(`Successfully analyzed ${foodItems.length} food items!`);
+        toast.success(`Successfully analyzed ${allFoodItems.length} food items!`);
       }
     } else {
       toast.warning("Couldn't determine any food groups. Please check your entries or manually select them.");
