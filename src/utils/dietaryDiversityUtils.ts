@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for Dietary Diversity calculations
  */
@@ -292,6 +293,146 @@ export function suggestMeals(consumedFoods: ConsumedFood[]): string[] {
   }
   
   return suggestions;
+}
+
+// Functions for identifying Hindi and global foods
+export function identifyHindiFood(foodName: string): boolean {
+  const hindiFood = [
+    "roti", "chapati", "naan", "paratha", "dal", "rajma", "chana", "paneer", 
+    "tikka", "masala", "biryani", "pulao", "samosa", "pakora", "chaat", 
+    "bhaji", "sabzi", "jalebi", "ladoo", "barfi", "halwa", "kheer"
+  ];
+  
+  const normalizedFood = foodName.toLowerCase().trim();
+  return hindiFood.some(food => normalizedFood.includes(food));
+}
+
+export function getHindiFoodGroup(foodName: string): string {
+  const normalizedFood = foodName.toLowerCase().trim();
+  
+  // Bread, rice and grain foods
+  if (/roti|chapati|naan|paratha|puri|bhature|rice|chawal|pulao|biryani/i.test(normalizedFood)) {
+    return "starchy_staples";
+  }
+  
+  // Lentils and legumes
+  if (/dal|rajma|chana|lobia|urad|moong|masoor|toor/i.test(normalizedFood)) {
+    return "legumes_nuts_seeds";
+  }
+  
+  // Dairy products
+  if (/paneer|dahi|lassi|ghee|makhan|khoya|chhach|buttermilk/i.test(normalizedFood)) {
+    return "dairy";
+  }
+  
+  // Vegetable dishes
+  if (/sabzi|bhaji|palak|gobi|aloo|matar|baingan|bhindi|tinda|karela/i.test(normalizedFood)) {
+    if (/palak|sarson|bathua|methi/i.test(normalizedFood)) {
+      return "dark_green_leafy_veg";
+    }
+    return "other_vegetables";
+  }
+  
+  // Meat dishes
+  if (/chicken|murgh|gosht|mutton|machli|fish|keema|korma|nihari/i.test(normalizedFood)) {
+    return "meat_fish";
+  }
+  
+  // Sweets
+  if (/ladoo|barfi|jalebi|halwa|kheer|gulab jamun|peda|rasgulla|rasmalai/i.test(normalizedFood)) {
+    return "sugars";
+  }
+  
+  // Snacks
+  if (/samosa|pakora|chaat|bhel|tikki|vada|idli|dosa|uttapam/i.test(normalizedFood)) {
+    return "mixed_dish";
+  }
+  
+  return "unknown";
+}
+
+export function identifyGlobalFood(foodName: string): string[] {
+  const normalizedFood = foodName.toLowerCase().trim();
+  const groups: string[] = [];
+  
+  // Global cuisines by dish
+  if (/pizza/i.test(normalizedFood)) {
+    return ["starchy_staples", "dairy", "other_vegetables", "mixed_dish"];
+  }
+  
+  if (/burger|hamburger/i.test(normalizedFood)) {
+    return ["starchy_staples", "meat_fish", "other_vegetables", "mixed_dish"];
+  }
+  
+  if (/pasta|spaghetti|noodle|macaroni|fettuccine|lasagna/i.test(normalizedFood)) {
+    if (/bolognese|carbonara/i.test(normalizedFood)) {
+      return ["starchy_staples", "meat_fish", "other_vegetables", "mixed_dish"];
+    }
+    return ["starchy_staples", "mixed_dish"];
+  }
+  
+  if (/sushi|maki|nigiri|sashimi/i.test(normalizedFood)) {
+    return ["starchy_staples", "meat_fish", "mixed_dish"];
+  }
+  
+  if (/taco|burrito|quesadilla|enchilada/i.test(normalizedFood)) {
+    return ["starchy_staples", "meat_fish", "other_vegetables", "mixed_dish"];
+  }
+  
+  if (/salad/i.test(normalizedFood)) {
+    return ["other_vegetables"];
+  }
+  
+  if (/sandwich|toast/i.test(normalizedFood)) {
+    return ["starchy_staples", "mixed_dish"];
+  }
+  
+  if (/curry/i.test(normalizedFood)) {
+    return ["meat_fish", "other_vegetables", "mixed_dish"];
+  }
+  
+  if (/soup/i.test(normalizedFood)) {
+    return ["other_vegetables", "mixed_dish"];
+  }
+  
+  // Basic food categories
+  if (/rice|bread|pasta|potato|cereal|grain|wheat|corn|oats/i.test(normalizedFood)) {
+    groups.push("starchy_staples");
+  }
+  
+  if (/milk|cheese|yogurt|cream|butter|dairy/i.test(normalizedFood)) {
+    groups.push("dairy");
+  }
+  
+  if (/egg|omelette|omlet/i.test(normalizedFood)) {
+    groups.push("eggs");
+  }
+  
+  if (/chicken|beef|pork|fish|meat|lamb|seafood|prawn|shrimp/i.test(normalizedFood)) {
+    groups.push("meat_fish");
+  }
+  
+  if (/bean|lentil|pea|dal|chickpea|legume/i.test(normalizedFood)) {
+    groups.push("legumes_nuts_seeds");
+  }
+  
+  if (/carrot|squash|sweet potato|pepper|mango|papaya/i.test(normalizedFood)) {
+    groups.push("vitamin_a_fruits_vegetables");
+  }
+  
+  if (/spinach|kale|lettuce|greens/i.test(normalizedFood)) {
+    groups.push("dark_green_leafy_veg");
+  }
+  
+  if (/apple|banana|orange|grape|tomato|cucumber|vegetable|fruit/i.test(normalizedFood)) {
+    groups.push("other_vegetables");
+  }
+  
+  if (groups.length === 0) {
+    return ["unknown"];
+  }
+  
+  return groups;
 }
 
 // Import food suggestion utilities

@@ -1,3 +1,4 @@
+
 /**
  * Maps food names to their respective food groups and categories
  * This is used to organize user-entered foods properly
@@ -249,3 +250,142 @@ export const foodMapping: { [key: string]: { name: string; group: FoodGroup; cat
   "star fruit": { name: "Star Fruit", group: FoodGroup.OTHER_FRUITS_AND_VEGETABLES, category: "Fruits" },
   "mulberry": { name: "Mulberry", group: FoodGroup.OTHER_FRUITS_AND_VEGETABLES, category: "Fruits" }
 };
+
+// Map a food item to its possible ingredients (for complex dishes)
+const dishIngredients: { [key: string]: string[] } = {
+  "pizza": ["flour", "cheese", "tomato", "olive oil"],
+  "burger": ["bread", "meat", "lettuce", "tomato"],
+  "pasta": ["wheat flour", "egg", "water"],
+  "sandwich": ["bread", "cheese", "lettuce", "tomato"],
+  "curry": ["spices", "vegetables", "meat"],
+  "biryani": ["rice", "meat", "spices"],
+  "dal": ["lentils", "spices", "ghee"],
+  "lasagna": ["pasta", "cheese", "tomato sauce", "meat"],
+  "salad": ["lettuce", "tomato", "cucumber", "olive oil"],
+  "soup": ["vegetables", "broth", "spices"],
+  "stir fry": ["vegetables", "oil", "soy sauce", "meat"],
+  "omelette": ["egg", "vegetables", "cheese"],
+  "bread": ["flour", "water", "yeast", "salt"],
+  "yogurt": ["milk", "bacteria culture"],
+  "cheese": ["milk", "rennet", "salt"]
+};
+
+// Process raw food text and return the category IDs
+export function processFoodText(text: string): number[] {
+  if (!text) return [];
+  
+  const normalizedText = text.toLowerCase();
+  const detectedGroups = new Set<number>();
+  
+  // Detect starchy staples
+  if (/rice|bread|pasta|potato|cereal|flour|noodle|chapati|roti|porridge|tortilla/i.test(normalizedText)) {
+    detectedGroups.add(1);
+  }
+  
+  // Detect vitamin A rich vegetables
+  if (/carrot|pumpkin|squash|sweet potato|papaya|mango/i.test(normalizedText)) {
+    detectedGroups.add(3);
+    detectedGroups.add(6);
+  }
+  
+  // Detect dark green leafy vegetables
+  if (/spinach|kale|lettuce|greens|saag|palak|methi|fenugreek/i.test(normalizedText)) {
+    detectedGroups.add(4);
+  }
+  
+  // Detect other vegetables
+  if (/tomato|onion|cucumber|eggplant|pepper|broccoli|cauliflower|cabbage|beans|peas/i.test(normalizedText)) {
+    detectedGroups.add(5);
+  }
+  
+  // Detect other fruits
+  if (/apple|banana|orange|grapes|watermelon|pineapple|berries|strawberry|peach|pear/i.test(normalizedText)) {
+    detectedGroups.add(7);
+  }
+  
+  // Detect organ meat
+  if (/liver|kidney|heart|brain|organs/i.test(normalizedText)) {
+    detectedGroups.add(8);
+  }
+  
+  // Detect flesh foods (meat/fish)
+  if (/chicken|beef|fish|pork|lamb|mutton|goat|seafood|turkey|duck|prawn|shrimp/i.test(normalizedText)) {
+    detectedGroups.add(9);
+    detectedGroups.add(11);
+  }
+  
+  // Detect eggs
+  if (/egg|omelette|omlet/i.test(normalizedText)) {
+    detectedGroups.add(10);
+  }
+  
+  // Detect legumes, nuts and seeds
+  if (/beans|lentils|chickpeas|nuts|seeds|almonds|cashew|peanut|walnut|dal/i.test(normalizedText)) {
+    detectedGroups.add(12);
+  }
+  
+  // Detect milk and milk products
+  if (/milk|yogurt|curd|cheese|paneer|butter|ghee|cream/i.test(normalizedText)) {
+    detectedGroups.add(13);
+  }
+  
+  // Detect oils and fats
+  if (/oil|ghee|butter|margarine|fat/i.test(normalizedText)) {
+    detectedGroups.add(14);
+  }
+  
+  // Detect sweets
+  if (/sugar|honey|sweet|candy|chocolate|cake|cookie|biscuit|pastry|dessert/i.test(normalizedText)) {
+    detectedGroups.add(15);
+  }
+  
+  // Detect spices, condiments, beverages
+  if (/salt|pepper|spice|sauce|masala|tea|coffee|wine|beer|drink|beverage/i.test(normalizedText)) {
+    detectedGroups.add(16);
+  }
+  
+  return Array.from(detectedGroups);
+}
+
+// Get ingredients for a dish
+export function getIngredientsForDish(dish: string): string[] {
+  const normalizedDish = dish.toLowerCase().trim();
+  
+  for (const [knownDish, ingredients] of Object.entries(dishIngredients)) {
+    if (normalizedDish.includes(knownDish)) {
+      return ingredients;
+    }
+  }
+  
+  return [];
+}
+
+// Function to guess the food group based on food name
+export function guessFoodGroup(foodName: string): FoodGroup | null {
+  const normalizedFoodName = foodName.toLowerCase().trim();
+  
+  if (normalizedFoodName in foodMapping) {
+    return foodMapping[normalizedFoodName].group;
+  }
+  
+  // Try to match with simple patterns
+  if (/rice|bread|pasta|potato|cereal|flour|noodle|chapati|roti/i.test(normalizedFoodName)) {
+    return FoodGroup.STARCHY_STAPLES;
+  } else if (/bean|lentil|dal|chickpea|pea|tofu/i.test(normalizedFoodName)) {
+    return FoodGroup.PULSES;
+  } else if (/nut|seed|almond|cashew|peanut|walnut/i.test(normalizedFoodName)) {
+    return FoodGroup.NUTS_AND_SEEDS;
+  } else if (/milk|yogurt|curd|cheese|paneer|butter/i.test(normalizedFoodName)) {
+    return FoodGroup.DAIRY;
+  } else if (/chicken|beef|fish|pork|lamb|mutton|goat|seafood/i.test(normalizedFoodName)) {
+    return FoodGroup.FLESH_FOODS;
+  } else if (/egg|omelette|omlet/i.test(normalizedFoodName)) {
+    return FoodGroup.EGGS;
+  } else if (/carrot|pumpkin|squash|sweet potato|papaya|mango/i.test(normalizedFoodName)) {
+    return FoodGroup.VITAMIN_A_RICH_FRUITS_AND_VEGETABLES;
+  } else if (/apple|banana|orange|tomato|onion|cucumber|eggplant/i.test(normalizedFoodName)) {
+    return FoodGroup.OTHER_FRUITS_AND_VEGETABLES;
+  }
+  
+  return null;
+}
