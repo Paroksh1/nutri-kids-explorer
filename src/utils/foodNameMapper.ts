@@ -243,7 +243,42 @@ export const foodNameToGroupMap: Record<string, string> = {
   tea: "beverage",
   soda: "beverage",
   juice: "beverage",
-  smoothie: "beverage"
+  smoothie: "beverage",
+  
+  // Additional foods and variants
+  "omlet": foodGroups.eggs,
+  "omelette": foodGroups.eggs,
+  "omelet": foodGroups.eggs,
+  "omlette": foodGroups.eggs,
+  "scrambledeggs": foodGroups.eggs,
+  "eggscrambled": foodGroups.eggs,
+  "boiledegg": foodGroups.eggs,
+  "friedegg": foodGroups.eggs,
+  
+  "biscuit": foodGroups.grains,
+  "biscuits": foodGroups.grains,
+  "cookie": foodGroups.grains,
+  "cookies": foodGroups.grains,
+  "cracker": foodGroups.grains,
+  "crackers": foodGroups.grains,
+  
+  "sweet": foodGroups.grains,
+  "sweets": foodGroups.grains,
+  "chocolate": foodGroups.grains,
+  "candy": foodGroups.grains,
+  "candies": foodGroups.grains,
+  "dessert": foodGroups.grains,
+  "sugar": foodGroups.grains,
+  "honey": foodGroups.grains,
+  "syrup": foodGroups.grains,
+  "jam": foodGroups.grains,
+  "jelly": foodGroups.grains,
+  
+  "cereal": foodGroups.grains,
+  "porridge": foodGroups.grains,
+  "oats": foodGroups.grains,
+  "granola": foodGroups.grains,
+  "muesli": foodGroups.grains,
 };
 
 // Function to guess food group based on partial matches
@@ -262,7 +297,19 @@ export function guessFoodGroup(foodItem: string): string {
     }
   }
   
-  // If no match found, try to guess based on common ingredients
+  // Special handling for common misspellings
+  if (foodItem.includes("omlet") || 
+      foodItem.includes("omlette") || 
+      foodItem.includes("omelet")) {
+    return foodGroups.eggs;
+  }
+  
+  if (foodItem.includes("biscuit") || 
+      foodItem.includes("cookie") || 
+      foodItem.includes("cracker")) {
+    return foodGroups.grains;
+  }
+  
   if (foodItem.includes("rice") || 
       foodItem.includes("bread") || 
       foodItem.includes("pasta") || 

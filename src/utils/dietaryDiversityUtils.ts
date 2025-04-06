@@ -1,4 +1,3 @@
-
 import { getIngredientsForDish, guessFoodGroup, processFoodText } from "./foodNameMapper";
 
 // Food groups according to FAO/WHO guidelines
@@ -245,7 +244,7 @@ export function getHindiFoodGroup(foodItem: string): string {
   return groups.length > 0 ? groups[0] : "unknown";
 }
 
-// Global food recognition database
+// Enhanced global food recognition database with more common foods and spelling variations
 const globalFoods: Record<string, string[]> = {
   // Western foods
   "pizza": ["starchy_staples", "dairy", "other_vegetables"],
@@ -268,7 +267,12 @@ const globalFoods: Record<string, string[]> = {
   "donut": ["starchy_staples", "sugars"],
   "cake": ["starchy_staples", "sugars", "eggs"],
   "cookie": ["starchy_staples", "sugars"],
+  "biscuit": ["starchy_staples", "sugars"],
+  "biscuits": ["starchy_staples", "sugars"],
+  "cookie": ["starchy_staples", "sugars"],
+  "cookies": ["starchy_staples", "sugars"],
   "pie": ["starchy_staples", "sugars"],
+  "pastry": ["starchy_staples", "sugars"],
   "ice cream": ["dairy", "sugars"],
   "yogurt": ["dairy"],
   "cheese": ["dairy"],
@@ -290,7 +294,11 @@ const globalFoods: Record<string, string[]> = {
   "crab": ["meat_fish"],
   "lobster": ["meat_fish"],
   "egg": ["eggs"],
+  "eggs": ["eggs"],
+  "omlet": ["eggs"],
   "omelette": ["eggs"],
+  "omlette": ["eggs"],
+  "omelet": ["eggs"],
   "scrambled eggs": ["eggs"],
   "fried egg": ["eggs"],
   "boiled egg": ["eggs"],
@@ -328,6 +336,31 @@ const globalFoods: Record<string, string[]> = {
   "onion": ["other_vegetables"],
   "pepper": ["other_vegetables"],
   "garlic": ["other_vegetables"],
+  "chocolate": ["sugars"],
+  "candy": ["sugars"],
+  "sweet": ["sugars"],
+  "jam": ["sugars"],
+  "jelly": ["sugars"],
+  "honey": ["sugars"],
+  "maple syrup": ["sugars"],
+  "syrup": ["sugars"],
+  "sugar": ["sugars"],
+  "bread": ["starchy_staples"],
+  "toast": ["starchy_staples"],
+  "roll": ["starchy_staples"],
+  "bun": ["starchy_staples"],
+  "naan": ["starchy_staples"],
+  "chapati": ["starchy_staples"],
+  "roti": ["starchy_staples"],
+  "tortilla": ["starchy_staples"],
+  "crackers": ["starchy_staples"],
+  "chips": ["starchy_staples", "oils_fats"],
+  "popcorn": ["starchy_staples"],
+  "cereal": ["starchy_staples"],
+  "granola": ["starchy_staples", "legumes_nuts_seeds"],
+  "muesli": ["starchy_staples", "legumes_nuts_seeds"],
+  "oats": ["starchy_staples"],
+  "porridge": ["starchy_staples"],
   
   // Asian foods
   "sushi": ["starchy_staples", "meat_fish"],
@@ -374,7 +407,7 @@ const globalFoods: Record<string, string[]> = {
   "water": ["spices_condiments"]
 };
 
-// Function to identify global foods and map them to food groups
+// Enhanced function to identify global foods and map them to food groups
 export function identifyGlobalFood(foodItem: string): string[] {
   const lowerFoodItem = foodItem.toLowerCase().trim();
   
@@ -387,6 +420,23 @@ export function identifyGlobalFood(foodItem: string): string[] {
   for (const [globalFood, foodGroups] of Object.entries(globalFoods)) {
     if (lowerFoodItem.includes(globalFood)) {
       return foodGroups;
+    }
+    
+    // Check for plurals (adding 's' at the end)
+    if (globalFood + 's' === lowerFoodItem) {
+      return foodGroups;
+    }
+    
+    // Check for common spelling variations
+    if (globalFood === 'omelet' && 
+        (lowerFoodItem.includes('omlet') || 
+         lowerFoodItem.includes('omlette') || 
+         lowerFoodItem.includes('omelette'))) {
+      return foodGroups;
+    }
+    
+    if (globalFood === 'cookie' && lowerFoodItem.includes('biscuit')) {
+      return ["starchy_staples", "sugars"];
     }
   }
   
@@ -423,6 +473,25 @@ export function identifyGlobalFood(foodItem: string): string[] {
     if (foodGroups.length > 0) {
       return foodGroups;
     }
+  }
+  
+  // Additional fallback checks for common food categories
+  if (lowerFoodItem.includes("biscuit") || 
+      lowerFoodItem.includes("cookie") || 
+      lowerFoodItem.includes("cracker")) {
+    return ["starchy_staples", "sugars"];
+  }
+  
+  if (lowerFoodItem.includes("egg") || 
+      lowerFoodItem.includes("oml")) {
+    return ["eggs"];
+  }
+  
+  if (lowerFoodItem.includes("sweet") || 
+      lowerFoodItem.includes("dessert") || 
+      lowerFoodItem.includes("chocolate") || 
+      lowerFoodItem.includes("candy")) {
+    return ["sugars"];
   }
   
   return [];
