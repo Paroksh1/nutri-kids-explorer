@@ -1,371 +1,271 @@
-/**
- * Utility functions for food spelling suggestions
- */
+// Food mapping database - maps food names to their categories
+export const foodMappings: Record<string, string> = {
+  // Starchy staples
+  "rice": "starchy_staples",
+  "bread": "starchy_staples",
+  "pasta": "starchy_staples",
+  "wheat": "starchy_staples",
+  "chapati": "starchy_staples",
+  "roti": "starchy_staples",
+  "naan": "starchy_staples",
+  "potato": "starchy_staples",
+  "yam": "starchy_staples",
+  "cassava": "starchy_staples",
+  "corn": "starchy_staples",
+  "maize": "starchy_staples",
+  "oats": "starchy_staples",
+  "barley": "starchy_staples",
+  "quinoa": "starchy_staples",
+  "millet": "starchy_staples",
+  "sorghum": "starchy_staples",
+  
+  // Dark green leafy vegetables
+  "spinach": "dark_green_leafy_veg",
+  "kale": "dark_green_leafy_veg",
+  "amaranth": "dark_green_leafy_veg",
+  "cassava leaves": "dark_green_leafy_veg",
+  "pumpkin leaves": "dark_green_leafy_veg",
+  "mustard greens": "dark_green_leafy_veg",
+  "broccoli": "dark_green_leafy_veg",
+  "chard": "dark_green_leafy_veg",
+  "collard greens": "dark_green_leafy_veg",
+  "palak": "dark_green_leafy_veg", // Hindi name for spinach
+  "saag": "dark_green_leafy_veg", // General term for leafy greens in Hindi
+  
+  // Vitamin A rich fruits and vegetables
+  "carrot": "vitamin_a_fruits_vegetables",
+  "pumpkin": "vitamin_a_fruits_vegetables",
+  "sweet potato": "vitamin_a_fruits_vegetables",
+  "mango": "vitamin_a_fruits_vegetables",
+  "papaya": "vitamin_a_fruits_vegetables",
+  "cantaloupe": "vitamin_a_fruits_vegetables",
+  "apricot": "vitamin_a_fruits_vegetables",
+  "red pepper": "vitamin_a_fruits_vegetables",
+  "yellow pepper": "vitamin_a_fruits_vegetables",
+  "gajar": "vitamin_a_fruits_vegetables", // Hindi for carrot
+  "kaddu": "vitamin_a_fruits_vegetables", // Hindi for pumpkin
+  "aam": "vitamin_a_fruits_vegetables", // Hindi for mango
+  "papita": "vitamin_a_fruits_vegetables", // Hindi for papaya
+  
+  // Other vegetables
+  "tomato": "other_vegetables",
+  "eggplant": "other_vegetables",
+  "cucumber": "other_vegetables",
+  "cauliflower": "other_vegetables",
+  "cabbage": "other_vegetables",
+  "onion": "other_vegetables",
+  "garlic": "other_vegetables",
+  "green beans": "other_vegetables",
+  "peas": "other_vegetables",
+  "bell pepper": "other_vegetables",
+  "zucchini": "other_vegetables",
+  "okra": "other_vegetables",
+  "baingan": "other_vegetables", // Hindi for eggplant
+  "tamatar": "other_vegetables", // Hindi for tomato
+  "pyaaz": "other_vegetables", // Hindi for onion
+  "gobhi": "other_vegetables", // Hindi for cauliflower
+  "bhindi": "other_vegetables", // Hindi for okra
+  "matar": "other_vegetables", // Hindi for peas
+  
+  // Other fruits
+  "apple": "other_fruits",
+  "banana": "other_fruits",
+  "orange": "other_fruits",
+  "grape": "other_fruits",
+  "watermelon": "other_fruits",
+  "pineapple": "other_fruits",
+  "strawberry": "other_fruits",
+  "lemon": "other_fruits",
+  "lime": "other_fruits",
+  "pear": "other_fruits",
+  "peach": "other_fruits",
+  "plum": "other_fruits",
+  "kiwi": "other_fruits",
+  "seb": "other_fruits", // Hindi for apple
+  "kela": "other_fruits", // Hindi for banana
+  "santara": "other_fruits", // Hindi for orange
+  "angoor": "other_fruits", // Hindi for grapes
+  "tarbooj": "other_fruits", // Hindi for watermelon
+  "ananas": "other_fruits", // Hindi for pineapple
+  
+  // Organ meat
+  "liver": "organ_meat",
+  "kidney": "organ_meat",
+  "heart": "organ_meat",
+  "brain": "organ_meat",
+  "kaleji": "organ_meat", // Hindi for liver
+  "gurda": "organ_meat", // Hindi for kidney
+  
+  // Flesh meat
+  "beef": "meat_fish",
+  "pork": "meat_fish",
+  "chicken": "meat_fish",
+  "goat": "meat_fish",
+  "lamb": "meat_fish",
+  "duck": "meat_fish",
+  "rabbit": "meat_fish",
+  "venison": "meat_fish",
+  "murga": "meat_fish", // Hindi for chicken
+  "gosht": "meat_fish", // Hindi/Urdu for meat
+  "mutton": "meat_fish", // Commonly used in India for goat meat
+  
+  // Eggs
+  "egg": "eggs",
+  "eggs": "eggs",
+  "anda": "eggs", // Hindi for egg
+  
+  // Fish and seafood
+  "fish": "meat_fish",
+  "salmon": "meat_fish",
+  "tuna": "meat_fish",
+  "sardines": "meat_fish",
+  "shrimp": "meat_fish",
+  "crab": "meat_fish",
+  "lobster": "meat_fish",
+  "machli": "meat_fish", // Hindi for fish
+  "jhinga": "meat_fish", // Hindi for prawn/shrimp
+  
+  // Legumes, nuts and seeds
+  "beans": "legumes_nuts_seeds",
+  "lentils": "legumes_nuts_seeds",
+  "chickpeas": "legumes_nuts_seeds",
+  "peanuts": "legumes_nuts_seeds",
+  "almonds": "legumes_nuts_seeds",
+  "cashews": "legumes_nuts_seeds",
+  "walnuts": "legumes_nuts_seeds",
+  "sesame seeds": "legumes_nuts_seeds",
+  "flaxseeds": "legumes_nuts_seeds",
+  "chia seeds": "legumes_nuts_seeds",
+  "sunflower seeds": "legumes_nuts_seeds",
+  "pumpkin seeds": "legumes_nuts_seeds",
+  "dal": "legumes_nuts_seeds", // Hindi for lentils
+  "chana": "legumes_nuts_seeds", // Hindi for chickpeas
+  "rajma": "legumes_nuts_seeds", // Hindi for kidney beans
+  "moong": "legumes_nuts_seeds", // Hindi for mung beans
+  "urad": "legumes_nuts_seeds", // Hindi for black gram
+  "masoor": "legumes_nuts_seeds", // Hindi for red lentils
+  "badam": "legumes_nuts_seeds", // Hindi for almonds
+  "kaju": "legumes_nuts_seeds", // Hindi for cashews
+  "akhrot": "legumes_nuts_seeds", // Hindi for walnuts
+  "til": "legumes_nuts_seeds", // Hindi for sesame
+  
+  // Dairy
+  "milk": "dairy",
+  "cheese": "dairy",
+  "yogurt": "dairy",
+  "curd": "dairy",
+  "butter": "dairy",
+  "cream": "dairy",
+  "doodh": "dairy", // Hindi for milk
+  "paneer": "dairy", // Hindi for cottage cheese
+  "dahi": "dairy", // Hindi for yogurt
+  "makhan": "dairy", // Hindi for butter
+  "ghee": "dairy", // Clarified butter common in South Asian cooking
+  
+  // Oils and fats
+  "oil": "oils_fats",
+  "vegetable oil": "oils_fats",
+  "olive oil": "oils_fats",
+  "coconut oil": "oils_fats",
+  "ghee": "oils_fats",
+  "butter": "oils_fats",
+  "lard": "oils_fats",
+  "tel": "oils_fats", // Hindi for oil
+  
+  // Sugars
+  "sugar": "sugars",
+  "honey": "sugars",
+  "jaggery": "sugars",
+  "molasses": "sugars",
+  "syrup": "sugars",
+  "candy": "sugars",
+  "chocolate": "sugars",
+  "dessert": "sugars",
+  "cheeni": "sugars", // Hindi for sugar
+  "shakkar": "sugars", // Hindi for sugar
+  "gur": "sugars", // Hindi for jaggery
+  "shahad": "sugars", // Hindi for honey
+  "mithai": "sugars", // Hindi for sweets
+};
 
-/**
- * Map food names to standardized names for consistent tracking
- * This helps account for different ways users might enter the same food
- */
-export function mapFoodName(foodName: string): string {
+// Function to map food items to their food groups
+export function mapFoodToGroup(foodName: string): string {
   const normalizedName = foodName.toLowerCase().trim();
   
-  // Check for exact matches first
+  // Check if the exact name exists in our mapping
   if (foodMappings[normalizedName]) {
     return foodMappings[normalizedName];
   }
   
-  // Check for partial matches
+  // Check if the name contains any key from our mapping
   for (const [key, value] of Object.entries(foodMappings)) {
     if (normalizedName.includes(key)) {
       return value;
     }
   }
   
-  // Return original name if no mapping found
-  return foodName;
+  // If no match is found
+  return "unknown";
 }
 
-/**
- * Process food text to identify food groups
- * Returns an array of food group IDs
- */
-export function processFoodText(foodText: string): number[] {
-  if (!foodText || foodText.trim() === '') {
-    return [];
-  }
-  
-  const detectedGroups = new Set<number>();
-  const normalizedText = foodText.toLowerCase();
-  
-  // Check for cereals and grains (group 1)
-  if (/\b(rice|bread|wheat|corn|maize|chapati|roti|pasta|noodle|cereal|grain|oats)\b/.test(normalizedText)) {
-    detectedGroups.add(1);
-  }
-  
-  // Check for white roots and tubers (group 2)
-  if (/\b(potato|yam|cassava|sweet potato|taro|white root|tuber)\b/.test(normalizedText)) {
-    detectedGroups.add(2);
-  }
-  
-  // Check for vitamin A rich vegetables (group 3)
-  if (/\b(carrot|pumpkin|squash|sweet pepper|red pepper)\b/.test(normalizedText)) {
-    detectedGroups.add(3);
-  }
-  
-  // Check for dark green leafy vegetables (group 4)
-  if (/\b(spinach|kale|amaranth|cassava leaves|green leafy|palak|saag)\b/.test(normalizedText)) {
-    detectedGroups.add(4);
-  }
-  
-  // Check for other vegetables (group 5)
-  if (/\b(tomato|onion|eggplant|cucumber|cabbage|cauliflower|broccoli|vegetable|veg)\b/.test(normalizedText)) {
-    detectedGroups.add(5);
-  }
-  
-  // Check for vitamin A rich fruits (group 6)
-  if (/\b(mango|papaya|apricot|peach|cantaloupe)\b/.test(normalizedText)) {
-    detectedGroups.add(6);
-  }
-  
-  // Check for other fruits (group 7)
-  if (/\b(apple|banana|orange|grape|pear|berry|berries|fruit)\b/.test(normalizedText)) {
-    detectedGroups.add(7);
-  }
-  
-  // Check for organ meat (group 8)
-  if (/\b(liver|kidney|heart|organ meat|blood)\b/.test(normalizedText)) {
-    detectedGroups.add(8);
-  }
-  
-  // Check for flesh meats (group 9)
-  if (/\b(beef|pork|lamb|goat|chicken|duck|bird|game|meat|mutton)\b/.test(normalizedText)) {
-    detectedGroups.add(9);
-  }
-  
-  // Check for eggs (group 10)
-  if (/\b(egg|eggs)\b/.test(normalizedText)) {
-    detectedGroups.add(10);
-  }
-  
-  // Check for fish and seafood (group 11)
-  if (/\b(fish|seafood|prawn|shrimp|crab|shellfish)\b/.test(normalizedText)) {
-    detectedGroups.add(11);
-  }
-  
-  // Check for legumes, nuts and seeds (group 12)
-  if (/\b(bean|lentil|pulse|dal|nut|seed|peanut|almond|cashew|walnut|legume)\b/.test(normalizedText)) {
-    detectedGroups.add(12);
-  }
-  
-  // Check for milk and milk products (group 13)
-  if (/\b(milk|cheese|yogurt|yoghurt|curd|dairy|paneer|cream)\b/.test(normalizedText)) {
-    detectedGroups.add(13);
-  }
-  
-  // Check for oils and fats (group 14)
-  if (/\b(oil|fat|butter|ghee|cream|margarine)\b/.test(normalizedText)) {
-    detectedGroups.add(14);
-  }
-  
-  // Check for sweets (group 15)
-  if (/\b(sugar|honey|sweet|candy|chocolate|dessert|cake|cookie|biscuit|sweets|mithai)\b/.test(normalizedText)) {
-    detectedGroups.add(15);
-  }
-  
-  // Check for spices, condiments, beverages (group 16)
-  if (/\b(spice|salt|pepper|sauce|tea|coffee|beverage|drink|alcohol|wine|beer|masala|garam masala)\b/.test(normalizedText)) {
-    detectedGroups.add(16);
-  }
-  
-  return Array.from(detectedGroups);
-}
-
-/**
- * Get ingredients for a composite dish
- * Returns an array of ingredient names
- */
-export function getIngredientsForDish(dishName: string): string[] {
-  const normalizedName = dishName.toLowerCase().trim();
-  
-  // Common dishes and their ingredients
-  const dishIngredients: Record<string, string[]> = {
-    "pizza": ["wheat flour", "cheese", "tomato"],
-    "burger": ["bread", "meat", "lettuce", "tomato"],
-    "sandwich": ["bread", "vegetables", "cheese"],
-    "pasta": ["wheat flour", "tomato"],
-    "spaghetti": ["wheat flour", "tomato"],
-    "rice and beans": ["rice", "beans"],
-    "fried rice": ["rice", "vegetable", "egg"],
-    "dal": ["lentil", "spices"],
-    "curry": ["spices", "vegetable", "meat"],
-    "soup": ["vegetable", "water"],
-    "salad": ["vegetable", "olive oil"],
-    "omelette": ["egg", "vegetable"],
-    "chicken curry": ["chicken", "spices"],
-    "stir fry": ["vegetable", "oil"],
-    "noodles": ["wheat flour", "vegetable"],
-    "paratha": ["wheat flour", "oil"],
-    "roti": ["wheat flour"],
-    "chapati": ["wheat flour"],
-    "dosa": ["rice", "lentil"],
-    "idli": ["rice", "lentil"],
-    "biryani": ["rice", "meat", "spices"],
-    "pulao": ["rice", "vegetable", "spices"],
-    "samosa": ["wheat flour", "potato", "vegetable"],
-    "pakora": ["gram flour", "vegetable", "oil"],
-    "chaat": ["potato", "chickpea", "spices"],
-    "lassi": ["yogurt", "sugar"],
-    "paneer butter masala": ["paneer", "butter", "tomato", "spices"],
-    "smoothie": ["fruit", "milk"],
-    "milkshake": ["milk", "fruit", "sugar"]
-  };
-  
-  // Check for exact dish match
-  if (dishIngredients[normalizedName]) {
-    return dishIngredients[normalizedName];
-  }
-  
-  // Check for partial dish matches
-  for (const [dish, ingredients] of Object.entries(dishIngredients)) {
-    if (normalizedName.includes(dish)) {
-      return ingredients;
-    }
-  }
-  
-  return [];
-}
-
-/**
- * Guess the food group based on food name
- * Returns an array of potential food group names
- */
-export function guessFoodGroup(foodName: string): string[] {
+// Function to categorize Indian food items based on their names
+export function categorizeIndianFood(foodName: string): string {
   const normalizedName = foodName.toLowerCase().trim();
-  const groups: string[] = [];
   
-  // Starchy staples
-  if (/\b(rice|bread|wheat|corn|maize|chapati|roti|pasta|noodle|cereal|grain|oats|potato|yam|cassava)\b/.test(normalizedName)) {
-    groups.push("starchy_staples");
+  // Check for cereals and grains
+  if (/chawal|roti|chapati|paratha|naan|aata|atta|besan|suji|dalia|idli|dosa|sevai/.test(normalizedName)) {
+    return "starchy_staples";
   }
   
-  // Vitamin A rich fruits and vegetables
-  if (/\b(carrot|pumpkin|squash|sweet pepper|red pepper|mango|papaya|apricot|peach|cantaloupe)\b/.test(normalizedText)) {
-    groups.push("vitamin_a_fruits_vegetables");
+  // Check for pulses and legumes
+  if (/dal|daal|rajma|chana|chole|moong|urad|masoor|toor|arhar|bean|lobhia|moth/.test(normalizedName)) {
+    return "legumes_nuts_seeds";
   }
   
-  // Dark green leafy vegetables
-  if (/\b(spinach|kale|amaranth|cassava leaves|green leafy|palak|saag)\b/.test(normalizedText)) {
-    groups.push("dark_green_leafy_veg");
+  // Check for vegetables
+  if (/palak|saag|gobhi|aloo|bhindi|baingan|tamatar|pyaaz|gajar|matar|tinda|torai|kaddu|lauki/.test(normalizedName)) {
+    // Check for dark green leafy vegetables
+    if (/palak|saag/.test(normalizedName)) {
+      return "dark_green_leafy_veg";
+    }
+    // Check for vitamin A rich vegetables
+    if (/gajar|kaddu/.test(normalizedName)) {
+      return "vitamin_a_fruits_vegetables";
+    }
+    return "other_vegetables";
   }
   
-  // Other vegetables
-  if (/\b(tomato|onion|eggplant|cucumber|cabbage|cauliflower|broccoli|vegetable|veg)\b/.test(normalizedText)) {
-    groups.push("other_vegetables");
+  // Check for fruits
+  if (/seb|kela|santara|aam|amrood|papita|ananas|angoor|nashpati|anar|jamun|tarbooj/.test(normalizedName)) {
+    // Check for vitamin A rich fruits
+    if (/aam|papita/.test(normalizedName)) {
+      return "vitamin_a_fruits_vegetables";
+    }
+    return "other_fruits";
   }
   
-  // Other fruits
-  if (/\b(apple|banana|orange|grape|pear|berry|berries|fruit)\b/.test(normalizedText)) {
-    groups.push("other_fruits");
+  // Check for dairy products
+  if (/doodh|dahi|paneer|ghee|makhan|lassi|chaas|khoya|mava/.test(normalizedName)) {
+    return "dairy";
   }
   
-  // Organ meat
-  if (/\b(liver|kidney|heart|organ meat|blood)\b/.test(normalizedText)) {
-    groups.push("organ_meat");
+  // Check for meat and eggs
+  if (/machli|machi|gosht|mutton|chicken|murgi|murga|anda|anday/.test(normalizedName)) {
+    if (/anda|anday/.test(normalizedName)) {
+      return "eggs";
+    }
+    return "meat_fish";
   }
   
-  // Meat and fish
-  if (/\b(beef|pork|lamb|goat|chicken|duck|bird|game|meat|mutton|fish|seafood|prawn|shrimp|crab|shellfish)\b/.test(normalizedText)) {
-    groups.push("meat_fish");
+  // Check for sweets and desserts
+  if (/mithai|jalebi|halwa|barfi|ladoo|peda|gulab jamun|rasgulla|kheer|payasam|rabri/.test(normalizedName)) {
+    return "sugars";
   }
   
-  // Eggs
-  if (/\b(egg|eggs)\b/.test(normalizedText)) {
-    groups.push("eggs");
+  // Check for oils and fats
+  if (/tel|ghee|makhan|cream|malai/.test(normalizedName)) {
+    return "oils_fats";
   }
   
-  // Legumes, nuts and seeds
-  if (/\b(bean|lentil|pulse|dal|nut|seed|peanut|almond|cashew|walnut|legume)\b/.test(normalizedText)) {
-    groups.push("legumes_nuts_seeds");
-  }
-  
-  // Dairy
-  if (/\b(milk|cheese|yogurt|yoghurt|curd|dairy|paneer|cream)\b/.test(normalizedText)) {
-    groups.push("dairy");
-  }
-  
-  // Oils and fats
-  if (/\b(oil|fat|butter|ghee|cream|margarine)\b/.test(normalizedText)) {
-    groups.push("oils_fats");
-  }
-  
-  // Sugars
-  if (/\b(sugar|honey|sweet|candy|chocolate|dessert|cake|cookie|biscuit|sweets|mithai)\b/.test(normalizedText)) {
-    groups.push("sugars");
-  }
-  
-  // Spices and condiments
-  if (/\b(spice|salt|pepper|sauce|tea|coffee|beverage|drink|alcohol|wine|beer|masala|garam masala)\b/.test(normalizedText)) {
-    groups.push("spices_condiments");
-  }
-  
-  // If it's a mixed dish
-  if (/\b(pizza|burger|sandwich|pasta|curry|biryani|stir fry|soup|salad)\b/.test(normalizedText)) {
-    groups.push("mixed_dish");
-  }
-  
-  return groups;
+  return "unknown";
 }
-
-// Food mappings to standardize food names
-// The key is the input form (lowercase), the value is the standardized output
-export const foodMappings: Record<string, string> = {
-  "apple": "Apple",
-  "apples": "Apple",
-  "red apple": "Apple",
-  "green apple": "Apple",
-  
-  "banana": "Banana",
-  "bananas": "Banana",
-  "ripe banana": "Banana",
-  
-  "orange": "Orange",
-  "oranges": "Orange",
-  "mandarin": "Orange",
-  
-  "carrot": "Carrot",
-  "carrots": "Carrot",
-  "baby carrots": "Carrot",
-  
-  "broccoli": "Broccoli",
-  "brocoli": "Broccoli", // common misspelling
-  
-  "spinach": "Spinach",
-  "baby spinach": "Spinach",
-  
-  "chicken": "Chicken",
-  "chicken breast": "Chicken",
-  "grilled chicken": "Chicken",
-  
-  "beef": "Beef",
-  "ground beef": "Beef",
-  "steak": "Beef",
-  
-  "rice": "Rice",
-  "brown rice": "Brown Rice",
-  "white rice": "White Rice",
-  
-  "bread": "Bread",
-  "whole grain bread": "Whole Grain Bread",
-  "white bread": "White Bread",
-  
-  "milk": "Milk",
-  "whole milk": "Whole Milk",
-  "skim milk": "Skim Milk",
-  "almond milk": "Almond Milk",
-  
-  "yogurt": "Yogurt",
-  "yoghurt": "Yogurt", // alternative spelling
-  "greek yogurt": "Greek Yogurt",
-  
-  "cheese": "Cheese",
-  "cheddar": "Cheddar Cheese",
-  "mozzarella": "Mozzarella Cheese",
-  
-  "egg": "Egg",
-  "eggs": "Egg",
-  "boiled egg": "Egg",
-  
-  "potato": "Potato",
-  "potatoes": "Potato",
-  "sweet potato": "Sweet Potato",
-  
-  "tomato": "Tomato",
-  "tomatoes": "Tomato",
-  "cherry tomato": "Tomato",
-  
-  "bell pepper": "Bell Pepper",
-  "red pepper": "Bell Pepper",
-  "green pepper": "Bell Pepper",
-  
-  "onion": "Onion",
-  "onions": "Onion",
-  "red onion": "Onion",
-  
-  "garlic": "Garlic",
-  "garlic clove": "Garlic",
-  
-  "avocado": "Avocado",
-  "avocados": "Avocado",
-  
-  "lettuce": "Lettuce",
-  "romaine lettuce": "Lettuce",
-  "iceberg lettuce": "Lettuce",
-  
-  "cucumber": "Cucumber",
-  "cucumbers": "Cucumber",
-  
-  "fish": "Fish",
-  "salmon": "Salmon",
-  "tuna": "Tuna",
-  
-  "beans": "Beans",
-  "black beans": "Black Beans",
-  "kidney beans": "Kidney Beans",
-  
-  "lentils": "Lentils",
-  "red lentils": "Lentils",
-  
-  "nuts": "Nuts",
-  "almonds": "Almonds",
-  "walnuts": "Walnuts",
-  "peanuts": "Peanuts"
-};
-
-// Common food groups for nutritional assessment
-export const foodGroups = {
-  fruits: ["Apple", "Banana", "Orange", "Berries", "Mango", "Grapes", "Watermelon", "Pineapple"],
-  vegetables: ["Carrot", "Broccoli", "Spinach", "Lettuce", "Cucumber", "Tomato", "Bell Pepper", "Onion"],
-  proteins: ["Chicken", "Beef", "Fish", "Eggs", "Beans", "Lentils", "Tofu", "Nuts"],
-  grains: ["Rice", "Bread", "Pasta", "Oats", "Quinoa", "Barley", "Cereal"],
-  dairy: ["Milk", "Yogurt", "Cheese", "Cottage Cheese"]
-};

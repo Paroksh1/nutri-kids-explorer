@@ -1,92 +1,85 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, LogIn, BookOpen, Calculator } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Home, BookOpen, PieChart, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { isAuthenticated } from '@/components/auth/AuthForm';
+import { isAuthenticated } from '../auth/AuthForm';
 
-interface GlobalNavProps {
-  className?: string;
-}
-
-const GlobalNav: React.FC<GlobalNavProps> = ({ className }) => {
+const GlobalNav = () => {
   const location = useLocation();
-  const isHomePage = location.pathname === '/';
-  const isAuthenticated_ = isAuthenticated();
-  
-  // Only don't render on home page (it already has its own nav)
-  if (isHomePage) {
+  const isActive = (path: string) => location.pathname === path;
+  const isLoggedIn = isAuthenticated();
+
+  // Hide nav on the following pages
+  const hideNavOnPages = ['/', '/login', '/signup', '/onboarding'];
+  if (hideNavOnPages.includes(location.pathname)) {
     return null;
   }
-  
-  // Don't show on login page (it already has back button in navbar)
-  if (location.pathname === '/login') {
-    return null;
-  }
-  
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={cn("fixed bottom-4 left-0 right-0 z-50 flex justify-center", className)}
-    >
-      <div className="flex gap-2 px-6 py-3 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-primary/10">
-        <Link to="/">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="rounded-full hover:bg-primary/10"
-          >
-            <Home className="h-4 w-4 mr-2" />
-            Home
-          </Button>
-        </Link>
-        
-        {!isAuthenticated_ && (
-          <Link to="/login">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="rounded-full hover:bg-primary/10"
-            >
-              <LogIn className="h-4 w-4 mr-2" />
-              Sign In
-            </Button>
+    <div className="fixed bottom-0 w-full bg-background border-t p-2 z-50">
+      <div className="flex justify-around items-center max-w-md mx-auto">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className={cn(
+            "flex-col items-center rounded-md h-16 px-2",
+            isActive('/dashboard') && "bg-primary/10 text-primary"
+          )}
+          asChild
+        >
+          <Link to={isLoggedIn ? '/dashboard' : '/login'}>
+            <Home className="h-5 w-5 mb-1" />
+            <span className="text-xs">Home</span>
           </Link>
-        )}
-        
-        <Link to="/dietary-diversity">
-          <Button 
-            variant={location.pathname === '/dietary-diversity' ? 'default' : 'ghost'}
-            size="sm" 
-            className={cn(
-              "rounded-full",
-              location.pathname !== '/dietary-diversity' && "hover:bg-primary/10"
-            )}
-          >
-            <Calculator className="h-4 w-4 mr-2" />
-            Diversity Calculator
-          </Button>
-        </Link>
-        
-        <Link to="/education">
-          <Button 
-            variant={location.pathname === '/education' ? 'default' : 'ghost'}
-            size="sm" 
-            className={cn(
-              "rounded-full",
-              location.pathname !== '/education' && "hover:bg-primary/10"
-            )}
-          >
-            <BookOpen className="h-4 w-4 mr-2" />
-            Education
-          </Button>
-        </Link>
+        </Button>
+
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className={cn(
+            "flex-col items-center rounded-md h-16 px-2",
+            isActive('/education') && "bg-primary/10 text-primary"
+          )}
+          asChild
+        >
+          <Link to="/education">
+            <BookOpen className="h-5 w-5 mb-1" />
+            <span className="text-xs">Education</span>
+          </Link>
+        </Button>
+
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className={cn(
+            "flex-col items-center rounded-md h-16 px-2",
+            isActive('/dietary-diversity') && "bg-primary/10 text-primary"
+          )}
+          asChild
+        >
+          <Link to={isLoggedIn ? '/dietary-diversity' : '/login'}>
+            <PieChart className="h-5 w-5 mb-1" />
+            <span className="text-xs">Diversity</span>
+          </Link>
+        </Button>
+
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className={cn(
+            "flex-col items-center rounded-md h-16 px-2",
+            isActive('/profile') && "bg-primary/10 text-primary"
+          )}
+          asChild
+        >
+          <Link to={isLoggedIn ? '/profile' : '/login'}>
+            <User className="h-5 w-5 mb-1" />
+            <span className="text-xs">Profile</span>
+          </Link>
+        </Button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
