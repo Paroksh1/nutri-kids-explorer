@@ -1,3 +1,4 @@
+
 import { getIngredientsForDish, guessFoodGroup, processFoodText } from "./foodNameMapper";
 
 // Food groups according to FAO/WHO guidelines
@@ -125,6 +126,7 @@ const hindiDishToFoodGroup: Record<string, string> = {
   "anda": "eggs",
   "egg": "eggs",
   "omelette": "eggs",
+  "omlet": "eggs",
   
   // Nuts & Seeds
   "badam": "legumes_nuts_seeds",
@@ -206,6 +208,7 @@ const hindiDishToFoodGroup: Record<string, string> = {
   "pasta": "starchy_staples",
   "noodles": "starchy_staples",
   "maggi": "starchy_staples",
+  "maggie": "starchy_staples",
   "chowmein": "starchy_staples",
   "fried rice": "starchy_staples",
   "manchurian": "mixed",
@@ -216,7 +219,17 @@ const hindiDishToFoodGroup: Record<string, string> = {
   "frankies": "mixed",
   "chaat": "mixed",
   "golgappa": "starchy_staples",
-  "pani puri": "starchy_staples"
+  "pani puri": "starchy_staples",
+
+  // Breakfast items and snacks
+  "biscuit": "starchy_staples",
+  "biscuits": "starchy_staples",
+  "toast": "starchy_staples",
+  "cornflakes": "starchy_staples",
+  "muesli": "starchy_staples",
+  "granola": "starchy_staples",
+  "pancake": "starchy_staples",
+  "waffle": "starchy_staples"
 };
 
 // Function to identify Hindi foods and map them to food groups
@@ -266,7 +279,6 @@ const globalFoods: Record<string, string[]> = {
   "muffin": ["starchy_staples", "sugars"],
   "donut": ["starchy_staples", "sugars"],
   "cake": ["starchy_staples", "sugars", "eggs"],
-  "cookie": ["starchy_staples", "sugars"],
   "biscuit": ["starchy_staples", "sugars"],
   "biscuits": ["starchy_staples", "sugars"],
   "cookie": ["starchy_staples", "sugars"],
@@ -345,8 +357,6 @@ const globalFoods: Record<string, string[]> = {
   "maple syrup": ["sugars"],
   "syrup": ["sugars"],
   "sugar": ["sugars"],
-  "bread": ["starchy_staples"],
-  "toast": ["starchy_staples"],
   "roll": ["starchy_staples"],
   "bun": ["starchy_staples"],
   "naan": ["starchy_staples"],
@@ -356,7 +366,6 @@ const globalFoods: Record<string, string[]> = {
   "crackers": ["starchy_staples"],
   "chips": ["starchy_staples", "oils_fats"],
   "popcorn": ["starchy_staples"],
-  "cereal": ["starchy_staples"],
   "granola": ["starchy_staples", "legumes_nuts_seeds"],
   "muesli": ["starchy_staples", "legumes_nuts_seeds"],
   "oats": ["starchy_staples"],
@@ -371,7 +380,6 @@ const globalFoods: Record<string, string[]> = {
   "pad thai": ["starchy_staples", "eggs"],
   "curry": ["mixed"],
   "biryani": ["starchy_staples", "meat_fish"],
-  "naan": ["starchy_staples"],
   "samosa": ["starchy_staples"],
   "dim sum": ["mixed"],
   "spring roll": ["starchy_staples", "other_vegetables"],
@@ -404,7 +412,15 @@ const globalFoods: Record<string, string[]> = {
   "juice": ["other_fruits"],
   "smoothie": ["mixed"],
   "soda": ["sugars"],
-  "water": ["spices_condiments"]
+  "water": ["spices_condiments"],
+  
+  // Indian/Asian specific foods with spelling variations
+  "maggi": ["starchy_staples"],
+  "maggie": ["starchy_staples"],
+  "paratha": ["starchy_staples"],
+  "parata": ["starchy_staples"],
+  "dosa": ["starchy_staples"],
+  "idli": ["starchy_staples"]
 };
 
 // Enhanced function to identify global foods and map them to food groups
@@ -433,10 +449,6 @@ export function identifyGlobalFood(foodItem: string): string[] {
          lowerFoodItem.includes('omlette') || 
          lowerFoodItem.includes('omelette'))) {
       return foodGroups;
-    }
-    
-    if (globalFood === 'cookie' && lowerFoodItem.includes('biscuit')) {
-      return ["starchy_staples", "sugars"];
     }
   }
   

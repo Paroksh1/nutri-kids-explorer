@@ -1,3 +1,4 @@
+
 const foodGroups = {
   grains: "Grains, white roots and tubers, and plantains",
   pulses: "Pulses (beans, peas and lentils)",
@@ -235,7 +236,7 @@ export const foodNameToGroupMap: Record<string, string> = {
   
   // Desserts
   cake: foodGroups.grains,
-  cookie: foodGroups.grains,
+  cookies: foodGroups.grains,
   pie: foodGroups.grains,
   
   // Beverages (typically not counted in food groups but included for completeness)
@@ -258,8 +259,6 @@ export const foodNameToGroupMap: Record<string, string> = {
   "biscuit": foodGroups.grains,
   "biscuits": foodGroups.grains,
   "cookie": foodGroups.grains,
-  "cookies": foodGroups.grains,
-  "cracker": foodGroups.grains,
   "crackers": foodGroups.grains,
   
   "sweet": foodGroups.grains,
@@ -274,11 +273,38 @@ export const foodNameToGroupMap: Record<string, string> = {
   "jam": foodGroups.grains,
   "jelly": foodGroups.grains,
   
-  "cereal": foodGroups.grains,
+  // Additional items with spelling variants
   "porridge": foodGroups.grains,
-  "oats": foodGroups.grains,
   "granola": foodGroups.grains,
   "muesli": foodGroups.grains,
+  "toast": foodGroups.grains,
+  "parata": foodGroups.grains, // variant of paratha
+  "parotta": foodGroups.grains, // South Indian variant
+  "rotti": foodGroups.grains, // variant of roti
+  "chappati": foodGroups.grains, // variant of chapati
+  "maggi": foodGroups.grains, // instant noodles common in India
+  "maggie": foodGroups.grains, // misspelling of Maggi
+  "noodels": foodGroups.grains, // misspelling of noodles
+  "pasta": foodGroups.grains,
+  "spagetti": foodGroups.grains, // misspelling of spaghetti
+  "spaghetti": foodGroups.grains,
+  "macaroni": foodGroups.grains,
+  "bun": foodGroups.grains,
+  "pav": foodGroups.grains, // Indian bread
+  "pawbhaji": foodGroups.grains, // misspelling of pav bhaji
+  "pavbhaji": foodGroups.grains,
+  "beal": foodGroups.meat, // misspelling of beef
+  "checken": foodGroups.meat, // misspelling of chicken
+  "chiken": foodGroups.meat, // misspelling of chicken
+  "panir": foodGroups.dairy, // misspelling of paneer
+  "yougurt": foodGroups.dairy, // misspelling of yogurt
+  "yoghurt": foodGroups.dairy, // variant spelling of yogurt
+  "dahi": foodGroups.dairy, // Hindi for yogurt
+  "curd": foodGroups.dairy,
+  "buttermilk": foodGroups.dairy,
+  "chaas": foodGroups.dairy, // Indian buttermilk
+  "lassi": foodGroups.dairy, // yogurt drink
+  "milkshake": foodGroups.dairy
 };
 
 // Function to guess food group based on partial matches
@@ -526,7 +552,7 @@ export function processFoodText(text: string): number[] {
   }
   
   // Eggs
-  if (containsFoodFromGroup(lowerText, ['egg'])) {
+  if (containsFoodFromGroup(lowerText, ['egg', 'omlet', 'omelette', 'omelet'])) {
     foodGroups.add(10);
   }
   

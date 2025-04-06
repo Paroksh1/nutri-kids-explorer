@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, Search, Check, Trash } from 'lucide-react';
+import { Plus, Search, Check, Trash, HelpCircle } from 'lucide-react';
 import { getMealLogs, addMealLog, getFoodDatabase } from './MealService';
+import { findSimilarFoods, isSameFood } from '@/utils/foodSuggestionUtils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface FoodItem {
   id: string;
@@ -34,6 +37,7 @@ const MealTracker: React.FC<{ childId: string }> = ({ childId }) => {
   const [selectedFoods, setSelectedFoods] = useState<Array<FoodItem & { quantity: number }>>([]);
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
   const [foodDatabase, setFoodDatabase] = useState<FoodItem[]>([]);
+  const [suggestedFoods, setSuggestedFoods] = useState<string[]>([]);
   
   useEffect(() => {
     // Load meal logs for the child
@@ -48,13 +52,37 @@ const MealTracker: React.FC<{ childId: string }> = ({ childId }) => {
     // Filter food database based on search term
     if (searchTerm.trim() === '') {
       setSearchResults([]);
+      setSuggestedFoods([]);
     } else {
-      const results = foodDatabase.filter(food => 
+      // First, try to find exact matches
+      const exactResults = foodDatabase.filter(food => 
         food.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setSearchResults(results);
+      
+      setSearchResults(exactResults);
+      
+      // If no exact matches found, look for similar foods
+      if (exactResults.length === 0 && searchTerm.trim().length >= 3) {
+        // Get all food names from database
+        const foodNames = foodDatabase.map(food => food.name);
+        
+        // Find similar foods based on spelling
+        const similarFoods = findSimilarFoods(searchTerm, foodNames);
+        
+        // Set suggestions
+        setSuggestedFoods(similarFoods);
+      } else {
+        setSuggestedFoods([]);
+      }
     }
   }, [searchTerm, foodDatabase]);
+  
+  const handleSuggestionClick = (suggestedFood: string) => {
+    // Set search term to the suggested food
+    setSearchTerm(suggestedFood);
+    // Clear suggestions
+    setSuggestedFoods([]);
+  };
   
   const handleAddFood = (food: FoodItem) => {
     // Check if food is already added
@@ -66,6 +94,7 @@ const MealTracker: React.FC<{ childId: string }> = ({ childId }) => {
     setSelectedFoods(prev => [...prev, { ...food, quantity: 1 }]);
     setSearchTerm('');
     setSearchResults([]);
+    setSuggestedFoods([]);
   };
   
   const handleUpdateQuantity = (id: string, quantity: number) => {
@@ -163,6 +192,29 @@ const MealTracker: React.FC<{ childId: string }> = ({ childId }) => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
+                
+                {/* Food Spelling Suggestions Alert */}
+                {suggestedFoods.length > 0 && (
+                  <Alert className="bg-blue-50 border-blue-200 mt-2">
+                    <HelpCircle className="h-4 w-4 text-blue-500" />
+                    <AlertDescription className="text-blue-700 text-sm">
+                      <span>Did you mean: </span>
+                      {suggestedFoods.map((food, index) => (
+                        <React.Fragment key={food}>
+                          <Button 
+                            variant="link" 
+                            className="p-0 h-auto text-blue-600 font-medium underline"
+                            onClick={() => handleSuggestionClick(food)}
+                          >
+                            {food}
+                          </Button>
+                          {index < suggestedFoods.length - 1 && <span>, </span>}
+                        </React.Fragment>
+                      ))}
+                      <span>?</span>
+                    </AlertDescription>
+                  </Alert>
+                )}
                 
                 {searchResults.length > 0 && (
                   <div className="border rounded-md mt-1 max-h-60 overflow-y-auto">
