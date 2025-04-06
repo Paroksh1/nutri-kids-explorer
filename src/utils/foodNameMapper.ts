@@ -269,3 +269,99 @@ export function categorizeIndianFood(foodName: string): string {
   
   return "unknown";
 }
+
+// Function to guess the food group for a food item
+export function guessFoodGroup(foodName: string): string {
+  const hindiGroup = categorizeIndianFood(foodName);
+  if (hindiGroup !== "unknown") {
+    return hindiGroup;
+  }
+  
+  return mapFoodToGroup(foodName);
+}
+
+// Function to get ingredients for a dish
+export const knownDishes: Record<string, string[]> = {
+  "pizza": ["flour", "cheese", "tomato", "olive oil"],
+  "burger": ["bread", "meat", "lettuce", "tomato", "onion"],
+  "pasta": ["flour", "egg", "olive oil"],
+  "sushi": ["rice", "fish", "seaweed", "vinegar"],
+  "curry": ["spices", "onion", "tomato", "vegetables", "meat"],
+  "biryani": ["rice", "meat", "spices", "onion", "yogurt"],
+  "dal": ["lentils", "onion", "tomato", "spices"],
+  "salad": ["lettuce", "tomato", "cucumber", "olive oil"],
+  "sandwich": ["bread", "cheese", "vegetables", "meat"],
+  "soup": ["vegetables", "water", "spices"],
+  "noodles": ["wheat", "water", "vegetables"],
+  "pancake": ["flour", "egg", "milk", "butter"],
+  "omelette": ["egg", "milk", "vegetables", "cheese"],
+  "stir fry": ["vegetables", "oil", "meat", "sauce"],
+  "taco": ["corn", "meat", "lettuce", "cheese", "tomato"],
+  "samosa": ["flour", "potato", "peas", "spices", "oil"],
+  "dosa": ["rice", "lentils", "potato", "oil"],
+  "idli": ["rice", "lentils", "water"],
+  "paratha": ["wheat", "oil", "vegetables"],
+  "roti": ["wheat", "water"]
+};
+
+export function getIngredientsForDish(dishName: string): string[] {
+  const normalizedName = dishName.toLowerCase().trim();
+  
+  // Check if the dish is in our known dishes
+  for (const [dish, ingredients] of Object.entries(knownDishes)) {
+    if (normalizedName.includes(dish)) {
+      return ingredients;
+    }
+  }
+  
+  // Return an empty array if dish is not recognized
+  return [];
+}
+
+// Process food text to identify food groups
+export function processFoodText(foodText: string): number[] {
+  const foodItems = foodText.toLowerCase()
+    .split(/[,;\n\s]+/)
+    .map(item => item.trim())
+    .filter(item => item.length > 0);
+  
+  const foodGroupIds = new Set<number>();
+  
+  foodItems.forEach(food => {
+    // Try to get ingredients if it's a dish
+    const ingredients = getIngredientsForDish(food);
+    if (ingredients.length > 0) {
+      ingredients.forEach(ingredient => {
+        addFoodGroupId(foodGroupIds, guessFoodGroup(ingredient));
+      });
+    } else {
+      // Try to identify the food group directly
+      addFoodGroupId(foodGroupIds, guessFoodGroup(food));
+    }
+  });
+  
+  return Array.from(foodGroupIds);
+}
+
+// Helper function to add food group IDs to a set
+function addFoodGroupId(groupSet: Set<number>, groupName: string) {
+  if (groupName === "starchy_staples") groupSet.add(1);
+  else if (groupName === "vitamin_a_fruits_vegetables") {
+    groupSet.add(3);
+    groupSet.add(6);
+  }
+  else if (groupName === "dark_green_leafy_veg") groupSet.add(4);
+  else if (groupName === "other_vegetables") groupSet.add(5);
+  else if (groupName === "other_fruits") groupSet.add(7);
+  else if (groupName === "organ_meat") groupSet.add(8);
+  else if (groupName === "meat_fish") {
+    groupSet.add(9);
+    groupSet.add(11);
+  }
+  else if (groupName === "eggs") groupSet.add(10);
+  else if (groupName === "legumes_nuts_seeds") groupSet.add(12);
+  else if (groupName === "dairy") groupSet.add(13);
+  else if (groupName === "oils_fats") groupSet.add(14);
+  else if (groupName === "sugars") groupSet.add(15);
+  else if (groupName === "spices_condiments") groupSet.add(16);
+}
