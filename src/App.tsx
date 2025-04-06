@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Education from "./pages/Education";
 import DietaryDiversity from "./pages/DietaryDiversity";
+import MealPlans from "./pages/MealPlans";
 import { isAuthenticated } from "./components/auth/AuthForm";
 import React from "react";
 
@@ -42,6 +43,7 @@ const App = () => {
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/education" element={<Education />} />
             <Route path="/dietary-diversity" element={<ProtectedRoute><DietaryDiversity /></ProtectedRoute>} />
+            <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

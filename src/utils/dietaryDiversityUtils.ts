@@ -1,510 +1,298 @@
+/**
+ * Utility functions for Dietary Diversity calculations
+ */
 
-import { getIngredientsForDish, guessFoodGroup, processFoodText } from "./foodNameMapper";
-
-// Food groups according to FAO/WHO guidelines
-export const foodGroupsGlobal = {
-  starchy_staples: "Grains, roots, and tubers",
-  dark_green_leafy_veg: "Dark green leafy vegetables",
-  vitamin_a_fruits_vegetables: "Vitamin A rich fruits and vegetables",
-  other_fruits: "Other fruits",
-  other_vegetables: "Other vegetables",
-  organ_meat: "Organ meat",
-  meat_fish: "Meat and fish",
-  eggs: "Eggs",
-  legumes_nuts_seeds: "Legumes, nuts and seeds",
-  dairy: "Milk and milk products",
-  oils_fats: "Oils and fats",
-  sugars: "Sweets and sugars",
-  spices_condiments: "Spices, condiments, beverages"
-};
-
-// Hindi dish to food group mapping
-const hindiDishToFoodGroup: Record<string, string> = {
-  // Rice & grains
-  "chawal": "starchy_staples",
-  "bhaat": "starchy_staples",
-  "rice": "starchy_staples",
-  "biryani": "starchy_staples",
-  "pulao": "starchy_staples",
-  "khichdi": "starchy_staples",
-  
-  // Breads
-  "roti": "starchy_staples",
-  "chapati": "starchy_staples",
-  "paratha": "starchy_staples",
-  "naan": "starchy_staples",
-  "puri": "starchy_staples",
-  "bhakri": "starchy_staples",
-  "thepla": "starchy_staples",
-  "dosa": "starchy_staples",
-  "idli": "starchy_staples",
-  "appam": "starchy_staples",
-  "uttapam": "starchy_staples",
-  
-  // Legumes & pulses
-  "dal": "legumes_nuts_seeds",
-  "rajma": "legumes_nuts_seeds",
-  "chana": "legumes_nuts_seeds",
-  "chole": "legumes_nuts_seeds",
-  "sambhar": "legumes_nuts_seeds",
-  "masoor": "legumes_nuts_seeds",
-  "toor": "legumes_nuts_seeds",
-  "moong": "legumes_nuts_seeds",
-  "urad": "legumes_nuts_seeds",
-  
-  // Dairy
-  "dahi": "dairy",
-  "yogurt": "dairy",
-  "paneer": "dairy",
-  "cheese": "dairy",
-  "butter": "dairy",
-  "ghee": "dairy",
-  "makhan": "dairy",
-  "lassi": "dairy",
-  "chaas": "dairy",
-  "milk": "dairy",
-  "doodh": "dairy",
-  
-  // Vegetables
-  "sabzi": "other_vegetables",
-  "vegetables": "other_vegetables",
-  "aloo": "starchy_staples",
-  "potato": "starchy_staples",
-  "gobi": "other_vegetables",
-  "cauliflower": "other_vegetables",
-  "matar": "legumes_nuts_seeds",
-  "peas": "legumes_nuts_seeds",
-  "bhindi": "other_vegetables",
-  "okra": "other_vegetables",
-  "baingan": "other_vegetables",
-  "eggplant": "other_vegetables",
-  "brinjal": "other_vegetables",
-  "pyaz": "other_vegetables",
-  "onion": "other_vegetables",
-  "tamatar": "other_vegetables",
-  "tomato": "other_vegetables",
-  "lahsun": "other_vegetables",
-  "garlic": "other_vegetables",
-  "adrak": "other_vegetables",
-  "ginger": "other_vegetables",
-  "gajar": "vitamin_a_fruits_vegetables",
-  "carrot": "vitamin_a_fruits_vegetables",
-  "palak": "dark_green_leafy_veg",
-  "spinach": "dark_green_leafy_veg",
-  "methi": "dark_green_leafy_veg",
-  "fenugreek": "dark_green_leafy_veg",
-  "sarson": "dark_green_leafy_veg",
-  "mustard greens": "dark_green_leafy_veg",
-  
-  // Fruits
-  "aam": "vitamin_a_fruits_vegetables",
-  "mango": "vitamin_a_fruits_vegetables",
-  "kela": "other_fruits",
-  "banana": "other_fruits",
-  "seb": "other_fruits",
-  "apple": "other_fruits",
-  "santra": "other_fruits",
-  "orange": "other_fruits",
-  "papita": "vitamin_a_fruits_vegetables",
-  "papaya": "vitamin_a_fruits_vegetables",
-  "ananas": "other_fruits",
-  "pineapple": "other_fruits",
-  
-  // Meat & Fish
-  "chicken": "meat_fish",
-  "murgh": "meat_fish",
-  "mutton": "meat_fish",
-  "gosht": "meat_fish",
-  "machli": "meat_fish",
-  "fish": "meat_fish",
-  "jhinga": "meat_fish",
-  "prawn": "meat_fish",
-  "keema": "meat_fish",
-  "minced meat": "meat_fish",
-  
-  // Eggs
-  "anda": "eggs",
-  "egg": "eggs",
-  "omelette": "eggs",
-  "omlet": "eggs",
-  
-  // Nuts & Seeds
-  "badam": "legumes_nuts_seeds",
-  "almond": "legumes_nuts_seeds",
-  "akhrot": "legumes_nuts_seeds",
-  "walnut": "legumes_nuts_seeds",
-  "kaju": "legumes_nuts_seeds",
-  "cashew": "legumes_nuts_seeds",
-  "pista": "legumes_nuts_seeds",
-  "pistachio": "legumes_nuts_seeds",
-  "til": "legumes_nuts_seeds",
-  "sesame": "legumes_nuts_seeds",
-  "moongfali": "legumes_nuts_seeds",
-  "peanut": "legumes_nuts_seeds",
-  
-  // Oils & Fats
-  "tel": "oils_fats",
-  "oil": "oils_fats",
-  
-  // Sweets & Desserts
-  "mithai": "sugars",
-  "sweet": "sugars",
-  "jalebi": "sugars",
-  "gulab jamun": "sugars",
-  "rasgulla": "sugars",
-  "halwa": "sugars",
-  "barfi": "sugars",
-  "ladoo": "sugars",
-  "kheer": "sugars",
-  "payasam": "sugars",
-  "shrikhand": "sugars",
-  
-  // Spices & Condiments
-  "masala": "spices_condiments",
-  "spice": "spices_condiments",
-  "haldi": "spices_condiments",
-  "turmeric": "spices_condiments",
-  "jeera": "spices_condiments",
-  "cumin": "spices_condiments",
-  "dhaniya": "spices_condiments",
-  "coriander": "spices_condiments",
-  "mirch": "spices_condiments",
-  "chilli": "spices_condiments",
-  "namak": "spices_condiments",
-  "salt": "spices_condiments",
-  "chai": "spices_condiments",
-  "tea": "spices_condiments",
-  "coffee": "spices_condiments",
-  
-  // Indian Dishes
-  "dal-chawal": "mixed",
-  "butter chicken": "meat_fish",
-  "chicken tikka": "meat_fish",
-  "tandoori chicken": "meat_fish",
-  "malai kofta": "mixed",
-  "chana masala": "legumes_nuts_seeds",
-  "rajma chawal": "legumes_nuts_seeds",
-  "pav bhaji": "mixed",
-  "vada pav": "starchy_staples",
-  "samosa": "starchy_staples",
-  "pakora": "mixed",
-  "bhaji": "other_vegetables",
-  "upma": "starchy_staples",
-  "poha": "starchy_staples",
-  "dhokla": "legumes_nuts_seeds",
-  "khandvi": "legumes_nuts_seeds",
-  "thali": "mixed",
-  "saag": "dark_green_leafy_veg",
-  "korma": "meat_fish",
-  "curry": "mixed",
-  "tikka": "meat_fish",
-  "seekh kebab": "meat_fish",
-  "bhurji": "eggs",
-  
-  // Fast Food / International
-  "pizza": "mixed",
-  "burger": "mixed",
-  "sandwich": "mixed",
-  "pasta": "starchy_staples",
-  "noodles": "starchy_staples",
-  "maggi": "starchy_staples",
-  "maggie": "starchy_staples",
-  "chowmein": "starchy_staples",
-  "fried rice": "starchy_staples",
-  "manchurian": "mixed",
-  "momo": "mixed",
-  "dumpling": "starchy_staples",
-  "roll": "mixed",
-  "paratha roll": "mixed",
-  "frankies": "mixed",
-  "chaat": "mixed",
-  "golgappa": "starchy_staples",
-  "pani puri": "starchy_staples",
-
-  // Breakfast items and snacks
-  "biscuit": "starchy_staples",
-  "biscuits": "starchy_staples",
-  "toast": "starchy_staples",
-  "cornflakes": "starchy_staples",
-  "muesli": "starchy_staples",
-  "granola": "starchy_staples",
-  "pancake": "starchy_staples",
-  "waffle": "starchy_staples"
-};
-
-// Function to identify Hindi foods and map them to food groups
-export function identifyHindiFood(foodItem: string): string[] {
-  const lowerFoodItem = foodItem.toLowerCase().trim();
-  
-  // Direct match with a Hindi food name
-  if (hindiDishToFoodGroup[lowerFoodItem]) {
-    return [hindiDishToFoodGroup[lowerFoodItem]];
-  }
-  
-  // Check for partial matches
-  for (const [hindiFood, foodGroup] of Object.entries(hindiDishToFoodGroup)) {
-    if (lowerFoodItem.includes(hindiFood)) {
-      return [foodGroup];
-    }
-  }
-  
-  return [];
+// Food groups as defined by WHO for minimum dietary diversity for women (MDD-W) and children (MDD)
+export enum FoodGroup {
+  STARCHY_STAPLES = "Starchy Staples",
+  PULSES = "Beans, Peas and Lentils",
+  NUTS_AND_SEEDS = "Nuts and Seeds",
+  DAIRY = "Dairy Products",
+  FLESH_FOODS = "Flesh Foods",
+  EGGS = "Eggs",
+  VITAMIN_A_RICH_FRUITS_AND_VEGETABLES = "Vitamin A-rich Fruits and Vegetables",
+  OTHER_FRUITS_AND_VEGETABLES = "Other Fruits and Vegetables"
 }
 
-// Function to get food group based on Hindi food name
-export function getHindiFoodGroup(foodItem: string): string {
-  const groups = identifyHindiFood(foodItem);
-  return groups.length > 0 ? groups[0] : "unknown";
+export interface ConsumedFood {
+  name: string;
+  group: FoodGroup;
+  category?: string;
 }
 
-// Enhanced global food recognition database with more common foods and spelling variations
-const globalFoods: Record<string, string[]> = {
-  // Western foods
-  "pizza": ["starchy_staples", "dairy", "other_vegetables"],
-  "burger": ["starchy_staples", "meat_fish", "other_vegetables"],
-  "sandwich": ["starchy_staples", "mixed"],
-  "pasta": ["starchy_staples"],
-  "spaghetti": ["starchy_staples"],
-  "macaroni": ["starchy_staples"],
-  "lasagna": ["starchy_staples", "dairy", "other_vegetables"],
-  "bread": ["starchy_staples"],
-  "bagel": ["starchy_staples"],
-  "croissant": ["starchy_staples"],
-  "toast": ["starchy_staples"],
-  "cereal": ["starchy_staples"],
-  "oatmeal": ["starchy_staples"],
-  "pancake": ["starchy_staples", "eggs"],
-  "waffle": ["starchy_staples", "eggs"],
-  "french toast": ["starchy_staples", "eggs"],
-  "muffin": ["starchy_staples", "sugars"],
-  "donut": ["starchy_staples", "sugars"],
-  "cake": ["starchy_staples", "sugars", "eggs"],
-  "biscuit": ["starchy_staples", "sugars"],
-  "biscuits": ["starchy_staples", "sugars"],
-  "cookie": ["starchy_staples", "sugars"],
-  "cookies": ["starchy_staples", "sugars"],
-  "pie": ["starchy_staples", "sugars"],
-  "pastry": ["starchy_staples", "sugars"],
-  "ice cream": ["dairy", "sugars"],
-  "yogurt": ["dairy"],
-  "cheese": ["dairy"],
-  "milk": ["dairy"],
-  "butter": ["dairy", "oils_fats"],
-  "salad": ["other_vegetables"],
-  "soup": ["mixed"],
-  "stew": ["mixed"],
-  "steak": ["meat_fish"],
-  "chicken": ["meat_fish"],
-  "beef": ["meat_fish"],
-  "pork": ["meat_fish"],
-  "lamb": ["meat_fish"],
-  "turkey": ["meat_fish"],
-  "fish": ["meat_fish"],
-  "salmon": ["meat_fish"],
-  "tuna": ["meat_fish"],
-  "shrimp": ["meat_fish"],
-  "crab": ["meat_fish"],
-  "lobster": ["meat_fish"],
-  "egg": ["eggs"],
-  "eggs": ["eggs"],
-  "omlet": ["eggs"],
-  "omelette": ["eggs"],
-  "omlette": ["eggs"],
-  "omelet": ["eggs"],
-  "scrambled eggs": ["eggs"],
-  "fried egg": ["eggs"],
-  "boiled egg": ["eggs"],
-  "potato": ["starchy_staples"],
-  "french fries": ["starchy_staples", "oils_fats"],
-  "mashed potato": ["starchy_staples"],
-  "rice": ["starchy_staples"],
-  "beans": ["legumes_nuts_seeds"],
-  "lentils": ["legumes_nuts_seeds"],
-  "tofu": ["legumes_nuts_seeds"],
-  "peanut": ["legumes_nuts_seeds"],
-  "almond": ["legumes_nuts_seeds"],
-  "walnut": ["legumes_nuts_seeds"],
-  "cashew": ["legumes_nuts_seeds"],
-  "apple": ["other_fruits"],
-  "banana": ["other_fruits"],
-  "orange": ["other_fruits"],
-  "grape": ["other_fruits"],
-  "strawberry": ["other_fruits"],
-  "blueberry": ["other_fruits"],
-  "raspberry": ["other_fruits"],
-  "watermelon": ["other_fruits"],
-  "mango": ["vitamin_a_fruits_vegetables"],
-  "papaya": ["vitamin_a_fruits_vegetables"],
-  "carrot": ["vitamin_a_fruits_vegetables"],
-  "sweet potato": ["vitamin_a_fruits_vegetables"],
-  "pumpkin": ["vitamin_a_fruits_vegetables"],
-  "tomato": ["other_vegetables"],
-  "cucumber": ["other_vegetables"],
-  "lettuce": ["dark_green_leafy_veg"],
-  "spinach": ["dark_green_leafy_veg"],
-  "kale": ["dark_green_leafy_veg"],
-  "broccoli": ["other_vegetables"],
-  "cauliflower": ["other_vegetables"],
-  "onion": ["other_vegetables"],
-  "pepper": ["other_vegetables"],
-  "garlic": ["other_vegetables"],
-  "chocolate": ["sugars"],
-  "candy": ["sugars"],
-  "sweet": ["sugars"],
-  "jam": ["sugars"],
-  "jelly": ["sugars"],
-  "honey": ["sugars"],
-  "maple syrup": ["sugars"],
-  "syrup": ["sugars"],
-  "sugar": ["sugars"],
-  "roll": ["starchy_staples"],
-  "bun": ["starchy_staples"],
-  "naan": ["starchy_staples"],
-  "chapati": ["starchy_staples"],
-  "roti": ["starchy_staples"],
-  "tortilla": ["starchy_staples"],
-  "crackers": ["starchy_staples"],
-  "chips": ["starchy_staples", "oils_fats"],
-  "popcorn": ["starchy_staples"],
-  "granola": ["starchy_staples", "legumes_nuts_seeds"],
-  "muesli": ["starchy_staples", "legumes_nuts_seeds"],
-  "oats": ["starchy_staples"],
-  "porridge": ["starchy_staples"],
+// Function to count unique food groups from consumed foods
+export function countFoodGroups(consumedFoods: ConsumedFood[]): number {
+  const uniqueGroups = new Set<FoodGroup>();
   
-  // Asian foods
-  "sushi": ["starchy_staples", "meat_fish"],
-  "ramen": ["starchy_staples"],
-  "pho": ["starchy_staples", "meat_fish"],
-  "stir fry": ["mixed"],
-  "fried rice": ["starchy_staples"],
-  "pad thai": ["starchy_staples", "eggs"],
-  "curry": ["mixed"],
-  "biryani": ["starchy_staples", "meat_fish"],
-  "samosa": ["starchy_staples"],
-  "dim sum": ["mixed"],
-  "spring roll": ["starchy_staples", "other_vegetables"],
-  "dumpling": ["starchy_staples"],
-  "bao": ["starchy_staples"],
-  
-  // Latin American foods
-  "taco": ["starchy_staples", "meat_fish", "other_vegetables"],
-  "burrito": ["starchy_staples", "legumes_nuts_seeds", "other_vegetables"],
-  "enchilada": ["starchy_staples", "meat_fish", "other_vegetables"],
-  "quesadilla": ["starchy_staples", "dairy"],
-  "tortilla": ["starchy_staples"],
-  "guacamole": ["other_fruits"],
-  "salsa": ["other_vegetables"],
-  "nachos": ["starchy_staples", "dairy"],
-  "empanada": ["starchy_staples", "meat_fish"],
-  
-  // Middle Eastern foods
-  "hummus": ["legumes_nuts_seeds"],
-  "falafel": ["legumes_nuts_seeds"],
-  "tabouleh": ["starchy_staples", "other_vegetables"],
-  "pita": ["starchy_staples"],
-  "kebab": ["meat_fish"],
-  "shawarma": ["meat_fish", "starchy_staples"],
-  "baklava": ["starchy_staples", "sugars"],
-  
-  // Beverages
-  "coffee": ["spices_condiments"],
-  "tea": ["spices_condiments"],
-  "juice": ["other_fruits"],
-  "smoothie": ["mixed"],
-  "soda": ["sugars"],
-  "water": ["spices_condiments"],
-  
-  // Indian/Asian specific foods with spelling variations
-  "maggi": ["starchy_staples"],
-  "maggie": ["starchy_staples"],
-  "paratha": ["starchy_staples"],
-  "parata": ["starchy_staples"],
-  "dosa": ["starchy_staples"],
-  "idli": ["starchy_staples"]
-};
-
-// Enhanced function to identify global foods and map them to food groups
-export function identifyGlobalFood(foodItem: string): string[] {
-  const lowerFoodItem = foodItem.toLowerCase().trim();
-  
-  // Direct match with a global food name
-  if (globalFoods[lowerFoodItem]) {
-    return globalFoods[lowerFoodItem];
+  for (const food of consumedFoods) {
+    uniqueGroups.add(food.group);
   }
   
-  // Check for partial matches
-  for (const [globalFood, foodGroups] of Object.entries(globalFoods)) {
-    if (lowerFoodItem.includes(globalFood)) {
-      return foodGroups;
-    }
-    
-    // Check for plurals (adding 's' at the end)
-    if (globalFood + 's' === lowerFoodItem) {
-      return foodGroups;
-    }
-    
-    // Check for common spelling variations
-    if (globalFood === 'omelet' && 
-        (lowerFoodItem.includes('omlet') || 
-         lowerFoodItem.includes('omlette') || 
-         lowerFoodItem.includes('omelette'))) {
-      return foodGroups;
-    }
-  }
-  
-  // If no match in global foods, try using the food mapper
-  const foodGroup = guessFoodGroup(lowerFoodItem);
-  if (foodGroup !== "unknown") {
-    // Map food mapper groups to our global food groups
-    if (foodGroup.includes("Grains")) return ["starchy_staples"];
-    if (foodGroup.includes("Pulses")) return ["legumes_nuts_seeds"];
-    if (foodGroup.includes("Nuts")) return ["legumes_nuts_seeds"];
-    if (foodGroup.includes("Dairy")) return ["dairy"];
-    if (foodGroup.includes("Meat")) return ["meat_fish"];
-    if (foodGroup.includes("Eggs")) return ["eggs"];
-    if (foodGroup.includes("Dark green")) return ["dark_green_leafy_veg"];
-    if (foodGroup.includes("Vitamin A")) return ["vitamin_a_fruits_vegetables"];
-    if (foodGroup.includes("Other vegetables")) return ["other_vegetables"];
-    if (foodGroup.includes("Other fruits")) return ["other_fruits"];
-  }
-  
-  // Try to identify ingredients in the food
-  const ingredients = getIngredientsForDish(lowerFoodItem);
-  if (ingredients.length > 0) {
-    const foodGroups: string[] = [];
-    
-    ingredients.forEach(ingredient => {
-      const groups = identifyGlobalFood(ingredient);
-      groups.forEach(group => {
-        if (!foodGroups.includes(group)) {
-          foodGroups.push(group);
-        }
-      });
-    });
-    
-    if (foodGroups.length > 0) {
-      return foodGroups;
-    }
-  }
-  
-  // Additional fallback checks for common food categories
-  if (lowerFoodItem.includes("biscuit") || 
-      lowerFoodItem.includes("cookie") || 
-      lowerFoodItem.includes("cracker")) {
-    return ["starchy_staples", "sugars"];
-  }
-  
-  if (lowerFoodItem.includes("egg") || 
-      lowerFoodItem.includes("oml")) {
-    return ["eggs"];
-  }
-  
-  if (lowerFoodItem.includes("sweet") || 
-      lowerFoodItem.includes("dessert") || 
-      lowerFoodItem.includes("chocolate") || 
-      lowerFoodItem.includes("candy")) {
-    return ["sugars"];
-  }
-  
-  return [];
+  return uniqueGroups.size;
 }
+
+// Function to calculate dietary diversity score based on WHO standards
+export function calculateDietaryDiversityScore(consumedFoods: ConsumedFood[], isChild: boolean = false): number {
+  const uniqueGroupsCount = countFoodGroups(consumedFoods);
+  
+  // For children (MDD): minimum score is 4 out of 7 food groups for adequate diversity
+  // For women (MDD-W): minimum score is 5 out of 10 food groups for adequate diversity
+  return uniqueGroupsCount;
+}
+
+// Get the recommended minimum number of food groups based on whether it's for a child
+export function getRecommendedMinimumFoodGroups(isChild: boolean = false): number {
+  return isChild ? 4 : 5;
+}
+
+// Determine if the dietary diversity is adequate based on WHO standards
+export function isDietaryDiversityAdequate(consumedFoods: ConsumedFood[], isChild: boolean = false): boolean {
+  const score = calculateDietaryDiversityScore(consumedFoods, isChild);
+  const minimumRecommended = getRecommendedMinimumFoodGroups(isChild);
+  
+  return score >= minimumRecommended;
+}
+
+// Count consumed foods in each group and return a mapping
+export function countFoodsInGroups(consumedFoods: ConsumedFood[]): Record<FoodGroup, number> {
+  const counts: Record<FoodGroup, number> = {
+    [FoodGroup.STARCHY_STAPLES]: 0,
+    [FoodGroup.PULSES]: 0,
+    [FoodGroup.NUTS_AND_SEEDS]: 0,
+    [FoodGroup.DAIRY]: 0,
+    [FoodGroup.FLESH_FOODS]: 0,
+    [FoodGroup.EGGS]: 0,
+    [FoodGroup.VITAMIN_A_RICH_FRUITS_AND_VEGETABLES]: 0,
+    [FoodGroup.OTHER_FRUITS_AND_VEGETABLES]: 0
+  };
+  
+  for (const food of consumedFoods) {
+    counts[food.group]++;
+  }
+  
+  return counts;
+}
+
+// Get missing food groups based on consumed foods
+export function getMissingFoodGroups(consumedFoods: ConsumedFood[]): FoodGroup[] {
+  const counts = countFoodsInGroups(consumedFoods);
+  const missing: FoodGroup[] = [];
+  
+  for (const group in counts) {
+    if (counts[group as FoodGroup] === 0) {
+      missing.push(group as FoodGroup);
+    }
+  }
+  
+  return missing;
+}
+
+// Get examples of foods for each food group
+export function getFoodExamples(group: FoodGroup): string[] {
+  switch(group) {
+    case FoodGroup.STARCHY_STAPLES:
+      return ['Rice', 'Bread', 'Pasta', 'Potato', 'Corn', 'Oats'];
+    case FoodGroup.PULSES:
+      return ['Beans', 'Lentils', 'Chickpeas', 'Tofu', 'Peas'];
+    case FoodGroup.NUTS_AND_SEEDS:
+      return ['Almonds', 'Walnuts', 'Peanuts', 'Sesame seeds', 'Chia seeds'];
+    case FoodGroup.DAIRY:
+      return ['Milk', 'Yogurt', 'Cheese', 'Curd', 'Paneer'];
+    case FoodGroup.FLESH_FOODS:
+      return ['Chicken', 'Fish', 'Beef', 'Lamb', 'Pork', 'Seafood'];
+    case FoodGroup.EGGS:
+      return ['Chicken eggs', 'Duck eggs', 'Quail eggs', 'Omelette'];
+    case FoodGroup.VITAMIN_A_RICH_FRUITS_AND_VEGETABLES:
+      return ['Carrots', 'Sweet potatoes', 'Spinach', 'Mango', 'Papaya'];
+    case FoodGroup.OTHER_FRUITS_AND_VEGETABLES:
+      return ['Apple', 'Banana', 'Orange', 'Tomato', 'Cucumber', 'Broccoli'];
+    default:
+      return [];
+  }
+}
+
+// Get a list of foods consumed from each food group
+export function getFoodsInGroups(consumedFoods: ConsumedFood[]): Record<FoodGroup, string[]> {
+  const foods: Record<FoodGroup, string[]> = {
+    [FoodGroup.STARCHY_STAPLES]: [],
+    [FoodGroup.PULSES]: [],
+    [FoodGroup.NUTS_AND_SEEDS]: [],
+    [FoodGroup.DAIRY]: [],
+    [FoodGroup.FLESH_FOODS]: [],
+    [FoodGroup.EGGS]: [],
+    [FoodGroup.VITAMIN_A_RICH_FRUITS_AND_VEGETABLES]: [],
+    [FoodGroup.OTHER_FRUITS_AND_VEGETABLES]: []
+  };
+  
+  for (const food of consumedFoods) {
+    foods[food.group].push(food.name);
+  }
+  
+  return foods;
+}
+
+// Map a food name to its food group using the food database
+import { foodMapping } from './foodNameMapper';
+
+export function mapFoodToGroup(foodName: string): ConsumedFood | null {
+  // Normalize the food name by converting to lowercase and trimming
+  const normalizedFoodName = foodName.toLowerCase().trim();
+  
+  // Check if the food exists in our mapping
+  if (normalizedFoodName in foodMapping) {
+    const mappedFood = foodMapping[normalizedFoodName];
+    return {
+      name: mappedFood.name,
+      group: mappedFood.group,
+      category: mappedFood.category
+    };
+  }
+  
+  // If the food doesn't exist in our mapping, try a fuzzy match
+  const similarFoods = findSimilarFoods(normalizedFoodName, Object.keys(foodMapping));
+  if (similarFoods.length > 0) {
+    // Return the most similar food's mapping
+    const mostSimilarFood = similarFoods[0];
+    const mappedFood = foodMapping[mostSimilarFood.toLowerCase()];
+    return {
+      name: mappedFood.name,
+      group: mappedFood.group,
+      category: mappedFood.category
+    };
+  }
+  
+  // If no match is found, return null
+  return null;
+}
+
+// Generate recommendations based on missing food groups
+export function generateRecommendations(consumedFoods: ConsumedFood[]): string[] {
+  const missing = getMissingFoodGroups(consumedFoods);
+  const recommendations: string[] = [];
+  
+  if (missing.length === 0) {
+    recommendations.push("Great job! You've included all major food groups in your diet.");
+    return recommendations;
+  }
+  
+  recommendations.push("To improve dietary diversity, consider adding foods from these groups:");
+  
+  for (const group of missing) {
+    const examples = getFoodExamples(group).join(', ');
+    recommendations.push(`- ${group}: Examples include ${examples}`);
+  }
+  
+  return recommendations;
+}
+
+// Calculate percentage of dietary diversity achieved
+export function calculateDietaryDiversityPercentage(consumedFoods: ConsumedFood[], isChild: boolean = false): number {
+  const score = calculateDietaryDiversityScore(consumedFoods, isChild);
+  const totalGroups = Object.keys(FoodGroup).length / 2; // Divide by 2 because enum has both string and numeric keys
+  
+  return Math.round((score / totalGroups) * 100);
+}
+
+// Calculate recommendations for age-specific dietary needs
+export function calculateAgeSpecificRecommendations(consumedFoods: ConsumedFood[], ageInYears: number): string[] {
+  const recommendations: string[] = [];
+  const missingGroups = getMissingFoodGroups(consumedFoods);
+  
+  // Early childhood (0-5 years)
+  if (ageInYears <= 5) {
+    recommendations.push("For young children, focus on nutrient-dense foods to support growth and development.");
+    
+    if (missingGroups.includes(FoodGroup.DAIRY)) {
+      recommendations.push("Calcium is crucial for bone development. Include milk, yogurt or cheese daily.");
+    }
+    
+    if (missingGroups.includes(FoodGroup.VITAMIN_A_RICH_FRUITS_AND_VEGETABLES)) {
+      recommendations.push("Vitamin A is essential for vision and immune function. Include carrots, sweet potatoes or mangoes.");
+    }
+    
+    if (missingGroups.includes(FoodGroup.FLESH_FOODS) && missingGroups.includes(FoodGroup.PULSES)) {
+      recommendations.push("Include iron-rich foods like meat, fish, beans or lentils to prevent anemia.");
+    }
+  }
+  // School-age children (6-12 years)
+  else if (ageInYears <= 12) {
+    recommendations.push("School-age children need balanced nutrition to support learning and physical activity.");
+    
+    if (missingGroups.includes(FoodGroup.DAIRY)) {
+      recommendations.push("Calcium and protein from dairy products support bone growth during this rapid growth period.");
+    }
+    
+    if (missingGroups.includes(FoodGroup.STARCHY_STAPLES)) {
+      recommendations.push("Complex carbohydrates provide energy for active school days. Include whole grains when possible.");
+    }
+    
+    if (countFoodsInGroups(consumedFoods)[FoodGroup.OTHER_FRUITS_AND_VEGETABLES] < 2) {
+      recommendations.push("Aim for multiple servings of fruits and vegetables daily to get sufficient fiber and vitamins.");
+    }
+  }
+  // Adolescents (13-18 years)
+  else {
+    recommendations.push("Adolescents have increased nutritional needs due to rapid growth and development.");
+    
+    if (missingGroups.includes(FoodGroup.DAIRY) || missingGroups.includes(FoodGroup.FLESH_FOODS)) {
+      recommendations.push("Protein is essential during adolescence. Include dairy, meat, fish, eggs or plant proteins daily.");
+    }
+    
+    if (missingGroups.includes(FoodGroup.NUTS_AND_SEEDS) && missingGroups.includes(FoodGroup.OTHER_FRUITS_AND_VEGETABLES)) {
+      recommendations.push("Healthy fats from nuts, seeds, and avocados support brain development and hormone production.");
+    }
+    
+    recommendations.push("Iron needs increase during adolescence, especially for girls after menstruation begins.");
+  }
+  
+  return recommendations;
+}
+
+// Function to suggest meals that would improve dietary diversity
+export function suggestMeals(consumedFoods: ConsumedFood[]): string[] {
+  const missing = getMissingFoodGroups(consumedFoods);
+  const suggestions: string[] = [];
+  
+  if (missing.length === 0) {
+    return ["Your diet already includes all food groups - keep up the good work!"];
+  }
+  
+  if (missing.includes(FoodGroup.STARCHY_STAPLES) && missing.includes(FoodGroup.PULSES)) {
+    suggestions.push("Rice and beans bowl with vegetables");
+  }
+  
+  if (missing.includes(FoodGroup.FLESH_FOODS) && missing.includes(FoodGroup.VITAMIN_A_RICH_FRUITS_AND_VEGETABLES)) {
+    suggestions.push("Chicken and sweet potato curry");
+  }
+  
+  if (missing.includes(FoodGroup.DAIRY) && missing.includes(FoodGroup.OTHER_FRUITS_AND_VEGETABLES)) {
+    suggestions.push("Fruit smoothie with yogurt");
+  }
+  
+  if (missing.includes(FoodGroup.EGGS) && missing.includes(FoodGroup.OTHER_FRUITS_AND_VEGETABLES)) {
+    suggestions.push("Vegetable omelette with whole grain toast");
+  }
+  
+  if (missing.includes(FoodGroup.NUTS_AND_SEEDS) && missing.includes(FoodGroup.OTHER_FRUITS_AND_VEGETABLES)) {
+    suggestions.push("Fruit and nut salad with a light dressing");
+  }
+  
+  // If we don't have specific combinations to suggest, recommend a balanced meal
+  if (suggestions.length === 0) {
+    suggestions.push("A balanced meal with whole grains, proteins, and colorful vegetables");
+    
+    // Add specific suggestions based on what's missing
+    if (missing.includes(FoodGroup.DAIRY)) {
+      suggestions.push("Add a glass of milk or yogurt to your meals");
+    }
+    
+    if (missing.includes(FoodGroup.EGGS)) {
+      suggestions.push("Boiled eggs make a great nutritious snack");
+    }
+  }
+  
+  return suggestions;
+}
+
+// Import food suggestion utilities
+import { findSimilarFoods } from './foodSuggestionUtils';
