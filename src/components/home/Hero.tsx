@@ -9,7 +9,10 @@ import {
   Calculator as CalculatorIcon, 
   Apple, 
   Salad, 
-  Heart
+  Heart,
+  Activity,
+  Baby,
+  Shield
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -58,43 +61,81 @@ const Hero = () => {
           </motion.div>
           
           <motion.div
-            className="mx-auto lg:mr-0 relative"
+            className="mx-auto w-full max-w-[600px] lg:mr-0 mt-8 lg:mt-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.3 }}
           >
-            <div className="relative">
-              <img
-                src="/images/hero-image.png"
-                alt="Diverse healthy foods"
-                width={550}
-                height={370}
-                className="rounded-2xl shadow-xl object-cover z-10 relative"
-              />
+            {/* Feature Circle Diagram */}
+            <div className="relative w-full aspect-square rounded-full bg-white shadow-xl overflow-hidden flex items-center justify-center">
+              {/* Center Circle */}
+              <div className="absolute inset-[15%] rounded-full bg-gradient-to-br from-background to-background/50 backdrop-blur-sm border border-white/20 shadow-inner flex items-center justify-center">
+                <div className="text-center">
+                  <Apple className="h-12 w-12 mx-auto text-primary" />
+                  <h3 className="text-xl font-bold mt-2 font-heading">NutriDiversity</h3>
+                  <p className="text-sm text-muted-foreground mt-1">For Better Health</p>
+                </div>
+              </div>
               
-              {/* Floating illustrations */}
+              {/* Feature Circles */}
+              {/* Top Left - Balanced Nutrition */}
               <motion.div 
-                className="absolute -top-5 -left-5 bg-nutrition-orange text-white p-3 rounded-xl shadow-lg"
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+                className="absolute top-[12%] left-[12%] w-[30%] aspect-square"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
               >
-                <Apple size={30} />
+                <div className="w-full h-full rounded-full bg-nutrition-blue/10 flex flex-col items-center justify-center p-4">
+                  <div className="h-12 w-12 rounded-full bg-nutrition-blue/20 flex items-center justify-center mb-2">
+                    <Apple className="h-6 w-6 text-nutrition-blue" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-center">Balanced Nutrition</h4>
+                </div>
               </motion.div>
               
+              {/* Top Right - Growth Tracking */}
               <motion.div 
-                className="absolute -bottom-5 -right-5 bg-primary text-white p-3 rounded-xl shadow-lg"
-                animate={{ y: [0, 15, 0] }}
-                transition={{ duration: 4, repeat: Infinity, repeatType: "reverse", delay: 1 }}
+                className="absolute top-[12%] right-[12%] w-[30%] aspect-square"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
               >
-                <Salad size={30} />
+                <div className="w-full h-full rounded-full bg-primary/10 flex flex-col items-center justify-center p-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                    <Activity className="h-6 w-6 text-primary" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-center">Growth Tracking</h4>
+                </div>
               </motion.div>
               
+              {/* Bottom Left - Pediatric Focus */}
               <motion.div 
-                className="absolute top-1/2 -right-10 bg-nutrition-blue text-white p-2 rounded-lg shadow-md"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 5, repeat: Infinity, repeatType: "reverse", delay: 0.5 }}
+                className="absolute bottom-[12%] left-[12%] w-[30%] aspect-square"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
               >
-                <Heart size={25} />
+                <div className="w-full h-full rounded-full bg-nutrition-orange/10 flex flex-col items-center justify-center p-4">
+                  <div className="h-12 w-12 rounded-full bg-nutrition-orange/20 flex items-center justify-center mb-2">
+                    <Baby className="h-6 w-6 text-nutrition-orange" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-center">Pediatric Focus</h4>
+                </div>
+              </motion.div>
+              
+              {/* Bottom Right - Health Insights */}
+              <motion.div 
+                className="absolute bottom-[12%] right-[12%] w-[30%] aspect-square"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1 }}
+              >
+                <div className="w-full h-full rounded-full bg-purple-100 flex flex-col items-center justify-center p-4">
+                  <div className="h-12 w-12 rounded-full bg-purple-200 flex items-center justify-center mb-2">
+                    <Shield className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-center">Health Insights</h4>
+                </div>
               </motion.div>
             </div>
           </motion.div>
